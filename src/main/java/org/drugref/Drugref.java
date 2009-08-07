@@ -40,82 +40,50 @@ import java.util.Vector;
 public class Drugref {
 
     public Vector list_drugs(String searchStr,Hashtable tags) {
-        List list = new ArrayList();
         TablesDao queryDao = new TablesDao();
-        list = queryDao.listSearchElement(searchStr);
-        Vector vec=new Vector(list);
+        Vector vec = queryDao.listSearchElement(searchStr);
+        //Vector vec=new Vector(list);
         System.out.print(vec);
         return vec;
     }
 
     public Vector list_drug_element_route(String searchStr, String route) throws Exception {
-
-        List list = new ArrayList();
         TablesDao queryDao = new TablesDao();
-        list = queryDao.listSearchElementRoute(searchStr, route);
-        //System.out.println("list               "+list);
-        Vector vec = new Vector(list);
-        //System.out.println("list size "+list.size());
-        //for (int i = 0; i < result.length; i++) {
-        //  System.out.println("result               " + result[i]);
-        //}
+        Vector vec = queryDao.listSearchElementRoute(searchStr, route);
+
         return vec;
     }
 
     public Vector list_brands_from_element(String drugID) throws Exception {
-        List list = new ArrayList();
         TablesDao queryDao = new TablesDao();
-        list = queryDao.listBrandsFromElement(drugID);
-        //System.out.println("list               "+list);
-        Vector vec = new Vector(list);
-        //System.out.println("list size "+list.size());
-        //for (int i = 0; i < result.length; i++) {
-        //    System.out.println("result               " + result[i]);
-        // }
+        Vector vec = new Vector();
+        vec = queryDao.listBrandsFromElement(drugID);
+
         return vec;
 
     }
 
     public Vector list_search_element_select_categories(String str, Vector cat) {
-        List list = null;
-        TablesDao queryDao = new TablesDao();
-        list = queryDao.listSearchElementSelectCategories(str, cat);
+          TablesDao queryDao = new TablesDao();
+        Vector vec = new Vector();
+        vec = queryDao.listSearchElementSelectCategories(str, cat);
         //System.out.println("list               "+list);
-        Vector vec = new Vector(list);
+        
         return vec;
     }
 
-    public Hashtable getDrugForm(int pKey) {
-        List list = new ArrayList();
+    public Hashtable getDrugForm(String pKey) {
+        Hashtable ha=new Hashtable();
         TablesDao queryDao = new TablesDao();
-        list = queryDao.getForm(pKey);
-        //System.out.println("list               "+list);
-        Object[] result = null;
-        result = list.toArray();
-        //System.out.println("list size "+list.size());
-        for (int i = 0; i < result.length; i++) {
-            System.out.println("result               " + result[i]);
-        }
-
-        Vector vec = new Vector(list);
-
-        Enumeration enume = vec.elements();
-        while (enume.hasMoreElements()) {
-            System.out.println("aaaaaaaaaaaaaaaa" + enume.nextElement().toString());
-        }
-        Hashtable returnVal = (Hashtable) vec.get(0);
-
-        return returnVal;
-
+        ha = (Hashtable)queryDao.getForm(pKey).get(0);
+        return ha;
     }
 
-
     public Hashtable getGenericName(String pKey) throws Exception {
+        Hashtable ha=new Hashtable();
         TablesDao queryDao = new TablesDao();
-        List list = queryDao.getGenericName(pKey);
-        Vector vec = new Vector(list);
-        Hashtable returnVal = (Hashtable) vec.get(0);
-        return returnVal;
+        ha = (Hashtable) queryDao.getGenericName(pKey).get(0);
+        return ha;
     }
 
     public Vector list_drug_element(String searchStr) throws Exception {
@@ -133,15 +101,13 @@ public class Drugref {
         list = queryDao.listDrugClass(dclass);
         Vector vec = new Vector(list);
         return vec;
-
     }
 
-    public Hashtable getDrug(String pKey, Boolean boolVal) throws Exception{
-        List list= new ArrayList();
+    public Hashtable getDrug(String pKey, boolean boolVal) throws Exception{
          System.out.println(pKey + "  "+boolVal);
          TablesDao queryDao = new TablesDao();
-        list = queryDao.getDrug(pKey,boolVal);
-        Vector vec = new Vector(list);
+        Vector vec = queryDao.getDrug(pKey,boolVal);
+       
         Hashtable returnVal=(Hashtable) vec.get(0);
         return returnVal;
      }

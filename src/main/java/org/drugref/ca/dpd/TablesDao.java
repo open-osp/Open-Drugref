@@ -27,7 +27,7 @@ public class TablesDao {
     public TablesDao() {
     }
 
-    public List listSearchElement(String str) {
+    public Vector listSearchElement(String str) {
         EntityManager em = JpaUtils.createEntityManager();
 
         str = str.replace(",", " ");
@@ -38,34 +38,54 @@ public class TablesDao {
             System.out.println(strArray[i]);
         }
 
-        String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
-
+        //String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
+        String queryStr = "select cds from CdDrugSearch cds where ";
         for (int i = 0; i < strArray.length; i++) {
             queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
             if (i < strArray.length - 1) {
                 queryStr = queryStr + " and ";
             }
         }
-        List results = new ArrayList();
+        List<CdDrugSearch> results = new ArrayList();
+        queryStr = queryStr + " order by cds.name";
         System.out.println(queryStr);
         try {
-             
+
             EntityTransaction tx = em.getTransaction();
             tx.begin();
             Query query = em.createQuery(queryStr);
-            System.out.println("333333333333333");
+
             results = query.getResultList();
-            System.out.println("22222222222222222222");
+
             tx.commit();
-            
+
         } finally {
             JpaUtils.close(em);
         }
-        System.out.println(results);
-        return (results);
+        if (results.size() > 0) {
+            Vector vec = new Vector();
+            for (int i = 0; i < results.size(); i++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", results.get(i).getName());
+                ha.put("category", results.get(i).getCategory());
+                ha.put("id", results.get(i).getId());
+                vec.addElement(ha);
+            }
+
+            System.out.println(results);
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", '0');
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
     }
 
-    public List listSearchElementRoute(String str, String route) {
+    public Vector listSearchElementRoute(String str, String route) {
         EntityManager em = JpaUtils.createEntityManager();
 
         str = str.replace(",", " ");
@@ -76,23 +96,6 @@ public class TablesDao {
         route = route.replace("'", "");
         String[] routeArray = route.split("\\s+");
 
-//for test only
-        for (int i = 0; i < strArray.length; i++) {
-            System.out.println(strArray[i]);
-        }
-        for (int i = 0; i < routeArray.length; i++) {
-            System.out.println(routeArray[i]);
-        }
-
-        String queryTwo = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
-
-        for (int i = 0; i < strArray.length; i++) {
-            queryTwo = queryTwo + " upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "' ";
-            if (i < strArray.length - 1) {
-                queryTwo = queryTwo + " and ";
-            }
-        }
-
         String queryOne = "select cr.drugCode from CdRoute cr where ";
         for (int i = 0; i < routeArray.length; i++) {
             queryOne = queryOne + "upper(cr.routeOfAdministration) like " + "'" + "%" + routeArray[i].toUpperCase() + "%" + "'";
@@ -101,8 +104,8 @@ public class TablesDao {
             }
         }
 
-        List resultOne = null;
-        List resultTwo = null;
+        List resultOne = new ArrayList();
+        List<CdDrugSearch> resultTwo = new ArrayList();
         System.out.println("queryOne :" + queryOne);
         try {
             EntityTransaction tx = em.getTransaction();
@@ -118,7 +121,14 @@ public class TablesDao {
             }
             //System.out.println(strListOne);
 
-
+            //String queryTwo = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
+            String queryTwo = "select cds from CdDrugSearch cds where ";
+            for (int i = 0; i < strArray.length; i++) {
+                queryTwo = queryTwo + " upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "' ";
+                if (i < strArray.length - 1) {
+                    queryTwo = queryTwo + " and ";
+                }
+            }
             System.out.println("queryTwo: " + queryTwo);
             Query querySecond = em.createQuery(queryTwo + " and cds.drugCode in (:array) order by cds.name");
             querySecond.setParameter("array", strListOne);
@@ -128,15 +138,34 @@ public class TablesDao {
             JpaUtils.close(em);
         }
         System.out.println("results:" + resultTwo);
-        return (resultTwo);
+        if (resultTwo.size() > 0) {
+            Vector vec = new Vector();
+            for (int i = 0; i < resultTwo.size(); i++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", resultTwo.get(i).getName());
+                ha.put("category", resultTwo.get(i).getCategory());
+                ha.put("id", resultTwo.get(i).getId());
+                vec.addElement(ha);
+            }
+
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", '0');
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
     }
 
-    public List listBrandsFromElement(String drugID) {
+    public Vector listBrandsFromElement(String drugID) {
         EntityManager em = JpaUtils.createEntityManager();
 
         String drugCode = "";
         Integer category;
-        List results = null;
+        List<CdDrugSearch> results = new ArrayList();
 
         try {
             EntityTransaction tx = em.getTransaction();
@@ -144,7 +173,7 @@ public class TablesDao {
 
 
             CdDrugSearch cdsResult = (CdDrugSearch) em.createQuery("select cds from CdDrugSearch cds where cds.id = " + drugID).getSingleResult();
-            System.out.println("adfffffffffffffffffffff");
+
 
             System.out.println(cdsResult.getDrugCode() + " -- " + cdsResult.getName() + " :: " + cdsResult.getCategory());
 
@@ -152,8 +181,8 @@ public class TablesDao {
                 drugCode = cdsResult.getDrugCode();
                 category = cdsResult.getCategory();
             } else {
-                List nullList = null;
-                return nullList;
+                Vector vec = new Vector();
+                return vec;
             }
 
             if (category == 8) {
@@ -163,10 +192,12 @@ public class TablesDao {
                 List<CdTherapeuticClass> listOne = queryOne.getResultList();
 
                 for (int i = 0; i < listOne.size(); i++) {
-                    Query query = em.createQuery("select sd.name,sd.category ,sd.id   from CdDrugSearch sd where (:tcDrugCode)= sd.drugCode order by sd.name");
+                    Query query = em.createQuery("select sd   from CdDrugSearch sd where (:tcDrugCode)= sd.drugCode order by sd.name");
                     query.setParameter("tcDrugCode", listOne.get(i).getDrugCode());
-                    List resultTwo=query.getResultList();
-                    results.add(resultTwo);
+                    CdDrugSearch cds = (CdDrugSearch) query.getSingleResult();
+
+                    results.add(cds);
+
                 }
             } else if (category == 10) {
                 Query queryOne = em.createQuery("select tc from CdTherapeuticClass tc where tc.tcAhfsNumber=(:drugCode)");
@@ -174,25 +205,47 @@ public class TablesDao {
                 List<CdTherapeuticClass> listOne = queryOne.getResultList();
 
                 for (int i = 0; i < listOne.size(); i++) {
-                    Query query = em.createQuery("select sd.name,sd.category ,sd.id   from CdDrugSearch sd where (:tcDrugCode)= sd.drugCode order by sd.name");
+                    Query query = em.createQuery("select sd  from CdDrugSearch sd where (:tcDrugCode)= sd.drugCode order by sd.name");
                     query.setParameter("tcDrugCode", listOne.get(i).getDrugCode());
-                    List resultTwo=query.getResultList();
-                    results.add(resultTwo);
+                    CdDrugSearch cds = (CdDrugSearch) query.getSingleResult();
+
+                    results.add(cds);
+
                 }
             } else {//category=11 or 12
-                System.out.println("aaaaaaa");
-                Query query = em.createQuery("select sd.name,sd.category ,sd.id     from LinkGenericBrand lgb, CdDrugSearch sd where lgb.id = (:drugCode) and lgb.drugCode = sd.drugCode order by sd.name");
+         
+                Query query = em.createQuery("select sd from LinkGenericBrand lgb, CdDrugSearch sd where lgb.id = (:drugCode) and lgb.drugCode = sd.drugCode order by sd.name");
                 query.setParameter("drugCode", Integer.parseInt(drugCode.trim()));
+
                 results = query.getResultList();
             }
         } finally {
             JpaUtils.close(em);
         }
-        System.out.println(results);
-        return (results);
+        if (results.size() > 0) {
+            Vector vec = new Vector();
+            for (int j = 0; j < results.size(); j++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", results.get(j).getName());
+                ha.put("category", results.get(j).getCategory());
+                ha.put("id", results.get(j).getId());
+                vec.addElement(ha);
+            }
+
+            System.out.println(vec);
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", '0');
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
     }
 
-    public List listSearchElementSelectCategories(String str, Vector cat) {
+    public Vector listSearchElementSelectCategories(String str, Vector cat) {
         EntityManager em = JpaUtils.createEntityManager();
 
         str = str.replace(",", " ");
@@ -203,7 +256,7 @@ public class TablesDao {
             System.out.println(strArray[i]);
         }
 
-        String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
+        String queryStr = "select cds from CdDrugSearch cds where ";
 
         for (int i = 0; i < strArray.length; i++) {
             queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
@@ -221,7 +274,7 @@ public class TablesDao {
         queryStr = queryStr + ") order by cds.category, cds.name";
         System.out.println(queryStr);
 
-        List results = null;
+        List<CdDrugSearch> results = new ArrayList();
 
         try {
             EntityTransaction tx = em.getTransaction();
@@ -233,98 +286,152 @@ public class TablesDao {
         } finally {
             JpaUtils.close(em);
         }
-        System.out.println(results);
-        return (results);
+        if (results.size() > 0) {
+            Vector vec = new Vector();
+            for (int j = 0; j < results.size(); j++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", results.get(j).getName());
+                ha.put("category", results.get(j).getCategory());
+                ha.put("id", results.get(j).getId());
+                vec.addElement(ha);
+            }
+            System.out.println(vec);
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", '0');
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
     }
 
-    public List getGenericName(String drugID) {
+    public Vector getGenericName(String drugID) {
+        Vector vec = new Vector();
         EntityManager em = JpaUtils.createEntityManager();
-        List results = null;
-
+        List<CdDrugSearch> results = new ArrayList();
         EntityTransaction tx = em.getTransaction();
         tx.begin();
-
-
         Query queryOne = em.createQuery("select lgb.id from LinkGenericBrand lgb ,CdDrugSearch cds where lgb.drugCode = cds.drugCode and cds.id=(:ID)");
         queryOne.setParameter("ID", Integer.parseInt(drugID));
         List resultDrugCode = queryOne.getResultList();
 
-        System.out.println("adfffffffffffffffffffff");
-
         if (resultDrugCode != null) {
-            Query queryTwo = em.createQuery("select cds.name,cds.category,cds.id from CdDrugSearch cds where cds.drugCode in (:drugCodeList)");
+            Query queryTwo = em.createQuery("select cds from CdDrugSearch cds where cds.drugCode in (:drugCodeList)");
             queryTwo.setParameter("drugCodeList", MiscUtils.toStringArrayList(resultDrugCode));
             results = queryTwo.getResultList();
             JpaUtils.close(em);
             System.out.println(results);
-            return results;
+            for (int j = 0; j < results.size(); j++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", results.get(j).getName());
+                ha.put("category", results.get(j).getCategory());
+                ha.put("id", results.get(j).getId());
+                vec.addElement(ha);
+            }
+            return vec;
         } else {
-            List nullList = null;
-            return nullList;
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", '0');
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
         }
     }
 
     //change to return Hashtable??
-    public List getForm(Integer pKey) {
+    public Vector getForm(String pKey) {
         EntityManager em = JpaUtils.createEntityManager();
-        List results = null;
-
+        List<CdForm> results = new ArrayList();
+        Vector vec = new Vector();
         EntityTransaction tx = em.getTransaction();
         tx.begin();
-
-
         Query queryOne = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.id = (:ID)");
-        queryOne.setParameter("ID", pKey);
+        queryOne.setParameter("ID", Integer.parseInt(pKey));
         List resultDrugCode = queryOne.getResultList();
 
-        System.out.println("adfffffffffffffffffffff" + resultDrugCode);
+
 
         if (resultDrugCode != null) {
-            Query queryTwo = em.createQuery("select cf.pharmCdFormCode,cf.pharmaceuticalCdForm from CdForm cf where cf.drugCode in (:drugCodeList)");
-            System.out.println("oooooooooo ");
+            Query queryTwo = em.createQuery("select cf from CdForm cf where cf.drugCode in (:drugCodeList)");
             queryTwo.setParameter("drugCodeList", MiscUtils.toIntegerArrayList(resultDrugCode));
-            System.out.println("pppppppppppp");
             results = queryTwo.getResultList();
             JpaUtils.close(em);
+
             System.out.println(results);
-            return results;
+
+            for (int i = 0; i < results.size(); i++) {
+                Hashtable ha = new Hashtable();
+                ha.put("pharmaceutical_cd_form", results.get(0).getPharmaceuticalCdForm());
+                ha.put("pharm_cd_form_code", results.get(0).getPharmCdFormCode());
+                vec.addElement(ha);
+            }
+            return vec;
         } else {
-            List nullList = null;
-            return nullList;
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("pharm_cd_form_code", "");
+            ha.put("pharmaceutical_cd_form", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
         }
     }
 
-    public List listDrugClass(Vector Dclass) {
+    public Vector listDrugClass(Vector Dclass) {
         EntityManager em = JpaUtils.createEntityManager();
         List results = new ArrayList();
         EntityTransaction tx = em.getTransaction();
         tx.begin();
 
-        //example
-        Query queryOne = em.createQuery("select cds from  CdDrugSearch cds where cds.id =123 or cds.id=456");
+        String q1 = "select cds from  CdDrugSearch cds where ";
+        for (int i = 0; i < Dclass.size(); i++) {
+            q1 = q1 + " cds.id = " + Dclass.get(i);
+            if (i < Dclass.size() - 1) {
+                q1 = q1 + " or ";
+            }
+        }
+        System.out.println(q1);
+        Vector vec = new Vector();
+        Query queryOne = em.createQuery(q1);
         List<CdDrugSearch> listOne = queryOne.getResultList();
-        System.out.println("zzzzzzzzzzzzzz     " + listOne.size());
+        if(listOne.size()>0){
         for (int i = 0; i < listOne.size(); i++) {
-            Query queryTwo = em.createQuery("select cds2 from CdDrugSearch cds2 where cds2.drugCode in (select tc.tcAhfsNumber from   CdTherapeuticClass tc where tc.drugCode = (:cdIntDrugCode))");
+            Query queryTwo = em.createQuery("select cds2 from CdDrugSearch cds2 where cds2.drugCode in (select tc.tcAhfsNumber from   CdTherapeuticClass tc where tc.drugCode = (:cdIntDrugCode)) order by cds2.id");
             queryTwo.setParameter("cdIntDrugCode", Integer.parseInt(listOne.get(i).getDrugCode().trim()));
             CdDrugSearch resultTwo = (CdDrugSearch) queryTwo.getSingleResult();
-            String row = listOne.get(i).getId().toString() + ", " + resultTwo.getDrugCode() + ", " + resultTwo.getName();
-            //System.out.println("rowwwwwwwwwwwww      "+row);
-            // System.out.println("rowwwwwwwwwwwww      "+i);
-            Vector strVec = new Vector();
-            strVec.add(row);
-            results.add(strVec);
-            //System.out.println("rowwwwwwwwwwwww      "+i);
-            }
+            Hashtable ha = new Hashtable();
+            ha.put("id_class", resultTwo.getId());
+            ha.put("name", resultTwo.getName());
+            ha.put("id_drug", listOne.get(i).getId());
+            vec.add(ha);
+        }
 
         JpaUtils.close(em);
-        return results;
+
+        return vec;}
+
+        else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("pharm_cd_form_code", "");
+            ha.put("pharmaceutical_cd_form", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
     }
 
-    public List getAllergyWarnings(String atcCode, Vector allergies) {
+    public Vector getAllergyWarnings(String atcCode, Vector allergies) {
         List results = new ArrayList();
+        Vector vec = new Vector();
+        Hashtable ha = new Hashtable();
+        Vector warning = new Vector();
+        ha.put("warnings", warning);
+        vec.add(ha);
         if (atcCode.matches("") || atcCode.matches("null")) {
-            return results;
+            return vec;
         }
         EntityManager em = JpaUtils.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -379,33 +486,34 @@ public class TablesDao {
             JpaUtils.close(em);
 
         }
-        return results;
+        return vec;
     }
 
-    public List getDrug(String pKey, Boolean html) {
+    public Vector getDrug(String pKey, Boolean html) {
         String productId = "";
         String origId = pKey;
 
         EntityManager em = JpaUtils.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         tx.begin();
-        Query queryDrugCode = em.createQuery("select cds.drug_code from cd_drug_search where cds.id=(:pKey)");
-        queryDrugCode.setParameter("pKey", pKey);
+        Query queryDrugCode = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.id=(:pKey)");
+        queryDrugCode.setParameter("pKey", Integer.parseInt(pKey));
         String resultDrugCode = "";
         resultDrugCode = (String) queryDrugCode.getSingleResult();
         if (!resultDrugCode.matches("")) {
             pKey = resultDrugCode;
         }
-        Query queryName = em.createQuery("select cai.ingredient as cai.name from CdActiveIngredients cai where cai.drugCode=(:pKey)");
-        queryName.setParameter("pKey", pKey);
-        Query queryAtc = em.createQuery("select ctc.tcAtcNumber as ctc.atccode from cd_therapeutic_class ctc where drug_code = (:pKey)");
-        queryAtc.setParameter("pKey", pKey);
+        Query queryName = em.createQuery("select cai.ingredient from CdActiveIngredients cai where cai.drugCode=(:pKey)");
+        queryName.setParameter("pKey", Integer.parseInt(pKey));
+        Query queryAtc = em.createQuery("select ctc.tcAtcNumber from CdTherapeuticClass ctc where ctc.drugCode = (:pKey)");
+        queryAtc.setParameter("pKey", Integer.parseInt(pKey));
         Query queryProduct = em.createQuery("select cds.name from CdDrugSearch cds where cds.id=(:origId)");
-        queryProduct.setParameter("origId", origId);
-        Query queryRegionalIdentifier = em.createQuery("select cdp from CdDrugProduct cdp where cdp.drugDode = (:pKey)");
-        queryRegionalIdentifier.setParameter("pKey", pKey);
-        Query queryComponent = em.createQuery("select cai from CdActiveIngredients where cai.drugCode=(:pKey)");
-        queryComponent.setParameter("pKey", pKey);
+        queryProduct.setParameter("origId", Integer.parseInt(origId));
+        Query queryRegionalIdentifier = em.createQuery("select cdp from CdDrugProduct cdp where cdp.drugCode = (:pKey)");
+        queryRegionalIdentifier.setParameter("pKey", Integer.parseInt(pKey));
+        Query queryComponent = em.createQuery("select cai from CdActiveIngredients cai where cai.drugCode=(:pKey)");
+        queryComponent.setParameter("pKey", Integer.parseInt(pKey));
+
 
         String name = "";
         String atc = "";
@@ -428,25 +536,30 @@ public class TablesDao {
         }
 
         List resultProduct = queryProduct.getResultList();
+    
         if (resultProduct.size() > 0) {
             for (int i = 0; i < resultProduct.size(); i++) {
                 product = (String) resultProduct.get(i);
             }
         }
+    
 
         List<CdDrugProduct> resultRegionalIdentifier = queryRegionalIdentifier.getResultList();
+
+
         if (resultRegionalIdentifier.size() > 0) {
             for (int i = 0; i < resultRegionalIdentifier.size(); i++) {
                 productId = resultRegionalIdentifier.get(i).getDrugCode().toString();
                 regionalIdentifier = resultRegionalIdentifier.get(i).getDrugIdentificationNumber().toString();
             }
         }
+        //System.out.println("reginoal Identifier " + regionalIdentifier);
         String ingredient = "";
         String strength = "";
         String strengthUnit = "";
 
-        // Hashtable ha=new Hashtable();
-        String str = "";
+        Hashtable ha = new Hashtable();
+        Vector component = new Vector();
         List<CdActiveIngredients> resultComponent = queryComponent.getResultList();
         if (resultComponent.size() > 0) {
             for (int i = 0; i < resultComponent.size(); i++) {
@@ -454,37 +567,23 @@ public class TablesDao {
                 strength = resultComponent.get(i).getStrength();
                 strengthUnit = resultComponent.get(i).getStrengthUnit();
             }
-            //ha.put("name", ingredient);
-            //ha.put("strength", Float.valueOf(strength.trim()).floatValue());
-            //ha.put("unit",strengthUnit);
-            str = "name " + ingredient + " strength " + strength + " unit " + strengthUnit;
+            ha.put("name", ingredient);
+            ha.put("strength", Float.valueOf(strength.trim()).floatValue());
+            ha.put("unit", strengthUnit);
+            component.addElement(ha);
         }
         Vector returnRows = new Vector();
-        returnRows.addElement("name " + name);
-        returnRows.addElement("atc " + atc);
-        returnRows.addElement("product " + product);
-        returnRows.addElement("regional_identifier " + regionalIdentifier);
-        returnRows.addElement("components " + str);
+        Hashtable ha2 = new Hashtable();
+        ha2.put("name", name);
+        ha2.put("atc", atc);
+        ha2.put("product", product);
+        ha2.put("regional_identifier", regionalIdentifier);
+        ha2.put("components", component);
 
+        returnRows.addElement(ha2);
+    
         return returnRows;
     }
 }
 
-/*public List<CachedProgram> findAll() {
-Query query = entityManager.createQuery("select x from " + modelClass.getSimpleName() + " x");
-@SuppressWarnings("unchecked")
-List<CachedProgram> results = query.getResultList();
-
-return (results);
-}
-
-@AdditionalSchemaGenerationSql
-public String[] getAdditionalCustomSql() {
-String[] sql = {
-"alter table " + modelClass.getSimpleName() + " add foreign key (integratorFacilityId) references Facility(id)"
-};
-
-return (sql);
-}*/
-//}
 
