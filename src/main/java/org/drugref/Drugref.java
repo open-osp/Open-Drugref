@@ -23,16 +23,135 @@
  */
 package org.drugref;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import org.drugref.ca.dpd.TablesDao;
+import java.util.List;
 import java.util.Vector;
 
 /**
  *
- * @author jaygallagher
+ * @author jaygallagher & jacksonbi
  */
+
+//TO DO: getDrug ,getAllergyWarnings, fetch?
+
 public class Drugref {
 
-    public String get_generic_name(String vec){
-        return "Warfarin Sodium";
+    public Vector list_drugs(String searchStr,Hashtable tags) {
+        List list = new ArrayList();
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.listSearchElement(searchStr);
+        Vector vec=new Vector(list);
+        System.out.print(vec);
+        return vec;
     }
 
+    public Vector list_drug_element_route(String searchStr, String route) throws Exception {
+
+        List list = new ArrayList();
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.listSearchElementRoute(searchStr, route);
+        //System.out.println("list               "+list);
+        Vector vec = new Vector(list);
+        //System.out.println("list size "+list.size());
+        //for (int i = 0; i < result.length; i++) {
+        //  System.out.println("result               " + result[i]);
+        //}
+        return vec;
+    }
+
+    public Vector list_brands_from_element(String drugID) throws Exception {
+        List list = new ArrayList();
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.listBrandsFromElement(drugID);
+        //System.out.println("list               "+list);
+        Vector vec = new Vector(list);
+        //System.out.println("list size "+list.size());
+        //for (int i = 0; i < result.length; i++) {
+        //    System.out.println("result               " + result[i]);
+        // }
+        return vec;
+
+    }
+
+    public Vector list_search_element_select_categories(String str, Vector cat) {
+        List list = null;
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.listSearchElementSelectCategories(str, cat);
+        //System.out.println("list               "+list);
+        Vector vec = new Vector(list);
+        return vec;
+    }
+
+    public Hashtable getDrugForm(int pKey) {
+        List list = new ArrayList();
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.getForm(pKey);
+        //System.out.println("list               "+list);
+        Object[] result = null;
+        result = list.toArray();
+        //System.out.println("list size "+list.size());
+        for (int i = 0; i < result.length; i++) {
+            System.out.println("result               " + result[i]);
+        }
+
+        Vector vec = new Vector(list);
+
+        Enumeration enume = vec.elements();
+        while (enume.hasMoreElements()) {
+            System.out.println("aaaaaaaaaaaaaaaa" + enume.nextElement().toString());
+        }
+        Hashtable returnVal = (Hashtable) vec.get(0);
+
+        return returnVal;
+
+    }
+
+
+    public Hashtable getGenericName(String pKey) throws Exception {
+        TablesDao queryDao = new TablesDao();
+        List list = queryDao.getGenericName(pKey);
+        Vector vec = new Vector(list);
+        Hashtable returnVal = (Hashtable) vec.get(0);
+        return returnVal;
+    }
+
+    public Vector list_drug_element(String searchStr) throws Exception {
+        Vector params = new Vector();
+        params.addElement(searchStr);
+        TablesDao queryDao = new TablesDao();
+        List list = queryDao.listSearchElement(searchStr);
+        Vector vec = new Vector(list);
+        return vec;
+    }
+
+    public Vector list_drug_class(Vector dclass) {
+        List list = new ArrayList();
+        TablesDao queryDao = new TablesDao();
+        list = queryDao.listDrugClass(dclass);
+        Vector vec = new Vector(list);
+        return vec;
+
+    }
+
+    public Hashtable getDrug(String pKey, Boolean boolVal) throws Exception{
+        List list= new ArrayList();
+         System.out.println(pKey + "  "+boolVal);
+         TablesDao queryDao = new TablesDao();
+        list = queryDao.getDrug(pKey,boolVal);
+        Vector vec = new Vector(list);
+        Hashtable returnVal=(Hashtable) vec.get(0);
+        return returnVal;
+     }
+
+    public Vector getAlergyWarnings(String drugs,Vector allergies) throws Exception{
+        List list= new ArrayList();
+         System.out.println(drugs + "  "+allergies);
+         TablesDao queryDao = new TablesDao();
+        list = queryDao.getAllergyWarnings(drugs,allergies);
+        Vector vec = new Vector(list);
+        return vec;
+     }
 }
