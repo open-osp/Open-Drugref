@@ -43,8 +43,9 @@ public class SpringUtils
 	private static final ClassPathXmlApplicationContext beanFactory=new ClassPathXmlApplicationContext(configs);
 
 
-	public static Object getBean(String beanName)
-	{      
+	public static Object getBean(String beanName) {
+                System.out.println("DISPLAY NAME="+beanFactory.getDisplayName());
+                System.out.println("CLASSPATH_URL_PREFIX="+beanFactory.CLASSPATH_ALL_URL_PREFIX);
                // System.out.println("BEANFACOTRY                                                 "+beanFactory);
 		return(beanFactory.getBean(beanName));
 	}

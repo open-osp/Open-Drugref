@@ -6,6 +6,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath:spring_config.xml</param-value>
+        <!--param-value>/classes/spring_config.xml</param-value-->
     </context-param>
 
 	
@@ -13,13 +14,9 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-    <!--listener>
+    <!--listener>web
         <listener-class>org.oscarehr.caisi_integrator.util.ContextStartupListener</listener-class>
     </listener-->
-
-
-
-
 
     <servlet>
         <servlet-name>DrugrefService</servlet-name>

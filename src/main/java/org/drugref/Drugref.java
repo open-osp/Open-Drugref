@@ -35,89 +35,71 @@ import java.util.Vector;
  * @author jaygallagher & jacksonbi
  */
 
-//TO DO: getDrug ,getAllergyWarnings, fetch?
-
+//TO DO: fetch
 public class Drugref {
 
-    public Vector list_drugs(String searchStr,Hashtable tags) {
-        TablesDao queryDao = new TablesDao();
-        Vector vec = queryDao.listSearchElement(searchStr);
-        //Vector vec=new Vector(list);
-        System.out.print(vec);
-        return vec;
-    }
+        public Vector list_search_element(String searchStr){
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listSearchElement(searchStr);
+                return vec;
+        }
 
-    public Vector list_drug_element_route(String searchStr, String route) throws Exception {
-        TablesDao queryDao = new TablesDao();
-        Vector vec = queryDao.listSearchElementRoute(searchStr, route);
+        public Vector list_search_element_route(String str, String route) {
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listSearchElementRoute(str,route);
+                return vec;
+        }
 
-        return vec;
-    }
+        public Vector list_brands_from_element(String drugID) {
+                System.out.println("in drugref.java list_brands_from_element");
+                System.out.println("drugID="+drugID);
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listBrandsFromElement(drugID);
+                System.out.println("after listBrandsFromElement.");
+                for(int i=0;i<vec.size();i++){
+                        System.out.println("vector="+vec.get(i));
+                }
+                return vec;
+        }
 
-    public Vector list_brands_from_element(String drugID) throws Exception {
-        TablesDao queryDao = new TablesDao();
-        Vector vec = new Vector();
-        vec = queryDao.listBrandsFromElement(drugID);
+        public Vector list_search_element_select_categories(String str, Vector cat) {
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listSearchElementSelectCategories(str,cat);
+                return vec;
+        }
 
-        return vec;
+       public Vector get_generic_name(String drugID) {
+                System.out.println("in get_generic_name,drugref.java");
+                TablesDao queryDao = new TablesDao();
+                Vector vec=new Vector();
+                try{
+                    vec=queryDao.getGenericName(drugID);
+                }
+                catch(Exception e){e.printStackTrace();}
+                for (int i=0; i<vec.size();i++){
+                        System.out.println("the returned vec: vec.get(i)="+vec.get(i));
+                }
+                return vec;
+        }
+       public Vector get_form(String pKey) {
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.getForm(pKey);
+                return vec;
+        }
+        public Vector list_drug_class(Vector Dclass) {
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listDrugClass(Dclass);
+                return vec;
+        }
+        public Vector get_allergy_warnings(String atcCode, Vector allergies) {
 
-    }
-
-    public Vector list_search_element_select_categories(String str, Vector cat) {
-          TablesDao queryDao = new TablesDao();
-        Vector vec = new Vector();
-        vec = queryDao.listSearchElementSelectCategories(str, cat);
-        //System.out.println("list               "+list);
-        
-        return vec;
-    }
-
-    public Hashtable getDrugForm(String pKey) {
-        Hashtable ha=new Hashtable();
-        TablesDao queryDao = new TablesDao();
-        ha = (Hashtable)queryDao.getForm(pKey).get(0);
-        return ha;
-    }
-
-    public Hashtable getGenericName(String pKey) throws Exception {
-        Hashtable ha=new Hashtable();
-        TablesDao queryDao = new TablesDao();
-        ha = (Hashtable) queryDao.getGenericName(pKey).get(0);
-        return ha;
-    }
-
-    public Vector list_drug_element(String searchStr) throws Exception {
-        Vector params = new Vector();
-        params.addElement(searchStr);
-        TablesDao queryDao = new TablesDao();
-        List list = queryDao.listSearchElement(searchStr);
-        Vector vec = new Vector(list);
-        return vec;
-    }
-
-    public Vector list_drug_class(Vector dclass) {
-        List list = new ArrayList();
-        TablesDao queryDao = new TablesDao();
-        list = queryDao.listDrugClass(dclass);
-        Vector vec = new Vector(list);
-        return vec;
-    }
-
-    public Hashtable getDrug(String pKey, boolean boolVal) throws Exception{
-         System.out.println(pKey + "  "+boolVal);
-         TablesDao queryDao = new TablesDao();
-        Vector vec = queryDao.getDrug(pKey,boolVal);
-       
-        Hashtable returnVal=(Hashtable) vec.get(0);
-        return returnVal;
-     }
-
-    public Vector getAlergyWarnings(String drugs,Vector allergies) throws Exception{
-        List list= new ArrayList();
-         System.out.println(drugs + "  "+allergies);
-         TablesDao queryDao = new TablesDao();
-        list = queryDao.getAllergyWarnings(drugs,allergies);
-        Vector vec = new Vector(list);
-        return vec;
-     }
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.getAllergyWarnings(atcCode,allergies);
+                return vec;
+        }
+        public Vector get_drug(String pKey, boolean html) {
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.getDrug(pKey,html);
+                return vec;
+        }
 }

@@ -27,11 +27,12 @@ package org.drugref.util;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 
 public class JpaUtils {
 
     private static EntityManagerFactory entityManagerFactory = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
-//private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistenceUnit");
+    //private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistenceUnit");
     /**
      * This method will close the entity manager.
      * Any active transaction will be rolled back.
@@ -45,6 +46,10 @@ public class JpaUtils {
     }
 
     public static EntityManager createEntityManager() {
+        System.out.println("in createEntityManager()");
+        if (entityManagerFactory==null)
+            System.out.println("entityManagerFactory is null");
+
         return (entityManagerFactory.createEntityManager());
     }
 
