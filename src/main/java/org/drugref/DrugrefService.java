@@ -41,9 +41,9 @@ public class DrugrefService extends HttpServlet {
     public static XmlRpcServer xmlrpc = new XmlRpcServer();
 
     public void init(ServletConfig config) throws ServletException {
+        System.out.println("HERE-INIT");
         xmlrpc = new XmlRpcServer();
         xmlrpc.addHandler("$default", new Drugref());
-
     }
     /** 
      * Handles the HTTP <code>POST</code> method.

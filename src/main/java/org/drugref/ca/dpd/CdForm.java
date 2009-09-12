@@ -25,6 +25,7 @@
 package org.drugref.ca.dpd;
 
 import java.io.Serializable;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,32 +40,49 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "link_generic_brand", catalog = "drugref2")
-@NamedQueries({@NamedQuery(name = "LinkGenericBrand.findAll", query = "SELECT l FROM LinkGenericBrand l"), @NamedQuery(name = "LinkGenericBrand.findByPkId", query = "SELECT l FROM LinkGenericBrand l WHERE l.pkId = :pkId"), @NamedQuery(name = "LinkGenericBrand.findById", query = "SELECT l FROM LinkGenericBrand l WHERE l.id = :id"), @NamedQuery(name = "LinkGenericBrand.findByDrugCode", query = "SELECT l FROM LinkGenericBrand l WHERE l.drugCode = :drugCode")})
-public class LinkGenericBrand implements Serializable {
+@Table(name = "cd_form", catalog = "drugref2")
+@NamedQueries({@NamedQuery(name = "CdForm.findAll", query = "SELECT c FROM CdForm c"), @NamedQuery(name = "CdForm.findByDrugCode", query = "SELECT c FROM CdForm c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdForm.findByPharmCdFormCode", query = "SELECT c FROM CdForm c WHERE c.pharmCdFormCode = :pharmCdFormCode"), @NamedQuery(name = "CdForm.findByPharmaceuticalCdForm", query = "SELECT c FROM CdForm c WHERE c.pharmaceuticalCdForm = :pharmaceuticalCdForm"), @NamedQuery(name = "CdForm.findById", query = "SELECT c FROM CdForm c WHERE c.id = :id")})
+public class CdForm implements Serializable {
     private static final long serialVersionUID = 1L;
+    @Column(name = "drug_code")
+    private Integer drugCode;
+    @Column(name = "pharm_cd_form_code")
+    private Integer pharmCdFormCode;
+    @Column(name = "pharmaceutical_cd_form", length = 40)
+    private String pharmaceuticalCdForm;
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "pk_id", nullable = false)
-    private Integer pkId;
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "drug_code", length = 30)
-    private String drugCode;
 
-    public LinkGenericBrand() {
+    public CdForm() {
     }
 
-    public LinkGenericBrand(Integer pkId) {
-        this.pkId = pkId;
+    public CdForm(Integer id) {
+        this.id = id;
     }
 
-    public Integer getPkId() {
-        return pkId;
+    public Integer getDrugCode() {
+        return drugCode;
     }
 
-    public void setPkId(Integer pkId) {
-        this.pkId = pkId;
+    public void setDrugCode(Integer drugCode) {
+        this.drugCode = drugCode;
+    }
+
+    public Integer getPharmCdFormCode() {
+        return pharmCdFormCode;
+    }
+
+    public void setPharmCdFormCode(Integer pharmCdFormCode) {
+        this.pharmCdFormCode = pharmCdFormCode;
+    }
+
+    public String getPharmaceuticalCdForm() {
+        return pharmaceuticalCdForm;
+    }
+
+    public void setPharmaceuticalCdForm(String pharmaceuticalCdForm) {
+        this.pharmaceuticalCdForm = pharmaceuticalCdForm;
     }
 
     public Integer getId() {
@@ -75,29 +93,21 @@ public class LinkGenericBrand implements Serializable {
         this.id = id;
     }
 
-    public String getDrugCode() {
-        return drugCode;
-    }
-
-    public void setDrugCode(String drugCode) {
-        this.drugCode = drugCode;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (pkId != null ? pkId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof LinkGenericBrand)) {
+        if (!(object instanceof CdForm)) {
             return false;
         }
-        LinkGenericBrand other = (LinkGenericBrand) object;
-        if ((this.pkId == null && other.pkId != null) || (this.pkId != null && !this.pkId.equals(other.pkId))) {
+        CdForm other = (CdForm) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -105,7 +115,7 @@ public class LinkGenericBrand implements Serializable {
 
     @Override
     public String toString() {
-        return "org.drugref.ca.dpd.LinkGenericBrand[pkId=" + pkId + "]";
+        return "org.drugref.ca.dpd.CdForm[id=" + id + "]";
     }
 
 }

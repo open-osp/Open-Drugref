@@ -39,32 +39,39 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "link_generic_brand", catalog = "drugref2")
-@NamedQueries({@NamedQuery(name = "LinkGenericBrand.findAll", query = "SELECT l FROM LinkGenericBrand l"), @NamedQuery(name = "LinkGenericBrand.findByPkId", query = "SELECT l FROM LinkGenericBrand l WHERE l.pkId = :pkId"), @NamedQuery(name = "LinkGenericBrand.findById", query = "SELECT l FROM LinkGenericBrand l WHERE l.id = :id"), @NamedQuery(name = "LinkGenericBrand.findByDrugCode", query = "SELECT l FROM LinkGenericBrand l WHERE l.drugCode = :drugCode")})
-public class LinkGenericBrand implements Serializable {
+@Table(name = "cd_pharmaceutical_std", catalog = "drugref2")
+@NamedQueries({@NamedQuery(name = "CdPharmaceuticalStd.findAll", query = "SELECT c FROM CdPharmaceuticalStd c"), @NamedQuery(name = "CdPharmaceuticalStd.findByDrugCode", query = "SELECT c FROM CdPharmaceuticalStd c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdPharmaceuticalStd.findByPharmaceuticalStd", query = "SELECT c FROM CdPharmaceuticalStd c WHERE c.pharmaceuticalStd = :pharmaceuticalStd"), @NamedQuery(name = "CdPharmaceuticalStd.findById", query = "SELECT c FROM CdPharmaceuticalStd c WHERE c.id = :id")})
+public class CdPharmaceuticalStd implements Serializable {
     private static final long serialVersionUID = 1L;
+    @Column(name = "drug_code")
+    private Integer drugCode;
+    @Column(name = "pharmaceutical_std", length = 40)
+    private String pharmaceuticalStd;
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "pk_id", nullable = false)
-    private Integer pkId;
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "drug_code", length = 30)
-    private String drugCode;
 
-    public LinkGenericBrand() {
+    public CdPharmaceuticalStd() {
     }
 
-    public LinkGenericBrand(Integer pkId) {
-        this.pkId = pkId;
+    public CdPharmaceuticalStd(Integer id) {
+        this.id = id;
     }
 
-    public Integer getPkId() {
-        return pkId;
+    public Integer getDrugCode() {
+        return drugCode;
     }
 
-    public void setPkId(Integer pkId) {
-        this.pkId = pkId;
+    public void setDrugCode(Integer drugCode) {
+        this.drugCode = drugCode;
+    }
+
+    public String getPharmaceuticalStd() {
+        return pharmaceuticalStd;
+    }
+
+    public void setPharmaceuticalStd(String pharmaceuticalStd) {
+        this.pharmaceuticalStd = pharmaceuticalStd;
     }
 
     public Integer getId() {
@@ -75,29 +82,21 @@ public class LinkGenericBrand implements Serializable {
         this.id = id;
     }
 
-    public String getDrugCode() {
-        return drugCode;
-    }
-
-    public void setDrugCode(String drugCode) {
-        this.drugCode = drugCode;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (pkId != null ? pkId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof LinkGenericBrand)) {
+        if (!(object instanceof CdPharmaceuticalStd)) {
             return false;
         }
-        LinkGenericBrand other = (LinkGenericBrand) object;
-        if ((this.pkId == null && other.pkId != null) || (this.pkId != null && !this.pkId.equals(other.pkId))) {
+        CdPharmaceuticalStd other = (CdPharmaceuticalStd) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -105,7 +104,7 @@ public class LinkGenericBrand implements Serializable {
 
     @Override
     public String toString() {
-        return "org.drugref.ca.dpd.LinkGenericBrand[pkId=" + pkId + "]";
+        return "org.drugref.ca.dpd.CdPharmaceuticalStd[id=" + id + "]";
     }
 
 }

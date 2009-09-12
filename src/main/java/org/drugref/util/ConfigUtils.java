@@ -24,6 +24,7 @@ package org.drugref.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -71,6 +72,11 @@ public class ConfigUtils {
     }
 
     protected static Properties getProperties() {
+        Enumeration em=properties.propertyNames();
+        while(em.hasMoreElements()){
+            System.out.println("property="+em.nextElement());
+            
+        }
         return (properties);
     }
 

@@ -10,50 +10,52 @@
           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
-	<bean class="org.drugref.util.SpringPropertyConfigurer" />
+    <bean class="org.drugref.util.SpringPropertyConfigurer" />
 
 	<!-- DataSource -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${db_driver}" />
-		<property name="url" value="${db_url}" />
-		<property name="defaultAutoCommit" value="false" />
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${db_driver}" />
+        <!--property name="url" value="${db_url}" /-->
+        <property name="url" value="${db_url}" />
+        <property name="defaultAutoCommit" value="false" />
 
-		<property name="username" value="${db_user}" />
-		<property name="password" value="${db_password}" />
+        <property name="username" value="${db_user}" />
+        <property name="password" value="${db_password}" />
 
-		<property name="maxActive" value="32" />
-		<property name="maxIdle" value="2" />
-		<property name="maxWait" value="10000" />
+        <property name="maxActive" value="32" />
+        <property name="maxIdle" value="2" />
+        <property name="maxWait" value="10000" />
 
-		<property name="maxOpenPreparedStatements" value="320" />
-		<property name="poolPreparedStatements" value="true" />
-	</bean>
+        <property name="maxOpenPreparedStatements" value="320" />
+        <property name="poolPreparedStatements" value="true" />
+    </bean>
 
 	<!-- JPA -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter" />
+			<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter" >
+                            <property name="showSql" value="true"/>
+                        </bean>
 		</property>
 		<property name="jpaProperties">
 			<props>
 				<prop key="openjpa.Log">log4j</prop>
-				<prop key="openjpa.DetachState">fgs(DetachedStateField=true)</prop>
+				<!-- prop key="openjpa.DetachState">fgs(DetachedStateField=true)</prop>
 				<prop key="openjpa.DataCache">true(CacheSize=10000, SoftReferenceSize=0)</prop>
 				<prop key="openjpa.DataCacheTimeout">3600000</prop>
-				<prop key="openjpa.RemoteCommitProvider">sjvm</prop>
+				<prop key="openjpa.RemoteCommitProvider">sjvm</prop -->
 			</props>
 		</property>
 	</bean>
-
 	<!-- JPA annotations bean post processor -->
-	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
 
 	<!-- TransactionManager -->
-	<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager" autowire="byName" />
-	<tx:annotation-driven transaction-manager="txManager" />
+    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager" autowire="byName" />
+    <tx:annotation-driven transaction-manager="txManager" />
 
 	<!-- Managed JPA Beans -->
- 	<context:component-scan base-package="org.drugref"/>
+    <context:component-scan base-package="org.drugref"/>
 
 </beans>

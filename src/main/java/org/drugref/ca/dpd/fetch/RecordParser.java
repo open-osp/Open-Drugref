@@ -129,9 +129,9 @@ public class RecordParser {
                 vet.setCompanyCode(new Integer(items[2]));
                 vet.setCompanyName(items[3]);
                 vet.setCompanyType(items[4]);
-                vet.setAddressMailingFlag(items[5].charAt(0));
-                vet.setAddressBillingFlag(items[6].charAt(0));
-                vet.setAddressNotificationFlag(items[7].charAt(0));
+                vet.setAddressMailingFlag(items[5]);//.charAt(0));
+                vet.setAddressBillingFlag(items[6]);//.charAt(0));
+                vet.setAddressNotificationFlag(items[7]);//.charAt(0));
                 vet.setAddressOther(items[8]);
                 vet.setSuiteNumber(items[9]);
                 vet.setStreetName(items[10]);
@@ -140,6 +140,9 @@ public class RecordParser {
                 vet.setCountry(items[13]);
                 vet.setPostalCode(items[14]);
                 vet.setPostOfficeBox(items[15]);
+
+                System.out.println("addrBillingFlag>"+vet.getAddressBillingFlag()+"<");
+
                 em.persist(vet);
                 em.flush();
                 em.clear();
@@ -167,7 +170,7 @@ public class RecordParser {
                 prod.setCompanyCode(0);
                 prod.setDrugIdentificationNumber(items[3]);
                 prod.setBrandName(items[4]);
-                prod.setGpFlag(items[5].charAt(0));
+                prod.setGpFlag(items[5]);//.charAt(0));
                 prod.setAccessionNumber(items[6]);
                 prod.setNumberOfAis(items[7]);
                 prod.setLastUpdateDate(getDate(items[8]));
@@ -215,12 +218,12 @@ public class RecordParser {
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setActiveIngredientCode(new Integer((items[1])));
                 vet.setIngredient(items[2]);
-                vet.setIngredientSuppliedInd(items[3].charAt(0));
+                vet.setIngredientSuppliedInd(items[3]);//.charAt(0));
                 vet.setStrength(items[4]);
                 vet.setStrengthUnit(items[5]);
                 vet.setStrengthType(items[6]);
                 vet.setDosageValue(items[7]);
-                vet.setBase(items[8].charAt(0));
+                vet.setBase(items[8]);//.charAt(0));
                 vet.setDosageUnit(items[9]);
                 vet.setNotes(items[10]);
                 em.persist(vet);
@@ -307,7 +310,7 @@ public class RecordParser {
                 System.out.println(looksLike(items));
                 CdDrugStatus vet = new CdDrugStatus();
                 vet.setDrugCode(new Integer(items[0]));
-                vet.setCurrentStatusFlag(items[1].charAt(0));
+                vet.setCurrentStatusFlag(items[1]);//.charAt(0));
                 vet.setStatus(items[2]);
                 vet.setHistoryDate(getDate(items[3]));
                 em.persist(vet);
@@ -322,14 +325,15 @@ public class RecordParser {
              TC_AHFS_NUMBER                                   VARCHAR2(20)
              TC_AHFS                                          VARCHAR2(80)
              */
+            //0.64437-- 1.C03EA01-- 2.HYDROCHLOROTHIAZIDE AND POTASSIUM-SPARING AGENTS-- 3.24:08.24.16-- 4.POTASSIUM-SPARING DIURETICS-- 420909056/1068302336 :56619472
             while (( items = csv.getLine()) != null) {
                 System.out.println(looksLike(items));
                 CdTherapeuticClass vet = new CdTherapeuticClass();
                 vet.setDrugCode(new Integer(items[0]));
-                vet.setTcAhfsNumber(items[1]);
-                vet.setTcAhfs(items[2]);
-                vet.setTcAtcNumber(items[3]);
-                vet.setTcAtc(items[4]);
+                vet.setTcAtcNumber(items[1]);
+                vet.setTcAtc(items[2]);
+                vet.setTcAhfsNumber(items[3]);
+                vet.setTcAhfs(items[4]);
                 em.persist(vet);
                 em.flush();
                 em.clear();

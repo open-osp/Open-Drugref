@@ -39,32 +39,39 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "link_generic_brand", catalog = "drugref2")
-@NamedQueries({@NamedQuery(name = "LinkGenericBrand.findAll", query = "SELECT l FROM LinkGenericBrand l"), @NamedQuery(name = "LinkGenericBrand.findByPkId", query = "SELECT l FROM LinkGenericBrand l WHERE l.pkId = :pkId"), @NamedQuery(name = "LinkGenericBrand.findById", query = "SELECT l FROM LinkGenericBrand l WHERE l.id = :id"), @NamedQuery(name = "LinkGenericBrand.findByDrugCode", query = "SELECT l FROM LinkGenericBrand l WHERE l.drugCode = :drugCode")})
-public class LinkGenericBrand implements Serializable {
+@Table(name = "cd_schedule", catalog = "drugref2")
+@NamedQueries({@NamedQuery(name = "CdSchedule.findAll", query = "SELECT c FROM CdSchedule c"), @NamedQuery(name = "CdSchedule.findByDrugCode", query = "SELECT c FROM CdSchedule c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdSchedule.findBySchedule", query = "SELECT c FROM CdSchedule c WHERE c.schedule = :schedule"), @NamedQuery(name = "CdSchedule.findById", query = "SELECT c FROM CdSchedule c WHERE c.id = :id")})
+public class CdSchedule implements Serializable {
     private static final long serialVersionUID = 1L;
+    @Column(name = "drug_code")
+    private Integer drugCode;
+    @Column(name = "schedule", length = 40)
+    private String schedule;
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "pk_id", nullable = false)
-    private Integer pkId;
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "drug_code", length = 30)
-    private String drugCode;
 
-    public LinkGenericBrand() {
+    public CdSchedule() {
     }
 
-    public LinkGenericBrand(Integer pkId) {
-        this.pkId = pkId;
+    public CdSchedule(Integer id) {
+        this.id = id;
     }
 
-    public Integer getPkId() {
-        return pkId;
+    public Integer getDrugCode() {
+        return drugCode;
     }
 
-    public void setPkId(Integer pkId) {
-        this.pkId = pkId;
+    public void setDrugCode(Integer drugCode) {
+        this.drugCode = drugCode;
+    }
+
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(String schedule) {
+        this.schedule = schedule;
     }
 
     public Integer getId() {
@@ -75,29 +82,21 @@ public class LinkGenericBrand implements Serializable {
         this.id = id;
     }
 
-    public String getDrugCode() {
-        return drugCode;
-    }
-
-    public void setDrugCode(String drugCode) {
-        this.drugCode = drugCode;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (pkId != null ? pkId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof LinkGenericBrand)) {
+        if (!(object instanceof CdSchedule)) {
             return false;
         }
-        LinkGenericBrand other = (LinkGenericBrand) object;
-        if ((this.pkId == null && other.pkId != null) || (this.pkId != null && !this.pkId.equals(other.pkId))) {
+        CdSchedule other = (CdSchedule) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -105,7 +104,7 @@ public class LinkGenericBrand implements Serializable {
 
     @Override
     public String toString() {
-        return "org.drugref.ca.dpd.LinkGenericBrand[pkId=" + pkId + "]";
+        return "org.drugref.ca.dpd.CdSchedule[id=" + id + "]";
     }
 
 }
