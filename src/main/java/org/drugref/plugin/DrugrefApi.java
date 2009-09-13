@@ -19,10 +19,6 @@ import org.drugref.util.JpaUtils;
  *
  * @author jackson
  */
-public class ApiBase {
-
-    public ApiBase() { }
-    public class NotImplementedError{}
     //public void drugrefApiBase (String host="localhost", Integer port=8123, String database="drugref",String user="drugref",String pwd="drugref",String backend ="postgres") {
     public class DrugrefApi {
 
@@ -79,16 +75,19 @@ public class ApiBase {
         public void addquery(){
 
         }
-    }
-}
+    
 
-  /*      public Hashtable get(String attribute, Vector key){
+
+  public Object get(String attribute, Vector key){
+                        Hashtable haError=new Hashtable();
+                        String valStr="Attribute "+attribute+" not available";
+                        haError.put("Error", valStr);
             try {
                 Vector attr=(Vector)this.cache.get(attribute);
                 if (attr.get(1).equals(key)){
                                 //print "attr[0]=",attr[0];
                                 return attr.get(0);
-            }
+                   }
             } catch(Exception e){}
             Hashtable queryinfo=new Hashtable();
             try{
@@ -98,9 +97,7 @@ public class ApiBase {
                         //print "queryinfo=",queryinfo
             } catch(Exception e){
                         //print "error1"
-                        Hashtable haError=new Hashtable();
-                        String valStr="Attribute "+attribute+" not available";
-                        haError.put("Error", valStr);
+                        
                         return haError;
             }
             Vector results=new Vector();
@@ -108,15 +105,15 @@ public class ApiBase {
                         //if service provider available, try fiurst to retrieve the attribute by registered function
                         Object funcName = queryinfo.get("func") ;
 
-                        if (funcName instanceof ApiHolbrook.Holbrook.checkInteractionsATC){
+/*                        if (funcName instanceof ApiHolbrook.Holbrook.checkInteractionsATC){
                                 ApiHolbrook ah=new ApiHolbrook();
                                 ApiHolbrook.Holbrook ahh= ah.new Holbrook();
                                 ApiHolbrook.Holbrook.checkInteractionsATC ahhc = ahh.new checkInteractionsATC();
                                 results=ahhc.checkInteractionsATC(key);
-                        }
+                        }*/
                 }catch(Exception e){
                     try{
-                        String query=queryinfo.get("query");
+                        String query=queryinfo.get("query").toString();
                         Hashtable params=new Hashtable();
                         params.put(queryinfo.get("requires"), key);
                         results=runquery(query,params);
@@ -130,57 +127,37 @@ public class ApiBase {
                 if(results.equals(null)){
                     Hashtable htError=new Hashtable();
                     htError.put("Error", "Not Found");
-                    return htError;
+                    return htError;//return a hashtable
                 }
-
-                        print "try_results=",results
-                #else check whether we can retrieve the attribute via registered query
-                } catch(Exception e){ except KeyError:
-                        try:
-                                self._connect()
-                                query = queryinfo['query']
-                                params = {queryinfo['requires'] : key}
-                                results = self._runquery(query, params)
-                                print "try3"
-                        except:
-                                print "except3"
-                                results=None
+                String checkStr=(String)queryinfo.get("requires");
+                if(checkStr.startsWith("_search")){
+                    return results;//return a vector
                 }
-
-                if not results:
-                        print "error 2"
-                        return {'Error' : 'Not Found'}
-                if queryinfo['requires'].startswith('_search'):
-                        print "queryinfo is tru=",results
-                        #we are dealing with a list of result sets, not identified by a single primary key
-                        #thus no point ion caching anythying
-                        return results
-                else:
-                        #let's fill the cache with the attributes
-                        #it should have been a primary key search, so there should only be one result
-                        assert(len(results)==1)
-                        result = results[0]
-                        print "else 2"
-                        for attribute in result:
-                                print "in for"
-                                try:
-                                        self._cache[attribute] = (result[attribute], key)
-                                except:
-                                        #this attribute is not meant to be exposed, so just skip it
-                                        pass
-                try:
-                        attr = self._cache[attribute]
-                        print "try22 attr=",attr
-                        if attr[1]== key:
-                                print "return 2nd last"
-                                return attr[0]
-                except:
-                        pass
-                print "last error"
-                return {'Error' : 'Not Found'}
-
-
-        }
+                else{
+                    assert results.size()==1:results.size();
+                    Hashtable result=new Hashtable((Hashtable)results.get(0));
+                    Enumeration resultKeys=result.keys();
+                    while(resultKeys.hasMoreElements()){
+                        String attrib=resultKeys.nextElement().toString();
+                        //List valList=new ArrayList();
+                        //valList.add(result.get(attrib));
+                        //valList.add(key);
+                        Vector valVec=new Vector();
+                        valVec.addElement(result.get(attrib));
+                        valVec.addElement(key);
+                        this.cache.put(attrib, valVec);
+                        try{
+                            Vector attr=(Vector)this.cache.get(attrib);
+                            Vector attrElm=new Vector((Vector)attr.get(1));
+                            if (attrElm.equals(key)){
+                                return attr.get(0);
+                            }
+                        }
+                        catch(Exception e){ }
+                    }
+                }
+                return haError;
+ }
 
         private void connect(){}
 
@@ -220,4 +197,4 @@ public class ApiBase {
         }
 
     }
-}*/
+

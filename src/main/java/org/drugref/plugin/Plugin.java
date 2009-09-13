@@ -13,12 +13,12 @@ import java.util.Vector;
  * @author jackson
  */
 public interface Plugin {
-    public void drugrefPlugin();
+    //setters
     public void setName (String name);
     public void setVersion(String version);
     public void setProvides(Hashtable provides);
     public void setPlugin(Object plugin);
-
+    //getters
     public String getName();
     public String getVersion();
     public Hashtable getProvides();

@@ -18,26 +18,27 @@ import org.drugref.util.JpaUtils;
  *
  * @author jackson
  */
-public class ApiHolbrook extends PluginImpl {
+    //public Holbrook holBrook=new Holbrook();
+  //  public DrugrefPlugin drugrefPlugin=new DrugrefPlugin();
 
     //public void drugrefApiHolbrook(String host="localhost", Integer port=8123,String database="drugref2", String user="drugref", String pwd="drugref", String backend="postgres")
-    public class Holbrook {
+    public class Holbrook extends DrugrefApi {
 
-        public void Holbrook() {
-            String host = "localhost";
-            Integer port = 8123;
-            String database = "drugref2";
-            String user = "drugref";
-            String pwd = "drugref";
-            String backend = "postgres";
-            
-            ApiBase ab=new ApiBase();
-            ApiBase.DrugrefApi abd = ab.new  DrugrefApi(host, port, database, user, pwd, backend) ;
-            checkInteractionsATC cia = new checkInteractionsATC();
-            Vector vec = new Vector();
-            vec.addElement("interaction_byATC");
-            abd.addfunc(cia, "_search_interactions", vec);
-        }
+        private    String host = "localhost";
+        private    Integer port = 8123;
+        private    String database = "drugref2";
+        private    String user = "drugref";
+        private    String pwd = "drugref";
+        private    String backend = "postgres";
+   //     private    ApiBase ApiBaseObj=new ApiBase();
+    //    private    ApiBase.DrugrefApi DrugrefApiObj = this.ApiBaseObj.new  DrugrefApi(host, port, database, user, pwd, backend) ;
+
+       public Holbrook() {
+           checkInteractionsATC cia = new checkInteractionsATC();
+           Vector vec = new Vector();
+           vec.addElement("interaction_byATC");
+    //       DrugrefApiObj.addfunc(cia, "_search_interactions", vec);
+      }
 
         public Hashtable legend(String keyword) {
             Hashtable ha = new Hashtable();
@@ -110,20 +111,5 @@ public class ApiHolbrook extends PluginImpl {
         }
     }
 
-    public class drugrefPlugin {
-        private PluginImpl dpi = new PluginImpl();
-        private ApiHolbrook dab = new ApiHolbrook();
+    
 
-        public drugrefPlugin() {
-            
-            this.dpi.setName("Holbrook Drug Interactions");
-            this.dpi.setVersion("1.0");
-            this.dpi.setPlugin(dab);
-            ApiBase ab=new ApiBase();
-
-            ApiBase.DrugrefApi da=ab.new DrugrefApi();
-            da = (ApiBase.DrugrefApi) this.dpi.getPlugin();
-//            this.dpi.setProvides(da.listCapabilities());
-        }
-    }
-}

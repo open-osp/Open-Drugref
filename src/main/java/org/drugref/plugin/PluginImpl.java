@@ -18,7 +18,7 @@ public class PluginImpl implements Plugin{
     private Hashtable provides;
     private Object plugin;
 
-    public void drugrefPlugin(){
+    public PluginImpl(){
         this.name=null;
         this.version=null;
         this.provides=new Hashtable();
