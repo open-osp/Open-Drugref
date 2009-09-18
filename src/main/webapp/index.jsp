@@ -1,140 +1,271 @@
-
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="org.apache.xmlrpc.*,java.util.*" %>
+<%@page contentType="text/html" pageEncoding="MacRoman"%>
+<%@page import="java.io.BufferedReader,java.io.FileReader,java.io.IOException,java.lang.Object,java.util.Hashtable,java.util.Vector,org.apache.xmlrpc.XmlRpcClientLite,org.apache.xmlrpc.XmlRpcException" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-    "http://www.w3.org/TR/html4/loose.dtd">
+   "http://www.w3.org/TR/html4/loose.dtd">
+<%String str = request.getParameter("searchVal");
+if (str == null) str = "";
+%>
 
-<html>
+<html >
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=MacRoman">
         <title>JSP Page</title>
     </head>
-    <body>
-        <h1>Hello World!!!!!!</h1>
-
-
+    <body onload="document.getElementById('search').focus();">
+        <h1>Hello World!</h1>
+       
+        <form action="index.jsp">
+            <input type="text" id="search" name="searchVal" value="<%=str%>" />
+            <input type="submit"/>
+        </form>
+        <hr>
         <%
-        Vector paramsListDrugs = new Vector();
-        Hashtable haListDrugs=new Hashtable();
-        paramsListDrugs.addElement("coumarin");
-        System.out.println("params "+paramsListDrugs);
-        Object vecListDrugs = (Object) callWebserviceLite("list_search_element",paramsListDrugs);
-        System.out.println("vec "+vecListDrugs);
-        out.write("list_search_element result: " + vecListDrugs + "\n");
+            if (request.getParameter("searchVal") != null){
+                
 
-        Vector paramsGetDrug = new Vector();
-        boolean bool=true;
-        paramsGetDrug.addElement("12188");
-        paramsGetDrug.addElement(bool);
-        System.out.println("params   "+paramsGetDrug);
-        Object vecGetDrug = (Object) callWebserviceLite("get_drug",paramsGetDrug);
-        System.out.println("vec "+vecGetDrug);
-        out.write("get_drug : "+vecGetDrug + "\n");
 
-        Vector paramsListDrugElementRoute = new Vector();
-        paramsListDrugElementRoute.addElement("abc");
-        paramsListDrugElementRoute.addElement("ra");
-        System.out.println("params   "+paramsListDrugElementRoute);
-        Object vecListDrugElementRoute = (Object) callWebserviceLite("list_search_element_route",paramsListDrugElementRoute);
-        System.out.println("vec "+vecListDrugElementRoute);
-        out.write("list_drug_element_route result: "+vecListDrugElementRoute + "\n");
+                Vector params = new Vector();
+                params.addElement(request.getParameter("searchVal"));
+                Object obj = callWebserviceLite("list_search_element2",params);
+                System.out.println("obj "+obj.getClass().getName());
 
-        Vector paramsListBrandsFromElement = new Vector();
-        paramsListBrandsFromElement.addElement("26440");
-        System.out.println("params  "+paramsListBrandsFromElement);
-        Object vecListBrandsFromElement = (Object) callWebserviceLite("list_brands_from_element",paramsListBrandsFromElement);
-        System.out.println("vec "+vecListDrugElementRoute);
-        out.write("list_brands_from_element result: "+vecListBrandsFromElement + "\n");
+                    if(obj instanceof  org.apache.xmlrpc.XmlRpcException){
+                         org.apache.xmlrpc.XmlRpcException xmle = ( org.apache.xmlrpc.XmlRpcException) obj;
+                        xmle.printStackTrace();
+                        System.out.println("PROB with "+str);
+                        
+                    }else{
+                        Vector vec = (Vector) obj;
 
-       Vector paramsListSearchElementSelectCategories = new Vector();
-        String searchStr = "a,pro, bb, co";
-        Vector catVec = new Vector();
-        catVec.addElement(11);
-        catVec.addElement(13);
-        paramsListSearchElementSelectCategories.addElement(searchStr);
-        paramsListSearchElementSelectCategories.addElement(catVec);
-        System.out.println("params   "+paramsListSearchElementSelectCategories);
-        Object vecListSearchElementSelectCategories = (Object) callWebserviceLite("list_search_element_select_categories",paramsListSearchElementSelectCategories);
-        System.out.println("vec "+vecListSearchElementSelectCategories);
-        out.write("list_search_element_select_categories: "+vecListSearchElementSelectCategories + "\n");
+                        %>
 
-        Vector paramsGetDrugForm = new Vector();
-        catVec.addElement(11);
-        catVec.addElement(13);
-        paramsGetDrugForm.addElement("12188");
-        System.out.println("params   "+paramsGetDrugForm);
-        Object vecGetDrugForm = (Object) callWebserviceLite("get_form",paramsGetDrugForm);
-        System.out.println("vec "+vecGetDrugForm);
-        out.write("getDrugForm : "+vecGetDrugForm + "\n");
+                        <h3><%=request.getParameter("searchVal")%> -- <%=getDef( vec)%></h3>
+                        <table>
 
-        Vector paramsGetGenericName = new Vector();
-        paramsGetGenericName.addElement("18638");
-        System.out.println("params    "+paramsGetGenericName);
-        Object vecGetGenericName = (Object) callWebserviceLite("get_generic_name",paramsGetGenericName);
-        System.out.println("vec "+vecGetGenericName);
-        out.write("getGenericName : "+vecGetGenericName + "\n");
 
-        Vector paramsListDrugClass = new Vector();
-        Vector p=new Vector();
-        p.addElement(123);
-        p.addElement(456);
-        paramsListDrugClass.addElement(p);
-        System.out.println("params   "+paramsListDrugClass);
-        Object vecListDrugClass = (Object) callWebserviceLite("list_drug_class",paramsListDrugClass);
-        System.out.println("vec "+vecListDrugClass);
-        out.write("list_drug_class : "+vecListDrugClass + "\n");
 
-        Vector paramsGetAlergyWarnings = new Vector();
-        String drugs="73063";
-        Vector allergies = new Vector();
-        paramsGetAlergyWarnings.addElement(drugs);
-        paramsGetAlergyWarnings.addElement(allergies);
-        System.out.println("params    "+paramsGetAlergyWarnings);
-        Object vecGetAlergyWarnings = (Object) callWebserviceLite("get_allergy_warnings",paramsGetAlergyWarnings);
-        System.out.println("vec " + vecGetAlergyWarnings);
-        out.write("getAlergyWarnings : " + vecGetAlergyWarnings + "\n");
+                            <tr><th colspan="3" align="left">NEW GEN</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("18")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+                            <tr><th colspan="3" align="left">NEW GEN COMP</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("19")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+
+
+                            <tr><th colspan="3" align="left">ATC</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("8")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+
+
+
+
+
+                            <tr><th colspan="3" align="left">AHFS</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("10")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+                            <tr><th colspan="3" align="left">GEN ORIG</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("12")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+                            <tr><th colspan="3" align="left">GEN COMP ORIG</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("11")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+                            <tr><th colspan="3" align="left">INGREDIENT</th></tr>
+                             <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("14")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+
+
+                            <tr><th colspan="3" align="left">BRAND</th></tr>
+                            <% for (Object Hash: vec){
+                                Hashtable h = (Hashtable) Hash;
+                                String cat = ""+h.get("category");
+                                if(!cat.equals("13")) continue;
+                             %>
+                            <tr>
+                                <td><%=h.get("category")%></td>
+                                <td><%=h.get("id")%></td>
+                                <td><%=h.get("name")%></td>
+                            </tr>
+                            <%}%>
+
+
+                    
+                            
+                        </table>
+                    <%}%>
+
+
+
+
+
+
+
+           <% }
+
 
         %>
 
+         <pre>
+
+
+Return Extra Data Points
+  -Route
+  -Form ( is now part of the drug code )
+  -Derived Brand eg (Brand name that was searched that lead to this generic)
+  -Example Brand (To show with the generic name for clarification)
+  -
+
+How to order results.  (Should a relevance be returned or decided upon at the oscar side?)
+
+Check Inactive Drugs
+
+1.Yasmin 21 or Yasmin 28.. how would you know the generic?
+
+2.Does compound import need to be changed?
+        </pre>
+
     </body>
 </html>
+
+
+
 <%!
 
-private Object callWebserviceLite(String procedureName,Vector params) throws Exception{
-        // System.out.println("#CALLDRUGREF-"+procedureName);
-         Object object = new Object();
-         try{
-             System.out.println("in callWebserviceLite");
-            // System.out.println("server_url :"+server_url);
-           // XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/DrugrefService");
-             XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/drugref2/DrugrefService");
-            // XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:4082/drugref2/DrugrefService");
-            System.out.println("procedureName="+procedureName);
-            //XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:4080/drugref2/DrugrefService");
-            System.out.println("server's url :"+server.getURL());
-            System.out.println("server="+server);
-            //server.
-            /*try{
-                String[] args=new String[3];
-                args[0]="http://localhost:8084/DrugrefService";
-                args[1]=procedureName;
-                args[2]="testParam";
-                System.out.println("before main");
-                server.main(args);
-                System.out.println("after main");
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+
+
+
+/**
+ *
+ * @author jaygallagher
+ */
+
+   
+
+    private String getDef(Vector vec){
+        int brand = 0;
+        int atc = 0;
+        int ahfs = 0;
+        int gen = 0;
+        int genCompound = 0;
+        int ingred = 0;
+        int newGen = 0;
+        int newGenComp = 0;
+        int somethingElse = 0;
+
+
+
+        for(Object obj:vec){
+            Hashtable h = (Hashtable) obj;
+            String num = ""+ h.get("category");
+            if (num.equals("")){
+                num = "0";
             }
-            catch(Exception e){
-                System.out.println("main's e: ");
-                e.printStackTrace();
-            }*/
-            object = (Object) server.execute(procedureName, params);
-            System.out.println("Object in callWebserviceLite:       "+object);
-         }catch (Exception exception) {
-            System.out.println(exception.getClass().getName()+ "message in exception: "+exception.getMessage());
-            exception.getStackTrace();
-            exception.printStackTrace();
-             /*
+            Integer cat = new Integer(num);
+            if(cat == 13){
+                brand++;
+            }else if(cat == 8){
+                atc++;
+            }else if(cat == 10){
+                ahfs++;
+            }else if(cat == 12){
+                gen++;
+            }else if(cat == 11){
+                genCompound++;
+            }else if(cat == 14){
+                ingred++;
+            }else if(cat == 18){
+                newGen++;
+            }else if(cat == 19){
+                newGenComp++;
+            }else{
+                somethingElse++;
+            }
+
+        }
+
+        return " brand = "+ brand +" atc = "+atc+" ahfs = "+ahfs+" gen = "+gen+" genCompound = "+genCompound+" ingred = "+ingred+" newGen = "+newGen+" newGenComp = "+newGenComp+" else ="+somethingElse;
+
+
+    }
+
+
+    private Object callWebserviceLite(String procedureName,Vector params) throws Exception{
+        // System.out.println("#CALLDRUGREF-"+procedureName);
+         Object object = null;
+         try{
+            //System.out.println("server_url :"+server_url);
+            XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8080/drugref2/DrugrefService");
+            object = server.execute(procedureName, params);
+         }catch (XmlRpcException exception) {
+
                 System.err.println("JavaClient: XML-RPC Fault #" +
                                    Integer.toString(exception.code) + ": " +
                                    exception.toString());
@@ -143,15 +274,15 @@ private Object callWebserviceLite(String procedureName,Vector params) throws Exc
                 throw new Exception("JavaClient: XML-RPC Fault #" +
                                    Integer.toString(exception.code) + ": " +
                                    exception.toString());
- 
+
          } catch (Exception exception) {
                 System.err.println("JavaClient: " + exception.toString());
                 exception.printStackTrace();
                 throw new Exception("JavaClient: " + exception.toString());
- */
          }
          return object;
      }
+
 
 
 
