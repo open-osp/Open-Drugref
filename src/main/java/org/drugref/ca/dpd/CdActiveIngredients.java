@@ -1,14 +1,33 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *
+ * Copyright (c) 2001-2002. Department of Family Medicine, McMaster University. All Rights Reserved. *
+ * This software is published under the GPL GNU General Public License.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version. *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. *
+ *
+ *
+ *
+ * This software was written for the
+ * Department of Family Medicine
+ * McMaster University
+ * Hamilton
+ * Ontario, Canada
  */
-
 package org.drugref.ca.dpd;
 
 import java.io.Serializable;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -19,7 +38,7 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_active_ingredients", catalog = "drugref2", schema = "public")
+@Table(name = "cd_active_ingredients", catalog = "drugref2")
 @NamedQueries({@NamedQuery(name = "CdActiveIngredients.findAll", query = "SELECT c FROM CdActiveIngredients c"), @NamedQuery(name = "CdActiveIngredients.findByDrugCode", query = "SELECT c FROM CdActiveIngredients c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdActiveIngredients.findByActiveIngredientCode", query = "SELECT c FROM CdActiveIngredients c WHERE c.activeIngredientCode = :activeIngredientCode"), @NamedQuery(name = "CdActiveIngredients.findByIngredient", query = "SELECT c FROM CdActiveIngredients c WHERE c.ingredient = :ingredient"), @NamedQuery(name = "CdActiveIngredients.findByIngredientSuppliedInd", query = "SELECT c FROM CdActiveIngredients c WHERE c.ingredientSuppliedInd = :ingredientSuppliedInd"), @NamedQuery(name = "CdActiveIngredients.findByStrength", query = "SELECT c FROM CdActiveIngredients c WHERE c.strength = :strength"), @NamedQuery(name = "CdActiveIngredients.findByStrengthUnit", query = "SELECT c FROM CdActiveIngredients c WHERE c.strengthUnit = :strengthUnit"), @NamedQuery(name = "CdActiveIngredients.findByStrengthType", query = "SELECT c FROM CdActiveIngredients c WHERE c.strengthType = :strengthType"), @NamedQuery(name = "CdActiveIngredients.findByDosageValue", query = "SELECT c FROM CdActiveIngredients c WHERE c.dosageValue = :dosageValue"), @NamedQuery(name = "CdActiveIngredients.findByBase", query = "SELECT c FROM CdActiveIngredients c WHERE c.base = :base"), @NamedQuery(name = "CdActiveIngredients.findByDosageUnit", query = "SELECT c FROM CdActiveIngredients c WHERE c.dosageUnit = :dosageUnit"), @NamedQuery(name = "CdActiveIngredients.findByNotes", query = "SELECT c FROM CdActiveIngredients c WHERE c.notes = :notes"), @NamedQuery(name = "CdActiveIngredients.findById", query = "SELECT c FROM CdActiveIngredients c WHERE c.id = :id")})
 public class CdActiveIngredients implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -30,7 +49,7 @@ public class CdActiveIngredients implements Serializable {
     @Column(name = "ingredient", length = 240)
     private String ingredient;
     @Column(name = "ingredient_supplied_ind")
-    private Character ingredientSuppliedInd;
+    private String ingredientSuppliedInd;
     @Column(name = "strength", length = 20)
     private String strength;
     @Column(name = "strength_unit", length = 40)
@@ -40,14 +59,13 @@ public class CdActiveIngredients implements Serializable {
     @Column(name = "dosage_value", length = 20)
     private String dosageValue;
     @Column(name = "base")
-    private Character base;
+    private String base;
     @Column(name = "dosage_unit", length = 40)
     private String dosageUnit;
     @Column(name = "notes", length = 2147483647)
     private String notes;
     @Id
-    @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     public CdActiveIngredients() {
@@ -81,11 +99,11 @@ public class CdActiveIngredients implements Serializable {
         this.ingredient = ingredient;
     }
 
-    public Character getIngredientSuppliedInd() {
+    public String getIngredientSuppliedInd() {
         return ingredientSuppliedInd;
     }
 
-    public void setIngredientSuppliedInd(Character ingredientSuppliedInd) {
+    public void setIngredientSuppliedInd(String ingredientSuppliedInd) {
         this.ingredientSuppliedInd = ingredientSuppliedInd;
     }
 
@@ -121,11 +139,11 @@ public class CdActiveIngredients implements Serializable {
         this.dosageValue = dosageValue;
     }
 
-    public Character getBase() {
+    public String getBase() {
         return base;
     }
 
-    public void setBase(Character base) {
+    public void setBase(String base) {
         this.base = base;
     }
 

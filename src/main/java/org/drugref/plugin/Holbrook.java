@@ -4,13 +4,15 @@
  */
 package org.drugref.plugin;
 
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+//import org.drugref.ca.dpd.Interactions;
+//import org.drugref.ca.dpd.Interactions;
 import org.drugref.ca.dpd.Interactions;
 import org.drugref.util.JpaUtils;
 
@@ -34,13 +36,15 @@ import org.drugref.util.JpaUtils;
     //    private    ApiBase.DrugrefApi DrugrefApiObj = this.ApiBaseObj.new  DrugrefApi(host, port, database, user, pwd, backend) ;
 
        public Holbrook() {
+           super("localhost",8123,"drugref2","drugref","drugref","postgres");
            checkInteractionsATC cia = new checkInteractionsATC();
            Vector vec = new Vector();
-           vec.addElement("interaction_byATC");
-    //       DrugrefApiObj.addfunc(cia, "_search_interactions", vec);
+           vec.addElement("interactions_byATC");
+           this.addfunc(cia, "_search_interactions", vec);
       }
 
         public Hashtable legend(String keyword) {
+            p("===start of legend===");
             Hashtable ha = new Hashtable();
             if (keyword.equals("effect")) {
                 ha.put("a", "augments (no clinical effect)");
@@ -61,39 +65,45 @@ import org.drugref.util.JpaUtils;
                 ha.put("G", "goog");
                 ha.put(" ", "unknown");
             }
+            p("legend return",ha.toString());
+            p("==end of legend==");
             return ha;
         }
 
         public class checkInteractionsATC {
 
             public Vector checkInteractionsATC(Vector druglist) {
+                p("===start of checkInteractionsATC===");
+                p("druglist",druglist.toString());
+
                 Vector interactions = new Vector();
                 for (int i = 0; i < druglist.size(); i++) {
                     Vector idrugs = new Vector(druglist);
                     String drug = (String) druglist.get(i);
                     idrugs.removeElement(drug);
                     for (int j = 0; j < idrugs.size(); j++) {
-
-                        String query = "select hi from Interactions where affectingatc = (:affecting) and affectedatc = (:affected)";
-                        /*Hashtable params=new Hashtable();
-                        params.put("affecting", drug);
-                        params.put("affected",idrugs.get(j));
-                         */
+                        String query = "select hi from Interactions hi where hi.affectingatc=:affecting and hi.affectedatc=:affected";
                         //start to run query
+                        p("before query");
                         EntityManager em = JpaUtils.createEntityManager();
                         EntityTransaction tx = em.getTransaction();
                         tx.begin();
                         Query queryOne = em.createQuery(query);
                         queryOne.setParameter("affecting", drug);
                         queryOne.setParameter("affected", idrugs.get(j));
-                        List<Interactions> results = queryOne.getResultList();
-                        tx.commit();
-                        
+                        p("affecting",drug);
+                        p("affected",idrugs.get(j).toString());
+                        p("query",query);
+
+                        List<Interactions> results = new ArrayList();
+                      try{  p("before query");
+                            results = queryOne.getResultList();                          
+                            p("after query");
+                            tx.commit();
 
                         // Vector results = this.runquery(query, params);
-                        for (int q = 0; q < results.size(); q++) {
+                         for(Interactions result:results){
                             Hashtable interaction = new Hashtable();
-                            Interactions result = results.get(q);
                             interaction.put("affectingatc", result.getAffectingatc());
                             interaction.put("affectedatc", result.getAffectedatc());
                             interaction.put("affectingdrug", result.getAffectingdrug());
@@ -102,10 +112,16 @@ import org.drugref.util.JpaUtils;
                             interaction.put("effect", result.getEffect());
                             interaction.put("evidence", result.getEvidence());
                             interaction.put("comment", result.getComment());
+                            p("***interaction",interaction.toString());
                             interactions.addElement(interaction);
+                        }
+                        }catch(Exception e){
+                            e.printStackTrace();                            
                         }
                     }
                 }
+                p("interactions",interactions.toString());
+                p("===end of checkInteractionsATC===");
                 return interactions;
             }
         }

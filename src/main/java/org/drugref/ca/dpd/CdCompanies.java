@@ -1,14 +1,34 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *
+ * Copyright (c) 2001-2002. Department of Family Medicine, McMaster University. All Rights Reserved. *
+ * This software is published under the GPL GNU General Public License.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version. *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. *
+ *
+ *
+ *
+ * This software was written for the
+ * Department of Family Medicine
+ * McMaster University
+ * Hamilton
+ * Ontario, Canada
  */
 
 package org.drugref.ca.dpd;
 
 import java.io.Serializable;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -19,7 +39,7 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_companies", catalog = "drugref2", schema = "public")
+@Table(name = "cd_companies", catalog = "drugref2")
 @NamedQueries({@NamedQuery(name = "CdCompanies.findAll", query = "SELECT c FROM CdCompanies c"), @NamedQuery(name = "CdCompanies.findByDrugCode", query = "SELECT c FROM CdCompanies c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdCompanies.findByMfrCode", query = "SELECT c FROM CdCompanies c WHERE c.mfrCode = :mfrCode"), @NamedQuery(name = "CdCompanies.findByCompanyCode", query = "SELECT c FROM CdCompanies c WHERE c.companyCode = :companyCode"), @NamedQuery(name = "CdCompanies.findByCompanyName", query = "SELECT c FROM CdCompanies c WHERE c.companyName = :companyName"), @NamedQuery(name = "CdCompanies.findByCompanyType", query = "SELECT c FROM CdCompanies c WHERE c.companyType = :companyType"), @NamedQuery(name = "CdCompanies.findByAddressMailingFlag", query = "SELECT c FROM CdCompanies c WHERE c.addressMailingFlag = :addressMailingFlag"), @NamedQuery(name = "CdCompanies.findByAddressBillingFlag", query = "SELECT c FROM CdCompanies c WHERE c.addressBillingFlag = :addressBillingFlag"), @NamedQuery(name = "CdCompanies.findByAddressNotificationFlag", query = "SELECT c FROM CdCompanies c WHERE c.addressNotificationFlag = :addressNotificationFlag"), @NamedQuery(name = "CdCompanies.findByAddressOther", query = "SELECT c FROM CdCompanies c WHERE c.addressOther = :addressOther"), @NamedQuery(name = "CdCompanies.findBySuiteNumber", query = "SELECT c FROM CdCompanies c WHERE c.suiteNumber = :suiteNumber"), @NamedQuery(name = "CdCompanies.findByStreetName", query = "SELECT c FROM CdCompanies c WHERE c.streetName = :streetName"), @NamedQuery(name = "CdCompanies.findByCityName", query = "SELECT c FROM CdCompanies c WHERE c.cityName = :cityName"), @NamedQuery(name = "CdCompanies.findByProvince", query = "SELECT c FROM CdCompanies c WHERE c.province = :province"), @NamedQuery(name = "CdCompanies.findByCountry", query = "SELECT c FROM CdCompanies c WHERE c.country = :country"), @NamedQuery(name = "CdCompanies.findByPostalCode", query = "SELECT c FROM CdCompanies c WHERE c.postalCode = :postalCode"), @NamedQuery(name = "CdCompanies.findByPostOfficeBox", query = "SELECT c FROM CdCompanies c WHERE c.postOfficeBox = :postOfficeBox"), @NamedQuery(name = "CdCompanies.findById", query = "SELECT c FROM CdCompanies c WHERE c.id = :id")})
 public class CdCompanies implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -34,11 +54,11 @@ public class CdCompanies implements Serializable {
     @Column(name = "company_type", length = 40)
     private String companyType;
     @Column(name = "address_mailing_flag")
-    private Character addressMailingFlag;
+    private String addressMailingFlag;
     @Column(name = "address_billing_flag")
-    private Character addressBillingFlag;
+    private String addressBillingFlag;
     @Column(name = "address_notification_flag")
-    private Character addressNotificationFlag;
+    private String addressNotificationFlag;
     @Column(name = "address_other", length = 20)
     private String addressOther;
     @Column(name = "suite_number", length = 20)
@@ -56,8 +76,7 @@ public class CdCompanies implements Serializable {
     @Column(name = "post_office_box", length = 15)
     private String postOfficeBox;
     @Id
-    @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     public CdCompanies() {
@@ -107,27 +126,27 @@ public class CdCompanies implements Serializable {
         this.companyType = companyType;
     }
 
-    public Character getAddressMailingFlag() {
+    public String getAddressMailingFlag() {
         return addressMailingFlag;
     }
 
-    public void setAddressMailingFlag(Character addressMailingFlag) {
+    public void setAddressMailingFlag(String addressMailingFlag) {
         this.addressMailingFlag = addressMailingFlag;
     }
 
-    public Character getAddressBillingFlag() {
+    public String getAddressBillingFlag() {
         return addressBillingFlag;
     }
 
-    public void setAddressBillingFlag(Character addressBillingFlag) {
+    public void setAddressBillingFlag(String addressBillingFlag) {
         this.addressBillingFlag = addressBillingFlag;
     }
 
-    public Character getAddressNotificationFlag() {
+    public String getAddressNotificationFlag() {
         return addressNotificationFlag;
     }
 
-    public void setAddressNotificationFlag(Character addressNotificationFlag) {
+    public void setAddressNotificationFlag(String addressNotificationFlag) {
         this.addressNotificationFlag = addressNotificationFlag;
     }
 

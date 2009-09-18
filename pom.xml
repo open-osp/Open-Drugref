@@ -137,16 +137,17 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--dependency>
-            <groupId>unknown.binary</groupId>
-            <artifactId>postgresql-8.3-603.jdbc3</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency-->
-    <dependency>
-        <groupId>postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>8.3-603.jdbc3</version>
-    </dependency>
+
+        <dependency>
+            <groupId>org.ostermiller</groupId>
+            <artifactId>utils</artifactId>
+            <version>1.07.00</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.3-603.jdbc3</version>
+        </dependency>
     
     </dependencies>
     <build>

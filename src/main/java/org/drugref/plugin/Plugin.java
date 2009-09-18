@@ -12,17 +12,19 @@ import java.util.Vector;
  *
  * @author jackson
  */
-public interface Plugin {
+interface Plugin <T> {
+
     //setters
     public void setName (String name);
     public void setVersion(String version);
     public void setProvides(Hashtable provides);
-    public void setPlugin(Object plugin);
+    public void setPlugin(T plugin);
+
     //getters
     public String getName();
     public String getVersion();
     public Hashtable getProvides();
-    public Object getPlugin();
+    public T getPlugin();
 
     public Vector register();
     

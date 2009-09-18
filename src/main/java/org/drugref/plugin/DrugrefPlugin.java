@@ -12,7 +12,6 @@ package org.drugref.plugin;
 
 public class DrugrefPlugin extends PluginImpl {
         public DrugrefPlugin() {
-
             this.setName("Holbrook Drug Interactions");
             this.setVersion("1.0");
             Holbrook hb=new Holbrook();

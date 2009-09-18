@@ -15,7 +15,8 @@
 
 
         <%
-        Vector paramsListDrugs = new Vector();
+        
+   /*     Vector paramsListDrugs = new Vector();
         Hashtable haListDrugs=new Hashtable();
         paramsListDrugs.addElement("coumarin");
         System.out.println("params "+paramsListDrugs);
@@ -94,9 +95,40 @@
         Object vecGetAlergyWarnings = (Object) callWebserviceLite("get_allergy_warnings",paramsGetAlergyWarnings);
         System.out.println("vec " + vecGetAlergyWarnings);
         out.write("getAlergyWarnings : " + vecGetAlergyWarnings + "\n");
+*/
+        /*Vector paramsFakeFetch = new Vector();
+        System.out.println("params    " + paramsFakeFetch);
+        Object vecFakeFetch = (Object) callWebserviceLite("fake_fetch",paramsFakeFetch);
+        System.out.println("vec " + vecFakeFetch);
+        out.write("getFakeFetch : " + vecFakeFetch + "\n");
+        */
+        
+        Vector paramsFetch = new Vector();
+        paramsFetch.addElement("interactions_byATC");
+        Vector key=new Vector();
 
+        //key= ['B01AA03', 'D10AF52', 'C10BX02', 'A12AX', 'H02AB07', 'B01AA03', 'M04AA01', 'C09DA01', 'C09AA01']
+        key.addElement("B01AA03");
+        key.addElement("D10AF52");
+        key.addElement("C10BX02");
+        key.addElement("A12AX");
+        key.addElement("H02AB07");
+        key.addElement("B01AA03");
+        key.addElement("M04AA01");
+        key.addElement("C09DA01");
+        key.addElement("C09AA01");
+        
+        paramsFetch.addElement(key);
+        //
+        //Vector services=new Vector();
+        //boolean b=true;
+        //paramsFetch.addElement(services);
+        //paramsFetch.addElement(b);
+        System.out.println("params    " + paramsFetch.toString());
+        Object vecFetch = (Object) callWebserviceLite("fetch",paramsFetch);
+        System.out.println("vec " + vecFetch);
+        out.write("getFetch : " + vecFetch + "\n");
         %>
-
     </body>
 </html>
 <%!

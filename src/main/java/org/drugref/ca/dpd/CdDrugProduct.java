@@ -1,18 +1,39 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *
+ * Copyright (c) 2001-2002. Department of Family Medicine, McMaster University. All Rights Reserved. *
+ * This software is published under the GPL GNU General Public License.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version. *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. *
+ *
+ *
+ *
+ * This software was written for the
+ * Department of Family Medicine
+ * McMaster University
+ * Hamilton
+ * Ontario, Canada
  */
 
 package org.drugref.ca.dpd;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -22,7 +43,7 @@ import javax.persistence.TemporalType;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_drug_product", catalog = "drugref2", schema = "public")
+@Table(name = "cd_drug_product", catalog = "drugref2")
 @NamedQueries({@NamedQuery(name = "CdDrugProduct.findAll", query = "SELECT c FROM CdDrugProduct c"), @NamedQuery(name = "CdDrugProduct.findByDrugCode", query = "SELECT c FROM CdDrugProduct c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdDrugProduct.findByProductCategorization", query = "SELECT c FROM CdDrugProduct c WHERE c.productCategorization = :productCategorization"), @NamedQuery(name = "CdDrugProduct.findByClass1", query = "SELECT c FROM CdDrugProduct c WHERE c.class1 = :class1"), @NamedQuery(name = "CdDrugProduct.findByDrugIdentificationNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.drugIdentificationNumber = :drugIdentificationNumber"), @NamedQuery(name = "CdDrugProduct.findByBrandName", query = "SELECT c FROM CdDrugProduct c WHERE c.brandName = :brandName"), @NamedQuery(name = "CdDrugProduct.findByGpFlag", query = "SELECT c FROM CdDrugProduct c WHERE c.gpFlag = :gpFlag"), @NamedQuery(name = "CdDrugProduct.findByAccessionNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.accessionNumber = :accessionNumber"), @NamedQuery(name = "CdDrugProduct.findByNumberOfAis", query = "SELECT c FROM CdDrugProduct c WHERE c.numberOfAis = :numberOfAis"), @NamedQuery(name = "CdDrugProduct.findByLastUpdateDate", query = "SELECT c FROM CdDrugProduct c WHERE c.lastUpdateDate = :lastUpdateDate"), @NamedQuery(name = "CdDrugProduct.findByAiGroupNo", query = "SELECT c FROM CdDrugProduct c WHERE c.aiGroupNo = :aiGroupNo"), @NamedQuery(name = "CdDrugProduct.findByCompanyCode", query = "SELECT c FROM CdDrugProduct c WHERE c.companyCode = :companyCode"), @NamedQuery(name = "CdDrugProduct.findById", query = "SELECT c FROM CdDrugProduct c WHERE c.id = :id")})
 public class CdDrugProduct implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -37,7 +58,7 @@ public class CdDrugProduct implements Serializable {
     @Column(name = "brand_name", length = 200)
     private String brandName;
     @Column(name = "gp_flag")
-    private Character gpFlag;
+    private String gpFlag;
     @Column(name = "accession_number", length = 5)
     private String accessionNumber;
     @Column(name = "number_of_ais", length = 10)
@@ -50,8 +71,7 @@ public class CdDrugProduct implements Serializable {
     @Column(name = "company_code")
     private Integer companyCode;
     @Id
-    @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     public CdDrugProduct() {
@@ -94,6 +114,7 @@ public class CdDrugProduct implements Serializable {
     }
 
     public String getBrandName() {
+
         return brandName;
     }
 
@@ -101,11 +122,11 @@ public class CdDrugProduct implements Serializable {
         this.brandName = brandName;
     }
 
-    public Character getGpFlag() {
+    public String getGpFlag() {
         return gpFlag;
     }
 
-    public void setGpFlag(Character gpFlag) {
+    public void setGpFlag(String gpFlag) {
         this.gpFlag = gpFlag;
     }
 

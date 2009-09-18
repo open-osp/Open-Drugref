@@ -32,7 +32,6 @@ import javax.persistence.Persistence;
 public class JpaUtils {
 
     private static EntityManagerFactory entityManagerFactory = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
-    //private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistenceUnit");
     /**
      * This method will close the entity manager.
      * Any active transaction will be rolled back.

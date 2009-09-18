@@ -6,18 +6,18 @@ package org.drugref.ca.dpd;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 
+import java.util.List;
 import java.util.Vector;
-import javax.persistence.Query;
-import org.drugref.util.JpaUtils;
-import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import org.drugref.util.MiscUtils;
-import java.util.Enumeration;
+import javax.persistence.Query;
+import org.springframework.stereotype.Repository;
 import org.drugref.plugin.*;
+import org.drugref.util.JpaUtils;
+import org.drugref.util.MiscUtils;
 
 /**
  *  org.drugref.DrugrefTest
@@ -37,21 +37,64 @@ public class TablesDao {
     private String pwd;
 
     public TablesDao() {
-
+        p("=========start tablesdao constructor======");
         this.plugindir = "plugins";
         this.name = "Drugref Service";
         this.version = "1.0";
-        this.services.put("version", this.version);
+        
         this.db = "drugref2";
         this.user = null;
         this.pwd = null;
+        //creating an object of holbrook as plugin instead of importing from files.
 
+        //Holbrook holbrook = new Holbrook();
+        //this.plugins.addElement(holbrook);
+        
+        //PluginImpl module = new PluginImpl
+        DrugrefPlugin dp=new DrugrefPlugin();
+        this.plugins.addElement(dp);
+        p("DrugrefPlugin.register()",dp.register().toString());
+        String name;
+        String version;
+        Hashtable haProvides=new Hashtable();
+        Holbrook thePlugin=new Holbrook();
+        name=(String) dp.register().get(0);
+        version=(String) dp.register().get(1);
+        haProvides=(Hashtable) dp.register().get(2);
+        thePlugin=(Holbrook) dp.register().get(3);
 
-            //creating an object of holbrook as plugin instead of importing from files.
-            Holbrook holbrook = new Holbrook();
-            this.plugins.addElement(holbrook);
-  //          PluginImpl module = new PluginImpl
+        p("name",name);
+        p("version",version);
+        p("provides",haProvides.toString());
+        p("theplugin",thePlugin.toString());
 
+        Hashtable haService=new Hashtable();
+        haService.put("version", version);
+        haService.put("plugin", thePlugin);
+        haService.put("provides", haProvides);
+
+        this.services.put(name, haService);
+        p("this.services",this.services.toString());
+        //loop through all provides
+        Enumeration em=haProvides.keys();
+        while(em.hasMoreElements()){
+
+            String provided=(String) em.nextElement();
+            try{
+                Vector v=new Vector();
+                v=(Vector)this.provided.get(provided);
+                v.addElement(name);
+                p("in constructor try");
+            }catch(Exception e){
+                Vector nameVec=new Vector();
+                nameVec.addElement(name);
+                this.provided.put(provided, nameVec);
+                p("in constructor exception");
+            }
+        }
+        p("value of this.plugin after constructor",this.plugins.toString());
+        p("value of this.provided after constructor",this.provided.toString());
+        p("=========end tablesdao constructor======");
     }
 
     public String identify() {
@@ -62,10 +105,10 @@ public class TablesDao {
         return this.version;
     }
 
-    public List list_available_services() {
-        List lt = new ArrayList();
+    public Vector list_available_services() {
+        Vector v = new Vector();
         //TODO: implement
-        return lt;
+        return v;
     }
 
     public Hashtable list_capabilities() {
@@ -76,7 +119,48 @@ public class TablesDao {
         System.out.println(msg);
     }
 
-   /* public Object fetch(String attribute, Vector key, Vector services, boolean feelingLucky) {
+    public void p(String str, String s) {
+        System.out.println(str + "=" + s);
+    }
+
+    public void p(String str) {
+        System.out.println(str);
+    }
+
+    public Vector fakeFetch(){
+        Vector v=new Vector();
+        v.addElement("fakeFetch is always happy");
+        Hashtable ha=new Hashtable();
+
+        Holbrook api=new Holbrook();
+
+        Object obj=new Object();
+        Vector key=new Vector();
+        key.addElement("N02BE01");
+        key.addElement("N05BA01");
+        key.addElement("N05BA12");
+
+        obj=api.get("interactions_byATC",key);
+        p("obj",obj.toString());
+
+        ha=(Hashtable)api.legend("effect");
+        p("ha_effect",ha.toString());
+
+        ha=(Hashtable)api.legend("significance");
+        p("ha_significance",ha.toString());
+
+        ha=(Hashtable)api.legend("evidence");
+        p("ha_evidence",ha.toString());
+
+        return v;
+
+    }
+
+  public Object fetch(String attribute, Vector key, Vector services, boolean feelingLucky) {
+      p("===start of fetch===");
+      p("attribute",attribute);
+      p("key",key.toString());
+
         feelingLucky = true;
         Hashtable results = new Hashtable();
         Hashtable haError = new Hashtable();
@@ -86,9 +170,11 @@ public class TablesDao {
         Vector myservices = new Vector();
 
         try {
+            p("try 1");
             providers = new Vector((Vector) this.provided.get(attribute));
+            p("in fetch, providers",providers.toString());
         } catch (Exception e) {
-            //e.printStackTrace();
+            p("exception 1");
             String val = attribute + " not provided by an registered service";
             haError.put("Error", val);
             return haError;
@@ -96,28 +182,39 @@ public class TablesDao {
 
 
         if (services.size() > 0) {
+            p("in if");
             Collections.copy(myservices, services);
+            p("myservices and services should be identical");
+            p("myservices",myservices.toString());
+            p("services",services.toString());
         } else {
+            p("in else");
             Enumeration em = this.services.keys();
             while (em.hasMoreElements()) {
                 myservices.addElement(em.nextElement());
             }
         }
+        p("myservices",myservices.toString());
         Hashtable module = new Hashtable();
         for (int i = 0; i < myservices.size(); i++) {
+            String service= myservices.get(i).toString();
+            Hashtable mod = new Hashtable((Hashtable) this.services.get(service));
+            module = new Hashtable(mod);
+            p("module",module.toString());
+            Holbrook ah = (Holbrook) module.get("plugin");
+            Object result = ah.get(attribute, key);
+            //call plugin function
 
-            Hashtable service = new Hashtable((Hashtable) this.services.get(myservices.get(i)));
-            module = new Hashtable(service);
+            if(!result.equals(null)){
 
-            ApiHolbrook ah = (ApiHolbrook) module.get("plugin");
-            Object result = ah.holBrook.get(attribute, key);
-
-            if (result instanceof Vector) {
+               if (result instanceof Vector) {
                 Vector vec = (Vector) result;
                 if (vec.size() > 0) {
                     results.put(service, vec);
                 }
                 if (feelingLucky) {
+                    p("results",results.toString());
+                    p("===end of fetch222===");
                     return results;
                 }
             } else if (result instanceof Hashtable) {
@@ -126,15 +223,18 @@ public class TablesDao {
                     results.put(service, ha2);
                 }
                 if (feelingLucky) {
+                    p("results",results.toString());
+                    p("===end of fetch222===");
                     return results;
                 }
             }
-
-
+           }
         }
+        p("results",results.toString());
+        p("=== end of fetch===");
         return results;
     }
-*/
+
     //   public get(String attribute, String key){
 //
     //   }
@@ -669,7 +769,6 @@ public class TablesDao {
                     product = (String) resultProduct.get(i);
                 }
             }
-
 
             List<CdDrugProduct> resultRegionalIdentifier = queryRegionalIdentifier.getResultList();
 

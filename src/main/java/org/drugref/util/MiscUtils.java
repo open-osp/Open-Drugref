@@ -20,6 +20,7 @@ package org.drugref.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -47,5 +48,12 @@ public class MiscUtils {
         }
         return intArrayList;
     }
+
+    public static Logger getLogger(){
+    		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+    		String caller = ste[2].getClassName();
+    		return(Logger.getLogger(caller));
+    }
+
 
 }
