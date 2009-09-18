@@ -72,7 +72,25 @@ public class DPDImport {
         return arrList;
     }
 
-
+    public List getCreateIndexes(){
+        List<String> arrList = new ArrayList();
+        arrList.add("create index cd_drug_search_name on cd_drug_search(name(100));");
+        arrList.add("create index CD_active_ingredients_drug_code  on CD_active_ingredients (drug_code);");
+        arrList.add("create index  CD_companies_drug_code           on CD_companies (drug_code);");
+        arrList.add("create index  CD_drug_status_drug_code         on CD_drug_status (drug_code);");
+        arrList.add("create index  CD_form_drug_code                on CD_form (drug_code);");
+        arrList.add("create index  CD_inactive_products_drug_code   on CD_inactive_products (drug_code);");
+        arrList.add("create index  CD_packaging_drug_code           on CD_packaging (drug_code);");
+        arrList.add("create index  CD_pharmaceutical_std_drug_code  on CD_pharmaceutical_std (drug_code);");
+        arrList.add("create index  CD_route_drug_code              on CD_route (drug_code);");
+        arrList.add("create index  CD_schedule_drug_code            on CD_schedule (drug_code);");
+        arrList.add("create index  CD_therapeutic_class_drug_code   on CD_therapeutic_class (drug_code);");
+        arrList.add("create index  cd_drug_product_drug_code        on cd_drug_product (drug_code);");
+        arrList.add("create index  cd_drug_search_drug_code         on cd_drug_search (drug_code(30));");
+        arrList.add("create index  cd_veterinary_species_drug_code  on cd_veterinary_species (drug_code);");
+        arrList.add("create index cd_drug_product_ai_group_no on cd_drug_product (ai_group_no(10));");
+        return arrList;
+    }
 
     public List getDPDTables(){
         List<String> arrList = new ArrayList();
