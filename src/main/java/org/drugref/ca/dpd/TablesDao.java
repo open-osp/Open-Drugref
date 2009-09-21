@@ -1,7 +1,27 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+  /*
+ *
+ * Copyright (c) 2001-2002. Department of Family Medicine, McMaster University. All Rights Reserved. *
+ * This software is published under the GPL GNU General Public License.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version. *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. *
+ *
+ * <OSCAR TEAM>
+ *
+ * This software was written for the
+ * Department of Family Medicine
+ * McMaster Unviersity
+ * Hamilton
+ * Ontario, Canada
  */
+
 package org.drugref.ca.dpd;
 
 import java.util.ArrayList;
@@ -14,6 +34,7 @@ import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 import org.drugref.plugin.*;
 import org.drugref.util.JpaUtils;
@@ -25,7 +46,7 @@ import org.drugref.util.MiscUtils;
  */
 @Repository
 public class TablesDao {
-
+    Logger log = MiscUtils.getLogger();
     private String plugindir;
     private String name;
     private String version;
@@ -238,6 +259,224 @@ public class TablesDao {
     //   public get(String attribute, String key){
 //
     //   }
+
+  public List<CdDrugSearch> getListAICodes(List<String> listOfDrugCodes) {
+        EntityManager em = JpaUtils.createEntityManager();
+        List<CdDrugSearch> ret = new ArrayList();
+        try {
+            log.debug("before tx definition");
+            EntityTransaction tx = em.getTransaction();
+            log.debug("after txt definition");
+            tx.begin();
+            if (listOfDrugCodes != null) {
+                System.out.println("list of drug sizes " + listOfDrugCodes.size());
+                for (String s : listOfDrugCodes) {
+                    System.out.println(s);
+                }
+            }
+            //select substring(ai_group_no,1,7) from cd_drug_product where drug_code =
+            String queryStr = " select distinct substring(cds.aiGroupNo,1,7) from CdDrugProduct cds where cds.drugCode in (:array) ";
+            Query query = em.createQuery(queryStr);
+            query.setParameter("array", listOfDrugCodes);
+
+            System.out.println("before getListAICodes query");
+
+            List<String> results = query.getResultList();
+            System.out.println("results " + results.size() + " --- " + results);
+            for (String s : results) {
+                System.out.println("---" + s);
+                ret.addAll(listDrugsbyAIGroup2(s));
+            }
+
+            tx.commit();
+
+        } catch (Exception e) {
+            System.out.println("EXCEPTION-HERE");
+            e.printStackTrace();
+        } finally {
+            JpaUtils.close(em);
+        }
+        return ret;
+    }
+
+    public List listDrugsbyAIGroup(String aiGroup) {
+        EntityManager em = JpaUtils.createEntityManager();
+        List<Object[]> results = null;
+        try {
+            System.out.println("before tx definition");
+            EntityTransaction tx = em.getTransaction();
+            System.out.println("after txt definition");
+            tx.begin();
+            String queryStr = "select distinct cai.ingredient,cai.strength, cai.strengthUnit,cdf.pharmaceuticalCdForm   from CdDrugProduct cdp, CdForm cdf, CdActiveIngredients cai where cdp.drugCode = cai.drugCode and cdp.drugCode = cdf.drugCode and  cdp.aiGroupNo LIKE '"+ aiGroup + "%' order by cai.strength";//(:aiGroup) ";
+            Query query = em.createQuery(queryStr);
+            //query.setParameter("aiGroup", aiGroup+"%");
+
+            System.out.println("before getListAICodes query");
+
+            results = query.getResultList();
+            System.out.println("results " + results.size() + " --- " + results);
+            for (Object[] s : results) {
+                 // ingredient,strength  / cai.strengthUnit cdf.pharmaceuticalCdForm
+                System.out.println("---" + s[0]+"---"+ s[1]+"---"+ s[2]+"---"+ s[3]+"---");
+            }
+
+            tx.commit();
+
+        } catch (Exception e) {
+            System.out.println("EXCEPTION-HERE");
+            e.printStackTrace();
+        } finally {
+            JpaUtils.close(em);
+        }
+        return results;
+    }
+
+
+    public List<CdDrugSearch> listDrugsbyAIGroup2(String aiGroup) {
+        EntityManager em = JpaUtils.createEntityManager();
+        List<CdDrugSearch> results = null;
+        try {
+            log.debug("before tx definition for"+aiGroup);
+            EntityTransaction tx = em.getTransaction();
+            log.debug("after txt definition");
+            tx.begin();
+            //String queryStr = "select distinct cai.ingredient,cai.strength, cai.strengthUnit,cdf.pharmaceuticalCdForm   from CdDrugProduct cdp, CdForm cdf, CdActiveIngredients cai where cdp.drugCode = cai.drugCode and cdp.drugCode = cdf.drugCode and  cdp.aiGroupNo LIKE '"+ aiGroup + "%' order by cai.strength";//(:aiGroup) ";
+            String queryStr = "select cds from CdDrugSearch cds where cds.category in (18,19) and cds.drugCode like '"+ aiGroup + "%' ";
+
+            Query query = em.createQuery(queryStr);
+            //query.setParameter("aiGroup", aiGroup+"%");
+
+            System.out.println("before getListAICodes query");
+
+            results = query.getResultList();
+            System.out.println("results " + results.size() + " --- " + results);
+//            for (CdDrugSearch s : results) {
+//                 // ingredient,strength  / cai.strengthUnit cdf.pharmaceuticalCdForm
+//                System.out.println("---" + s[0]+"---"+ s[1]+"---"+ s[2]+"---"+ s[3]+"---");
+//            }
+
+            tx.commit();
+
+        } catch (Exception e) {
+            System.out.println("EXCEPTION-HERE");
+            e.printStackTrace();
+        } finally {
+            JpaUtils.close(em);
+        }
+        return results;
+    }
+
+
+
+
+
+    public Vector listSearchElement2(
+            String str) {
+        //EntityManagerFactory emf = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
+        //EntityManager em = emf.createEntityManager();
+        System.out.println("before create em in listSearchElement2");
+        EntityManager em = JpaUtils.createEntityManager();
+        System.out.println("created entity manager");
+
+        str =
+                str.replace(",", " ");
+        str =
+                str.replace("'", "");
+        String[] strArray = str.split("\\s+");
+
+        for (int i = 0; i <
+                strArray.length; i++) {
+            System.out.println(strArray[i]);
+        }
+
+//String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
+        String queryStr = "select cds from CdDrugSearch cds where ";
+        for (int i = 0; i <
+                strArray.length; i++) {
+            queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
+            if (i < strArray.length - 1) {
+                queryStr = queryStr + " and ";
+            }
+
+        }
+        List<CdDrugSearch> results = new ArrayList();
+        queryStr =
+                queryStr + " order by cds.name";
+        System.out.println(queryStr);
+        try {
+            System.out.println("before tx definition");
+            EntityTransaction tx = em.getTransaction();
+            System.out.println("after txt definition");
+            tx.begin();
+            Query query = em.createQuery(queryStr);
+            System.out.println("before query");
+
+            results =
+                    query.getResultList();
+
+            tx.commit();
+
+        } catch (Exception e) {
+            System.out.println("EXCEPTION-HERE");
+            e.printStackTrace();
+        } finally {
+            JpaUtils.close(em);
+        }
+
+        if (results.size() > 0) {
+            ArrayList drugCodeList = new ArrayList();
+            System.out.println("Looping results");
+            for (CdDrugSearch result : results) {
+                System.out.println("R:" + result.getDrugCode() + " ." + result.getCategory() + ". " + result.getName());
+                if (result.getCategory() == 13) {
+                    System.out.println(result.getCategory());
+                    drugCodeList.add(result.getDrugCode());
+                } else {
+                    System.out.println("catno 13 " + result.getCategory());
+                }
+
+            }
+
+            List<CdDrugSearch> newDrugsList = getListAICodes(drugCodeList);
+            Vector vec = new Vector();
+
+
+
+            for(CdDrugSearch obj:newDrugsList){
+                //String combinedStr = obj[0]+" "+obj[1]+" "+ obj[2]+" "+ obj[3];
+                if (results.contains(obj)) continue;  //ITEM IS ALREADY IN THE SEARCH BASED ON IT's NAME
+                Hashtable ha = new Hashtable();
+                ha.put("name", "*"+obj.getName());
+                ha.put("category", obj.getCategory());
+                ha.put("id", obj.getId());
+                vec.addElement(ha);
+                //System.out.println("---" + obj[0]+"---"+ obj[1]+"---"+ obj[2]+"---"+ obj[3]+"---");
+            }
+
+
+            for (int i = 0; i <
+                    results.size(); i++) {
+                Hashtable ha = new Hashtable();
+                ha.put("name", results.get(i).getName());
+                ha.put("category", results.get(i).getCategory());
+                ha.put("id", results.get(i).getId());
+                vec.addElement(ha);
+            }
+
+            System.out.println(results);
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", "0");
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
+
+    }
+
     public Vector listSearchElement(String str) {
         //EntityManagerFactory emf = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
         //EntityManager em = emf.createEntityManager();

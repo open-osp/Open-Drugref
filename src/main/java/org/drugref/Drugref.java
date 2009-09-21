@@ -34,7 +34,7 @@ import java.util.Vector;
  *
  * @author jaygallagher & jacksonbi
  */
-//TO DO: fetch
+
 public class Drugref {
 
     public Vector list_search_element(String searchStr) {
@@ -42,6 +42,18 @@ public class Drugref {
         Vector vec = queryDao.listSearchElement(searchStr);
         return vec;
     }
+
+    /*
+         * This is a testing method for now!
+         *
+         * This should take the search string, find all the possible matches.
+         * For each match get the ai code. ( first 7 characters only ) Then research all the available types using this key.
+         */
+        public Vector list_search_element2(String searchStr){
+                TablesDao queryDao = new TablesDao();
+                Vector vec=queryDao.listSearchElement2(searchStr);
+                return vec;
+        }
 
     public Vector list_search_element_route(String str, String route) {
         TablesDao queryDao = new TablesDao();
