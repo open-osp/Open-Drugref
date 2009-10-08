@@ -260,61 +260,6 @@ public class TablesDao {
 //
     //   }
 
-<<<<<<< local
-    public List list_available_services(){
-    List lt=new ArrayList();
-    //TODO: implement
-    return lt;
-    }
-
-    public List list_capabilities(String service){
-    List lt = new ArrayList();
-    //TODO: implement
-    return lt;
-    }
-
-    private void log(String msg){
-    System.out.println(msg);
-    }
-
-    public Object fetch (String attribute, String key, Vector services, boolean feelingLucky=1){
-    Object results=new Object();
-    try{
-    providers=
-    }catch(Exception e){
-    e.printStackTrace();
-    }
-    Hashtable ha=new Hashtable();
-    Vector myservices=new Vector();
-    if (services.size()>0)
-    myservices=services;
-    else{
-    Enumeration em=this.services.keys();
-    while(em.hasMoreElements()){
-    myservices.addElement(em.nextElement());
-    }
-    }
-    for (int i=0;i<myservices.size();i++){
-    module=this.services.get(myservices.get(i));
-    result=module...;
-    if (result.size>0){
-    results[service]=result;
-    if (feelingluck==1){
-    return results;
-    }
-    }
-
-    }
-    return results;
-    }
-
-    public get(attribute, key){
-    api=holbrook
-
-    }
-     */
-
-
 
     //using drugcode find din and atc codes
     public CdDrugProduct getDrugProduct(String drugcode){
@@ -578,7 +523,7 @@ public class TablesDao {
 
     }
 
-<<<<<<< local
+
 
 
     public Vector listSearchElement3(String str) {
