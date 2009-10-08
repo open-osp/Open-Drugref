@@ -12,17 +12,17 @@ import java.util.Vector;
  *
  * @author jackson
  */
-public class PluginImpl implements Plugin{
+public class PluginImpl <T> implements Plugin<T>{
     private String name;
     private String version;
     private Hashtable provides;
-    private Object plugin;
+    private T plugin;
 
-    public void drugrefPlugin(){
+    public PluginImpl(){
         this.name=null;
         this.version=null;
         this.provides=new Hashtable();
-        this.plugin=new Object();
+        //this.plugin=new T();
     }
     public void setName (String name){
         this.name=name;
@@ -30,7 +30,7 @@ public class PluginImpl implements Plugin{
     public void setVersion(String version){
         this.version=version;
     }
-    public void setPlugin(Object plugin){
+    public void setPlugin(T plugin){
         this.plugin=plugin;
     }
     public void setProvides(Hashtable provides){
@@ -42,7 +42,7 @@ public class PluginImpl implements Plugin{
     public String getVersion(){
         return this.version;
     }
-    public Object getPlugin(){
+    public T getPlugin(){
         return this.plugin;
     }
     public Hashtable getProvides(){

@@ -43,9 +43,16 @@ public class TempNewGenericImport {
     public static void main(String[] args) {
         // TODO code application logic here
         TempNewGenericImport nt = new TempNewGenericImport();
-        nt.run();
+        Long l=nt.run();
+        System.out.println("***time spent="+l);
+    }
+    public void p(String str, String s) {
+        System.out.println(str + "=" + s);
     }
 
+    public void p(String str) {
+        System.out.println(str);
+    }
      public long run() {
         long startTime = System.currentTimeMillis();
          int coumpoundsWGeneric = 0;
@@ -57,8 +64,8 @@ public class TempNewGenericImport {
         try {
             EntityTransaction tx = entityManager.getTransaction();
             tx.begin();
-
-            String initialSQL = "select distinct ai_group_no from cd_drug_product where number_of_ais = 1 order by ai_group_no";
+            String s="1";
+            String initialSQL = "select distinct ai_group_no from cd_drug_product where number_of_ais = '1' order by ai_group_no";
             Query query = entityManager.createNativeQuery(initialSQL);
 
             List<String> aiGroupList = query.getResultList();
@@ -66,6 +73,10 @@ public class TempNewGenericImport {
            
             for (String obj: aiGroupList){
                 int numIng = Integer.parseInt(obj.substring(0, 2));
+
+               // p("obj",obj);
+               // p("numIng",Integer.toString(numIng));
+                
                 if (numIng >1){
                     coumpounds++;
                     Query formQuery = entityManager.createNativeQuery("select distinct pharmaceutical_CD_form from cd_drug_product, cd_form where  cd_drug_product.drug_code=cd_form.drug_code and cd_drug_product.ai_group_no = '"+obj+"'");
@@ -118,9 +129,9 @@ public class TempNewGenericImport {
                             //nameAltered++;
                         }
                         CdDrugSearch drugSearch = new CdDrugSearch();
-                         drugSearch.setName(drugName+" "+drug[2]+drug[3]+" "+drug[4]);
-                         drugSearch.setDrugCode(""+drug[0]+"+"+drug[5]);
-                         drugSearch.setCategory(18);
+                        drugSearch.setName(drugName+" "+drug[2]+drug[3]+" "+drug[4]);
+                        drugSearch.setDrugCode(""+drug[0]+"+"+drug[5]);
+                        drugSearch.setCategory(18);
                         entityManager.persist(drugSearch);
                         entityManager.flush();
                         entityManager.clear();

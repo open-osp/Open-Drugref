@@ -85,7 +85,7 @@ public class ConfigureSearchData {
       public void importAllBrandName(EntityManager em){
         EntityTransaction tx = em.getTransaction();
         tx.begin();
-        System.out.println("Trying to get all the objects into memory");
+        System.out.println("Importing Brand Names");
         Query queryDrugProduct = em.createQuery("SELECT cdp from CdDrugProduct cdp");
         OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
         JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
@@ -97,14 +97,19 @@ public class ConfigureSearchData {
         
         for (CdDrugProduct drug:productList){
             CdDrugSearch drugSearch = new CdDrugSearch();
+
+            String str=drug.getBrandName();
+            
+          
             drugSearch.setDrugCode(""+drug.getDrugCode());
-            drugSearch.setName(drug.getBrandName());
+            drugSearch.setName(str);
             drugSearch.setCategory(13);
             em.persist(drugSearch);
             em.flush();
             em.clear();
+            
         }
-
+        p("DONE Import Brand Name");
         tx.commit();
       }
 
@@ -127,7 +132,7 @@ public class ConfigureSearchData {
        public void importAllATCCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
-        System.out.println("Trying to get all the objects into memory");
+        System.out.println("Import ATC Code Name");
         //Query queryDrugProduct = em.createNativeQuery("SELECT distinct cdp.tc_Atc, cdp.tc_Atc_Number from Cd_Therapeutic_Class cdp");
 
         Query queryDrugProduct = em.createQuery("SELECT distinct cdp.tcAtc, cdp.tcAtcNumber from CdTherapeuticClass cdp");
@@ -137,10 +142,10 @@ public class ConfigureSearchData {
 
         List<Object[]> productList = queryDrugProduct.getResultList();
 
-        System.out.println("Have got all the products in memory");
+        //System.out.println("Have got all the products in memory");
 
         for (Object[] drug:productList){
-            System.out.println(drug.getClass().getName()+" "+drug[0]);
+        //    System.out.println(drug.getClass().getName()+" "+drug[0]);
 
             CdDrugSearch drugSearch = new CdDrugSearch();
             drugSearch.setDrugCode(""+drug[1]);
@@ -152,7 +157,7 @@ public class ConfigureSearchData {
              
              
         }
-
+        System.out.println("DONE Import ATC Code Name");
         tx.commit();
        }
        /*
@@ -171,10 +176,18 @@ public class ConfigureSearchData {
                                         ida.insert_into_drug_search(con,result['tc_ahfs_number'],result['tc_ahfs'],'10')
 
         */
+
+           public void p(String str, String s) {
+        System.out.println(str + "=" + s);
+    }
+
+    public void p(String str) {
+        System.out.println(str);
+    }
        public void importAllAHFSCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
-        System.out.println("Trying to get all the objects into memory");
+        System.out.println("Import AHFS Code Name");
         //Query queryDrugProduct = em.createNativeQuery("SELECT distinct cdp.tc_Atc, cdp.tc_Atc_Number from Cd_Therapeutic_Class cdp");
 
         Query queryDrugProduct = em.createQuery("SELECT distinct cdp.tcAhfs, cdp.tcAhfsNumber from CdTherapeuticClass cdp");
@@ -184,11 +197,10 @@ public class ConfigureSearchData {
 
         List<Object[]> productList = queryDrugProduct.getResultList();
 
-        System.out.println("Have got all the products in memory");
+        //System.out.println("Have got all the products in memory");
 
         for (Object[] drug:productList){
-            System.out.println(drug.getClass().getName()+" "+drug[0]);
-
+       //     System.out.println(drug.getClass().getName()+" "+drug[0]);
             CdDrugSearch drugSearch = new CdDrugSearch();
             drugSearch.setDrugCode(""+drug[1]);
             drugSearch.setName(""+drug[0]);
@@ -199,7 +211,7 @@ public class ConfigureSearchData {
 
 
         }
-
+        System.out.println("DONE Import AHFS Code Name");
         tx.commit();
        }
 
@@ -255,7 +267,7 @@ public class ConfigureSearchData {
             Hashtable genHash = new Hashtable();
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Trying to get all the objects into memory");
+            System.out.println("Import Generics");
             Query queryDrugProduct = em.createQuery("SELECT cdp.drugCode from CdDrugProduct cdp");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
             JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
@@ -263,7 +275,7 @@ public class ConfigureSearchData {
 
             List<Integer> productList = queryDrugProduct.getResultList();
 
-            System.out.println("Have got all the products in memory");
+            //System.out.println("Have got all the products in memory");
 
             for (Integer drug:productList){
 
@@ -301,24 +313,33 @@ public class ConfigureSearchData {
                         }else{
                             drugSearch.setCategory(11);
                         }
-                
                         em.persist(drugSearch);
                         em.flush();
-                        
+
+
                         Integer drugId = drugSearch.getId();
-                        System.out.println("ID WAS"+drugId);
+                   //     System.out.println("ID WAS"+drugId);
                         genHash.put(genName,drugId);
                         em.clear();
 
+                        if(genHash.containsKey(genName)){
+                            LinkGenericBrand genBrand = new LinkGenericBrand();
+                            Integer genBrandId = (Integer) genHash.get(genName);
+                            genBrand.setId(genBrandId);
+                            genBrand.setDrugCode(""+drug);
+                            em.persist(genBrand);
+                            em.flush();
+                    //        System.out.println("id added to genBrand="+genBrandId+" || drugCode added to genBrand="+drug.toString());
+                            em.clear();
+                        }                  
                     }
-
-                }
-                
+                }                
             }
             Query updateQuery = em.createQuery("update CdDrugSearch cds set cds.drugCode = cds.id where cds.category = 11 or cds.category = 12");
             updateQuery.executeUpdate();
             em.flush();
             em.clear();
+             System.out.println("DONE Import Generics");
             tx.commit();
         }
 
@@ -345,7 +366,7 @@ public class ConfigureSearchData {
          public void importAllIngredients(EntityManager em){
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Trying to get all the objects into memory");
+            System.out.println("Import Ingredients");
 
             Query queryDrugProduct = em.createQuery("SELECT distinct cai.ingredient, cai.activeIngredientCode from CdActiveIngredients cai");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
@@ -354,10 +375,10 @@ public class ConfigureSearchData {
 
             List<Object[]> productList = queryDrugProduct.getResultList();
 
-            System.out.println("Have got all the products in memory");
+            //System.out.println("Have got all the products in memory");
 
             for (Object[] drug:productList){
-                System.out.println(drug.getClass().getName()+" "+drug[0]);
+            //    System.out.println(drug.getClass().getName()+" "+drug[0]);
 
                 CdDrugSearch drugSearch = new CdDrugSearch();
                 drugSearch.setDrugCode(""+drug[1]);
@@ -369,7 +390,7 @@ public class ConfigureSearchData {
 
 
             }
-
+System.out.println("DONE Import Ingredients");
             tx.commit();
        }
 
@@ -404,7 +425,7 @@ public class ConfigureSearchData {
         public void cleanUpSearchNames(EntityManager em){
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Trying to get all the objects into memory");
+            System.out.println("Clean Up Search Names");
 
             Query queryDrugProduct = em.createQuery("select cds.name ,count(cds.name)  from CdDrugSearch cds where cds.category = 13 group by cds.name ");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
@@ -420,14 +441,14 @@ public class ConfigureSearchData {
                 String name = ""+drug[0];
                 Long num = (Long) drug[1];
                 if (num > 1){
-                    System.out.println("Donig something with "+drug[0]);
+              //      System.out.println("Donig something with "+drug[0]);
                     List<String> drugCodeList = getDrugCodeForName( em, ""+drug[0]);
                     for (String code :drugCodeList){
-                        System.out.println("Going to work on "+code);
+                //        System.out.println("Going to work on "+code);
                                                 List<Object[]> strens = getStrengthsFromDrugCode(em,code);
-                                                System.out.println(code+":"+strens.size());
+                                   //             System.out.println(code+":"+strens.size());
                                                 String suggName = getSuggestedNewName(name, strens);
-                                                System.out.println(suggName);
+                                //                System.out.println(suggName);
                                                 if (!suggName.equals("")){
                                                     Query updateDrugSearch = em.createQuery("update CdDrugSearch cds set cds.name = (:NAME) where cds.drugCode = (:DRUGCODE) and cds.category = 13");
                                                     updateDrugSearch.setParameter("NAME", suggName);

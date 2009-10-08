@@ -24,7 +24,13 @@
 package org.drugref.ca.dpd.fetch;
 
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -33,6 +39,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import org.drugref.util.ConfigUtils;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.MiscUtils;
 
@@ -41,8 +48,8 @@ import org.drugref.util.MiscUtils;
  * @author jaygallagher
  */
 public class DPDImport {
-    private static Logger logger = MiscUtils.getLogger();
 
+    private static Logger logger = MiscUtils.getLogger();
 
     public ZipInputStream getZipStream() throws Exception {
         String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles.zip";
@@ -53,46 +60,55 @@ public class DPDImport {
         return in;
     }
 
-    public List getDPDTablesDrop(){
+    public List getDPDTablesDrop() {
         List<String> arrList = new ArrayList();
-        
-        arrList.add("DROP table CD_drug_product;");
-        arrList.add("DROp table CD_companies;");
-        arrList.add("DROp table CD_active_ingredients;");
-        arrList.add("DROp table CD_drug_status;");
-        arrList.add("DROp table CD_form;");
-        arrList.add("DROp table CD_inactive_products;");
-        arrList.add("DROp table CD_packaging;");
-        arrList.add("DROp table CD_pharmaceutical_std;");
-        arrList.add("DROp table CD_route;");
-        arrList.add("DROp table CD_schedule;");
-        arrList.add("DROp table CD_therapeutic_class;");
-        arrList.add("DROp table CD_veterinary_species;");
-        //arrList.add("DROP table cd2_companies;");
+        //table names are case sensitive.
+        String[] tableNames = {"cd_drug_product", "cd_companies", "cd_active_ingredients", "cd_drug_status", "cd_form", "cd_inactive_products",
+            "cd_packaging", "cd_pharmaceutical_std", "cd_route", "cd_schedule", "cd_therapeutic_class", "cd_veterinary_species", "interactions"};
+        for (String tableName : tableNames) {
+            if (isTablePresent(tableName)) {
+                String statement = "DROP TABLE " + tableName;
+                arrList.add(statement);
+            } else {
+            }
+        }
+
+        p("arrList", arrList.toString());
         return arrList;
     }
 
-    public List getCreateIndexes(){
-        List<String> arrList = new ArrayList();
-        arrList.add("create index cd_drug_search_name on cd_drug_search(name(100));");
-        arrList.add("create index CD_active_ingredients_drug_code  on CD_active_ingredients (drug_code);");
-        arrList.add("create index  CD_companies_drug_code           on CD_companies (drug_code);");
-        arrList.add("create index  CD_drug_status_drug_code         on CD_drug_status (drug_code);");
-        arrList.add("create index  CD_form_drug_code                on CD_form (drug_code);");
-        arrList.add("create index  CD_inactive_products_drug_code   on CD_inactive_products (drug_code);");
-        arrList.add("create index  CD_packaging_drug_code           on CD_packaging (drug_code);");
-        arrList.add("create index  CD_pharmaceutical_std_drug_code  on CD_pharmaceutical_std (drug_code);");
-        arrList.add("create index  CD_route_drug_code              on CD_route (drug_code);");
-        arrList.add("create index  CD_schedule_drug_code            on CD_schedule (drug_code);");
-        arrList.add("create index  CD_therapeutic_class_drug_code   on CD_therapeutic_class (drug_code);");
-        arrList.add("create index  cd_drug_product_drug_code        on cd_drug_product (drug_code);");
-        arrList.add("create index  cd_drug_search_drug_code         on cd_drug_search (drug_code(30));");
-        arrList.add("create index  cd_veterinary_species_drug_code  on cd_veterinary_species (drug_code);");
-        arrList.add("create index cd_drug_product_ai_group_no on cd_drug_product (ai_group_no(10));");
-        return arrList;
+    private boolean isTablePresent(String tableName) {//check if a table exists in the database
+        boolean bool = false;
+        Connection con = null;
+        String dbURL = ConfigUtils.getProperty("db_url");
+        String dbUser = ConfigUtils.getProperty("db_user");
+        String dbPassword = ConfigUtils.getProperty("db_password");
+
+        try {
+            con = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+
+        } catch (SQLException e) {
+            System.out.println("Connection Failed.");
+            e.printStackTrace();
+            bool = false;
+        }
+        try {
+            DatabaseMetaData dbm = con.getMetaData();
+            ResultSet rs = dbm.getTables(null, null, tableName, null);
+            if (rs.next()) {
+                bool = true;
+            } else {
+                bool = false;
+            }
+            con.close();//release resources
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return bool;
     }
 
-    public List getDPDTables(){
+    public List getDPDTables() {
         List<String> arrList = new ArrayList();
         
         arrList.add("CREATE TABLE  cd_drug_product  (id serial  PRIMARY KEY,drug_code  int default NULL,product_categorization  varchar(80) default NULL,   class  varchar(40) default NULL,   drug_identification_number  varchar(8) default NULL,   brand_name  varchar(200) default NULL,   gp_flag  char(1) default NULL,   accession_number  varchar(5) default NULL,   number_of_ais  varchar(10) default NULL,   last_update_date  date default NULL,ai_group_no  varchar(10) default NULL,company_code int);");
@@ -107,64 +123,76 @@ public class DPDImport {
         arrList.add("CREATE TABLE  CD_schedule  (id serial  PRIMARY KEY,   drug_code   int default NULL,   schedule  varchar(40) default NULL);");
         arrList.add("CREATE TABLE  CD_therapeutic_class  (id serial  PRIMARY KEY,   drug_code   int default NULL,   tc_atc_number  varchar(8) default NULL,   tc_atc  varchar(120) default NULL,   tc_ahfs_number  varchar(20) default NULL,   tc_ahfs  varchar(80) default NULL);");
         arrList.add("CREATE TABLE  cd_veterinary_species  (id serial  PRIMARY KEY,   drug_code   int default NULL,   vet_species  varchar(80) default NULL,   vet_sub_species  varchar(80) default NULL);");
+         
+        arrList.add("CREATE TABLE  interactions  (id serial PRIMARY KEY, affectingatc varchar(7), affectedatc varchar(7) default NULL, effect char(1) default NULL, significance char(1) default NULL, evidence char(1) default NULL, comment text default NULL, affectingdrug text default NULL, affecteddrug text default NULL, CONSTRAINT UNQ_ATC_EFFECT UNIQUE (affectingatc, affectedatc, effect));");
 
         return arrList;
     }
-    
-    public List importCompanyCodetoDrugProduct(){
+
+    public List importCompanyCodetoDrugProduct() {
         List<String> arrList = new ArrayList();
-        
+
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
         arrList.add("update cd_drug_product set company_code=(select company_code from cd_companies where cd_companies.drug_code =  cd_drug_product.drug_code);");
         return arrList;
     }
 
-
-
-    public List dropSearchTables(){
+    public List dropSearchTables() {
         List<String> arrList = new ArrayList();
-        arrList.add("drop table cd_drug_search;");
-        arrList.add("drop table link_generic_brand;");
+        String[] tableNames = {"cd_drug_search", "link_generic_brand"};
+        for (String tableName : tableNames) {
+            if (isTablePresent(tableName)) {
+                String statement = "DROP TABLE " + tableName;
+                arrList.add(statement);
+            } else {
+            }
+        }
         return arrList;
     }
-    public List getCreateSearchTables(){
+
+    public List getCreateSearchTables() {
         List<String> arrList = new ArrayList();
 
-        arrList.add("CREATE TABLE  cd_drug_search  (   id serial  PRIMARY KEY,   drug_code  varchar(30),   category   int,   name  text default NULL);");
+        arrList.add("CREATE TABLE  cd_drug_search  (id serial  PRIMARY KEY,   drug_code  varchar(30),   category   int,   name  text default NULL);");
         arrList.add("create table link_generic_brand(pk_id serial  PRIMARY KEY,   id integer,    drug_code varchar(30));");
         return arrList;
     }
-
-
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
 
+        
         DPDImport imp = new DPDImport();
-
         long timeTaken = imp.doItDifferent();  // executeOn(entities);
-        System.out.println("GOING OUT after "+timeTaken);
+        System.out.println("GOING OUT after " + timeTaken);
     }
 
+    private void insertLines(EntityManager entityManager, List<String> sqlLines) {
 
-
-    private void insertLines(EntityManager entityManager,List<String> sqlLines){
-
-             for (String sql : sqlLines) {
-                logger.debug(sql);
-                Query query = entityManager.createNativeQuery(sql);
-                try{
+        for (String sql : sqlLines) {
+            p("sql", sql);
+            logger.debug(sql);
+            Query query = entityManager.createNativeQuery(sql);
+            try {
                 query.executeUpdate();
-                }catch(Exception e){
-                    String getMsg = e.getMessage();
-                    System.out.println("ERROR :"+getMsg);
-                }
-             }
+            } catch (Exception e) { //org.postgresql.util.PSQLException
+                //String getMsg = e.getMessage();
+                // System.out.println("ERROR :"+getMsg);
+                e.printStackTrace();
+            }
+        }
     }
 
+    public void p(String str, String s) {
+        System.out.println(str + "=" + s);
+    }
+
+    public void p(String str) {
+        System.out.println(str);
+    }
 
     public long doItDifferent() {
         long startTime = System.currentTimeMillis();
@@ -173,72 +201,56 @@ public class DPDImport {
             EntityTransaction tx = entityManager.getTransaction();
             tx.begin();
 
-            insertLines(entityManager,getDPDTablesDrop());
-//             List<String> sqlLines = getDPDTablesDrop();
-//
-//             for (String sql : sqlLines) {
-//                logger.debug(sql);
-//                Query query = entityManager.createNativeQuery(sql);
-//                try{
-//                query.executeUpdate();
-//                }catch(Exception e){
-//                    String getMsg = e.getMessage();
-//                    System.out.println("ERROR :"+getMsg);
-//                }
-//             }
+            //drop tables only if they exist
+            if (!getDPDTablesDrop().isEmpty()) {
+                p("tables exist");
+                insertLines(entityManager, getDPDTablesDrop());
+            }
+            insertLines(entityManager, getDPDTables());
 
-             insertLines(entityManager, getDPDTables());
-//             sqlLines = getDPDTables();
-//
-//             for (String sql : sqlLines) {
-//                logger.debug(sql);
-//                Query query = entityManager.createNativeQuery(sql);
-//                query.executeUpdate();
-//             }
+            tx.commit();
+            RecordParser recordParse = new RecordParser();
+            try {
+                ZipInputStream zipStream = getZipStream();
+                ZipEntry ze = null;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    System.out.println("Files being open " + ze.getName());                    
+                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
+                    //entityManager.flush();
+                }
+                p("populate interactions table with data");
 
-             tx.commit();
-             RecordParser recordParse = new RecordParser();
-             try{
-                 ZipInputStream zipStream = getZipStream();
-                 ZipEntry ze = null;
-                 while ((ze = zipStream.getNextEntry()) != null) {
-                        System.out.println(ze.getName());
-                        recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
-                       
-                        //entityManager.flush();
-                 }
+                // Stream to read file
+                    String url="/interactions-holbrook.txt";
+                    InputStream ins=getClass().getResourceAsStream(url);
+                    if (ins==null) System.out.println("ins is null");
+                    recordParse.getDPDObject("interactions-holbrook.txt",ins,entityManager);
 
-             }catch(Exception e){
-                 e.printStackTrace();
-             }
-
-             tx.begin();
-             insertLines(entityManager,dropSearchTables());
-//             sqlLines = dropSearchTables();
-//
-//             for (String sql : sqlLines) {
-//                logger.debug(sql);
-//                Query query = entityManager.createNativeQuery(sql);
-//                query.executeUpdate();
-//             }
-             insertLines(entityManager,getCreateSearchTables());
-//             sqlLines = getCreateSearchTables();
-//
-//             for (String sql : sqlLines) {
-//                logger.debug(sql);
-//                Query query = entityManager.createNativeQuery(sql);
-//                query.executeUpdate();
-//             }
-             tx.commit();
-    
-             ConfigureSearchData searchData = new ConfigureSearchData();
-             searchData.importSearchData(entityManager);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
+
+
+            tx.begin();
+
+            //drop tables only if they exist
+            if (!dropSearchTables().isEmpty()) {
+                insertLines(entityManager, dropSearchTables());
+            }
+
+
+            insertLines(entityManager, getCreateSearchTables());
+
+            tx.commit();
+
+            ConfigureSearchData searchData = new ConfigureSearchData();
+            //import search data
+            searchData.importSearchData(entityManager);
             System.out.println("committing");
             //tx.commit();
         } finally {
-
             System.out.println("closing entityManager");
             JpaUtils.close(entityManager);
             System.out.println("entityManagerClosed");
@@ -251,7 +263,6 @@ public class DPDImport {
 //    private static final Localizer _loc = Localizer.forPackage(DPDImport.class);
 //    //(MappingToolTask.class);
 //    protected MappingTool.Flags flags = new MappingTool.Flags();
-
 //    public void executeOn(String[] files)
 //            throws Exception {
 //        //if (MappingTool.ACTION_IMPORT.equals(flags.action))
@@ -338,7 +349,6 @@ public class DPDImport {
 //        }
 //        //throw new BuildException(_loc.get("bad-conf", "MappingToolTask").getMessage());
 //    }
-
 //    public ConfigurationImpl newConfiguration() {
 //        //System.setProperty("catalina.base", System.getProperty("java.io.tmpdir"));
 //
@@ -362,7 +372,7 @@ public class DPDImport {
 //    }
 //}
 /*
- echo "downloading some 3 MB drug data from the web, might take a while ...\n"
+echo "downloading some 3 MB drug data from the web, might take a while ...\n"
 #wget -c http://www.hc-sc.gc.ca/hpfb-dgpsa/tpd-dpt/txt/allfiles.zip
 mkdir drugrefImport
 cd drugrefImport

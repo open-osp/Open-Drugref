@@ -114,6 +114,7 @@ public class CdDrugProduct implements Serializable {
     }
 
     public String getBrandName() {
+
         return brandName;
     }
 

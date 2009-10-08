@@ -33,11 +33,11 @@ public class Interactions implements Serializable {
     @Column(name = "affectedatc", length = 7)
     private String affectedatc;
     @Column(name = "effect")
-    private Character effect;
+    private String effect;
     @Column(name = "significance")
-    private Character significance;
+    private String significance;
     @Column(name = "evidence")
-    private Character evidence;
+    private String evidence;
     @Column(name = "comment", length = 2147483647)
     private String comment;
     @Column(name = "affectingdrug", length = 2147483647)
@@ -76,27 +76,27 @@ public class Interactions implements Serializable {
         this.affectedatc = affectedatc;
     }
 
-    public Character getEffect() {
+    public String getEffect() {
         return effect;
     }
 
-    public void setEffect(Character effect) {
+    public void setEffect(String effect) {
         this.effect = effect;
     }
 
-    public Character getSignificance() {
+    public String getSignificance() {
         return significance;
     }
 
-    public void setSignificance(Character significance) {
+    public void setSignificance(String significance) {
         this.significance = significance;
     }
 
-    public Character getEvidence() {
+    public String getEvidence() {
         return evidence;
     }
 
-    public void setEvidence(Character evidence) {
+    public void setEvidence(String evidence) {
         this.evidence = evidence;
     }
 

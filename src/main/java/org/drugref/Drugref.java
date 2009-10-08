@@ -36,7 +36,6 @@ import org.drugref.util.SpringUtils;
  * @author jaygallagher & jacksonbi
  */
 
-//TO DO: fetch
 public class Drugref {
         TablesDao queryDao = (TablesDao) SpringUtils.getBean("tablesDao");
 
@@ -46,7 +45,7 @@ public class Drugref {
                 return vec;
         }
 
-        /*
+    /*
          * This is a testing method for now!
          *
          * This should take the search string, find all the possible matches.
@@ -144,13 +143,13 @@ public class Drugref {
                 Vector vec=queryDao.listDrugClass(Dclass);
                 return vec;
         }
-        public Vector get_allergy_warnings(String atcCode, Vector allergies) {
+     public Vector get_allergy_warnings(String atcCode, Vector allergies) {
 
                 //TablesDao queryDao = new TablesDao();
                 Vector vec=queryDao.getAllergyWarnings(atcCode,allergies);
                 return vec;
-        }
-        public Vector get_drug(String pKey, boolean html) {
+    }
+     public Vector get_drug(String pKey, boolean html) {
                 //TablesDao queryDao = new TablesDao();
                 Vector vec=queryDao.getDrug(pKey,html);
                 return vec;
