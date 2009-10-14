@@ -274,10 +274,14 @@ public class TablesDao {
                     System.out.println(s);
                 }
             }
+            List<Integer> intListDrugCode=new ArrayList();
+            for(int i=0;i<listOfDrugCodes.size();i++){
+                intListDrugCode.add(Integer.parseInt(listOfDrugCodes.get(i)));
+            }
             //select substring(ai_group_no,1,7) from cd_drug_product where drug_code =
             String queryStr = " select distinct substring(cds.aiGroupNo,1,7) from CdDrugProduct cds where cds.drugCode in (:array) ";
             Query query = em.createQuery(queryStr);
-            query.setParameter("array", listOfDrugCodes);
+            query.setParameter("array", intListDrugCode);
 
             System.out.println("before getListAICodes query");
 
@@ -365,11 +369,6 @@ public class TablesDao {
         }
         return results;
     }
-
-
-
-
-
     public Vector listSearchElement2(
             String str) {
         //EntityManagerFactory emf = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
@@ -409,7 +408,7 @@ public class TablesDao {
             System.out.println("after txt definition");
             tx.begin();
             Query query = em.createQuery(queryStr);
-            System.out.println("before query");
+          //  System.out.println("before query");
 
             results =
                     query.getResultList();
@@ -509,7 +508,7 @@ public class TablesDao {
             System.out.println("after txt definition");
             tx.begin();
             Query query = em.createQuery(queryStr);
-            System.out.println("before query");
+        //    System.out.println("before query");
 
             results = query.getResultList();
 
