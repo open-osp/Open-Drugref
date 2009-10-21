@@ -135,6 +135,14 @@ public class TempNewGenericImport {
                         entityManager.persist(drugSearch);
                         entityManager.flush();
                         entityManager.clear();
+                        /*
+                          0.cd_drug_product.ai_group_no
+                          1.cd_active_ingredients.ingredient
+                          2.cd_active_ingredients.strength
+                          3.cd_active_ingredients.strength_unit
+                          4.cd_form.pharmaceutical_CD_form
+                          5.cd_form.pharm_CD_form_code
+                         */
                         //System.out.println(drug[0]+" "+drugName+" "+drug[2]+drug[3]+" "+drug[4]);
                     }
                 }

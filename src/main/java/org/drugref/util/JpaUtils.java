@@ -45,7 +45,7 @@ public class JpaUtils {
     }
 
     public static EntityManager createEntityManager() {
-        System.out.println("in createEntityManager()");
+     //   System.out.println("in createEntityManager()");
         if (entityManagerFactory==null)
             System.out.println("entityManagerFactory is null");
 
