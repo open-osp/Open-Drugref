@@ -154,4 +154,33 @@ public class Drugref {
                 Vector vec=queryDao.getDrug(pKey,html);
                 return vec;
         }
+
+     public Object fetch(String attribute, Vector key) {
+        //public Object fetch(String attribute,Vector key,Vector services,boolean b){
+        Vector services = new Vector();
+        boolean b = true;
+        Object obj = queryDao.fetch(attribute, key, services, b);
+        return obj;
+    }
+
+    public String identify() {
+
+        return queryDao.identify();
+    }
+
+    public String version() {
+
+        return queryDao.version();
+    }
+
+    public Vector list_available_services() {
+
+        return queryDao.list_available_services();
+    }
+
+    public Hashtable list_capabilities() {
+
+        return queryDao.list_capabilities();
+    }
+
 }
