@@ -1029,13 +1029,14 @@ public class TablesDao {
     }
 
     public Vector getAllergyWarnings(String atcCode, Vector allergies) {
-        List results = new ArrayList();
+        Vector results = new Vector();
         Vector vec = new Vector();
         Hashtable ha = new Hashtable();
-        Vector warning = new Vector();
-        ha.put("warnings", warning);
-        vec.add(ha);
+        Vector warning = new Vector();        
+        
         if (atcCode.matches("") || atcCode.matches("null")) {
+            ha.put("warnings", results);
+            vec.add(ha);
             return vec;
         }
         EntityManager em = JpaUtils.createEntityManager();
@@ -1054,7 +1055,7 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
-                    System.out.println(atcCode+" is in this Allergy group "+aDesc);
+                    System.out.println(atcCode+" is in this1 Allergy group "+aDesc);
                     results.add(aId);
                 }else{
                     System.out.println(atcCode+" is NOT in this group "+aDesc);
@@ -1065,7 +1066,7 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
-                    System.out.println(atcCode+" is in this Allergy group "+aDesc);
+                    System.out.println(atcCode+" is in this2 Allergy group "+aDesc);
                     results.add(aId);
                 }else{
                     System.out.println(atcCode+" is NOT in this group "+aDesc);
@@ -1100,9 +1101,17 @@ public class TablesDao {
             } else {
                 System.out.println("No Match YET desc "+aDesc+" type "+aType+" atccode "+atcCode);
             }
-            JpaUtils.close(em);
-
+            
         }
+
+        JpaUtils.close(em);
+
+        ha.put("warnings", results);
+        vec.add(ha);
+       // System.out.println("print out return values: ");
+       // Vector retlist=(Vector)((Hashtable)vec.get(0)).get("warnings");
+      //  for(int i=0;i<retlist.size();i++)
+      //      System.out.println("id="+retlist.get(i));
         return vec;
     }
 

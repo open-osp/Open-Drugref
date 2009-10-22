@@ -145,7 +145,6 @@ public class Drugref {
         }
      public Vector get_allergy_warnings(String atcCode, Vector allergies) {
 
-                //TablesDao queryDao = new TablesDao();
                 Vector vec=queryDao.getAllergyWarnings(atcCode,allergies);
                 return vec;
     }
