@@ -53,9 +53,21 @@ public class DPDImport {
 
     public ZipInputStream getZipStream() throws Exception {
         String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles.zip";
-        URL url = new URL(sUrl);
+        return getZipStream(sUrl);
+    }
 
-        //downloading some 3 MB drug data from the web, might take a while ...\n"
+    public ZipInputStream getInactiveZipStream() throws Exception {
+            String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles_ia.zip";
+                    return getZipStream(sUrl);
+    }
+
+    public ZipInputStream getInactiveTableZipStream() throws Exception {
+        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/inactive.zip";
+        return getZipStream(sUrl);
+    }
+
+    private  ZipInputStream getZipStream(String sUrl) throws Exception {
+        URL url = new URL(sUrl);
         ZipInputStream in = new ZipInputStream(new BufferedInputStream(url.openStream()));
         return in;
     }
@@ -218,6 +230,25 @@ public class DPDImport {
                     recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
                     //entityManager.flush();
                 }
+
+
+                zipStream = getInactiveZipStream() ;
+                ze = null;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    System.out.println("Files being open " + ze.getName());
+                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
+                    //entityManager.flush();
+                }
+
+
+                zipStream = getInactiveTableZipStream() ;
+                ze = null;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    System.out.println("Files being open " + ze.getName());
+                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
+                    //entityManager.flush();
+                }
+
                 p("populate interactions table with data");
 
                 // Stream to read file
