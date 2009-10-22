@@ -7,9 +7,10 @@ package org.drugref.ca.dpd;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -36,8 +37,7 @@ public class CdInactiveProducts implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date historyDate;
     @Id
-    @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     public CdInactiveProducts() {
