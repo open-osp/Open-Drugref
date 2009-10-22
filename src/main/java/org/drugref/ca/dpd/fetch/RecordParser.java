@@ -40,12 +40,14 @@ import org.drugref.ca.dpd.CdCompanies;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugStatus;
 import org.drugref.ca.dpd.CdForm;
+import org.drugref.ca.dpd.CdInactiveProducts;
 import org.drugref.ca.dpd.CdPackaging;
 import org.drugref.ca.dpd.CdPharmaceuticalStd;
 import org.drugref.ca.dpd.CdRoute;
 import org.drugref.ca.dpd.CdSchedule;
 import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.drugref.ca.dpd.Interactions;
+import org.drugref.util.ConfigUtils;
 
 /**
  *
@@ -107,7 +109,7 @@ public class RecordParser {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
 
-        if ("vet.txt".equals(type)) {
+        if ("vet.txt".equals(type) || "vet_ia.txt".equals(type)) {
 
             while ((items = csv.getLine()) != null) {
                 //System.out.println(looksLike(items));
@@ -121,7 +123,7 @@ public class RecordParser {
                 em.clear();
                 vet = null;
             }
-        } else if ("comp.txt".equals(type)) { 
+        } else if ("comp.txt".equals(type) || "comp_ia.txt".equals(type)) {
             //change encoding from ISO-8859-1 to UTF-8
             String str = "";
             try {
@@ -188,7 +190,7 @@ public class RecordParser {
                 em.clear();
                 vet = null;
             }
-        } else if ("drug.txt".equals(type)) {   
+        } else if ("drug.txt".equals(type) || "drug_ia.txt".equals(type)) {
             //change encoding from ISO-8859-1 to UTF-8
             String str = "";
             try {
@@ -224,14 +226,18 @@ public class RecordParser {
                 prod.setNumberOfAis(items[7]);
                 prod.setLastUpdateDate(getDate(items[8]));
                 prod.setAiGroupNo(items[9]);
+                String all_drug_classes = ConfigUtils.getProperty("all_drug_classes");
+
+                if("HUMAN".equals(prod.getClass1()) || ("YES".equalsIgnoreCase(all_drug_classes))  ){
                 em.persist(prod);
                 em.flush();
                 em.clear();
+                }
                 prod = null;
 
             }
             //System.out.println("check the ENCODING now");
-        } else if ("form.txt".equals(type)) {
+        } else if ("form.txt".equals(type) || "form_ia.txt".equals(type)) {
             /*
             DRUG_CODE                                      NOT NULL  NUMBER(8)
             PHARM_FORM_CODE                                NUMBER(7)
@@ -248,7 +254,7 @@ public class RecordParser {
                 em.clear();
                 vet = null;
             }
-        } else if ("ingred.txt".equals(type)) {
+        } else if ( "ingred.txt".equals(type) ||"ingred_ia.txt".equals(type)) {
             //change encoding from ISO-8859-1 to UTF-8
             /*
             DRUG_CODE                                NOT NULL NUMBER(8)
@@ -299,7 +305,7 @@ public class RecordParser {
                 em.clear();
                 vet = null;
             }
-        } else if ("package.txt".equals(type)) {
+        } else if ("package.txt".equals(type) || "package_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             UPC                                              VARCHAR2(12)
@@ -321,7 +327,7 @@ public class RecordParser {
                 em.flush();
                 em.clear();
             }
-        } else if ("pharm.txt".equals(type)) {
+        } else if ("pharm.txt".equals(type) || "pharm_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             PHARMACEUTICAL_STD                               VARCHAR2(40)
@@ -335,7 +341,7 @@ public class RecordParser {
                 em.flush();
                 em.clear();
             }
-        } else if ("route.txt".equals(type)) {
+        } else if ("route.txt".equals(type) || "route_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             ROUTE_OF_ADMINISTRATION_CODE		 	  NUMBER(6)
@@ -352,7 +358,7 @@ public class RecordParser {
                 em.clear();
             }
 
-        } else if ("schedule.txt".equals(type)) {
+        } else if ("schedule.txt".equals(type) || "schedule_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             SCHEDULE                                         VARCHAR2(40)
@@ -366,7 +372,7 @@ public class RecordParser {
                 em.flush();
                 em.clear();
             }
-        } else if ("status.txt".equals(type)) {
+        } else if ("status.txt".equals(type) || "status_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             CURRENT_STATUS_FLAG                              VARCHAR2(1)
@@ -385,7 +391,7 @@ public class RecordParser {
                 em.flush();
                 em.clear();
             }
-        } else if ("ther.txt".equals(type)) {
+        } else if ("ther.txt".equals(type) || "ther_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
             TC_ATC_NUMBER                                    VARCHAR2(8)
@@ -406,6 +412,21 @@ public class RecordParser {
                 em.flush();
                 em.clear();
             }
+
+        }else if ("inactive.txt".equals(type)) {
+            
+             while ((items = csv.getLine()) != null) {
+                //    System.out.println(looksLike(items));
+                CdInactiveProducts vet = new CdInactiveProducts();
+                vet.setDrugCode(new Integer(items[0]));
+                vet.setDrugIdentificationNumber(items[1]);
+                vet.setBrandName(items[2]);
+                vet.setHistoryDate(getDate(items[3]));
+                em.persist(vet);
+                em.flush();
+                em.clear();
+            }
+
         }else if("interactions-holbrook.txt".equals(type)){
             //put data into interactions table.
             //p(is.toString());
