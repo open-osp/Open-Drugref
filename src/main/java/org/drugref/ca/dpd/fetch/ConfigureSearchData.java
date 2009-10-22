@@ -443,6 +443,7 @@ System.out.println("DONE Import Ingredients");
                 if (num > 1){
               //      System.out.println("Donig something with "+drug[0]);
                     List<String> drugCodeList = getDrugCodeForName( em, ""+drug[0]);
+                    Query updateDrugSearch = em.createQuery("update CdDrugSearch cds set cds.name = (:NAME) where cds.drugCode = (:DRUGCODE) and cds.category = 13");
                     for (String code :drugCodeList){
                 //        System.out.println("Going to work on "+code);
                                                 List<Object[]> strens = getStrengthsFromDrugCode(em,code);
@@ -450,7 +451,6 @@ System.out.println("DONE Import Ingredients");
                                                 String suggName = getSuggestedNewName(name, strens);
                                 //                System.out.println(suggName);
                                                 if (!suggName.equals("")){
-                                                    Query updateDrugSearch = em.createQuery("update CdDrugSearch cds set cds.name = (:NAME) where cds.drugCode = (:DRUGCODE) and cds.category = 13");
                                                     updateDrugSearch.setParameter("NAME", suggName);
                                                     updateDrugSearch.setParameter("DRUGCODE", code);
                                                     updateDrugSearch.executeUpdate();

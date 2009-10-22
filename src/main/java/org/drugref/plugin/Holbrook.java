@@ -84,21 +84,21 @@ import org.drugref.util.JpaUtils;
                     for (int j = 0; j < idrugs.size(); j++) {
                         String query = "select hi from Interactions hi where hi.affectingatc=:affecting and hi.affectedatc=:affected";
                         //start to run query
-                        p("before query");
+                 //       p("before query");
                         EntityManager em = JpaUtils.createEntityManager();
                         EntityTransaction tx = em.getTransaction();
                         tx.begin();
                         Query queryOne = em.createQuery(query);
                         queryOne.setParameter("affecting", drug);
                         queryOne.setParameter("affected", idrugs.get(j));
-                        p("affecting",drug);
-                        p("affected",idrugs.get(j).toString());
-                        p("query",query);
+                      //  p("affecting",drug);
+                      //  p("affected",idrugs.get(j).toString());
+                      //  p("query",query);
 
                         List<Interactions> results = new ArrayList();
-                      try{  p("before query");
+                      try{ // p("before query");
                             results = queryOne.getResultList();                          
-                            p("after query");
+                           // p("after query");
                             tx.commit();
 
                         // Vector results = this.runquery(query, params);

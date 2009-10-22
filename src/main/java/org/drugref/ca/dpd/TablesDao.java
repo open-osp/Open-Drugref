@@ -147,7 +147,7 @@ public class TablesDao {
     public void p(String str) {
         System.out.println(str);
     }
-
+    //not used
     public Vector fakeFetch(){
         Vector v=new Vector();
         v.addElement("fakeFetch is always happy");
@@ -306,7 +306,6 @@ public class TablesDao {
     }
 
     public List<CdDrugSearch> getListAICodes(List<String> listOfDrugCodes) {
-
         EntityManager em = JpaUtils.createEntityManager();
         List<CdDrugSearch> ret = new ArrayList();
         try {
@@ -320,10 +319,14 @@ public class TablesDao {
                     System.out.println(s);
                 }
             }
+            List<Integer> intListDrugCode=new ArrayList();
+            for(int i=0;i<listOfDrugCodes.size();i++){
+                intListDrugCode.add(Integer.parseInt(listOfDrugCodes.get(i)));
+            }
             //select substring(ai_group_no,1,7) from cd_drug_product where drug_code =
             String queryStr = " select distinct substring(cds.aiGroupNo,1,7) from CdDrugProduct cds where cds.drugCode in (:array) ";
             Query query = em.createQuery(queryStr);
-            query.setParameter("array", listOfDrugCodes);
+            query.setParameter("array", intListDrugCode);
 
             System.out.println("before getListAICodes query");
 
@@ -411,11 +414,6 @@ public class TablesDao {
         }
         return results;
     }
-
-
-
-
-
     public Vector listSearchElement2(
             String str) {
         //EntityManagerFactory emf = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
@@ -455,7 +453,7 @@ public class TablesDao {
             System.out.println("after txt definition");
             tx.begin();
             Query query = em.createQuery(queryStr);
-            System.out.println("before query");
+          //  System.out.println("before query");
 
             results =
                     query.getResultList();
@@ -642,7 +640,7 @@ public class TablesDao {
             System.out.println("after txt definition");
             tx.begin();
             Query query = em.createQuery(queryStr);
-            System.out.println("before query");
+        //    System.out.println("before query");
 
             results = query.getResultList();
 
@@ -1031,13 +1029,14 @@ public class TablesDao {
     }
 
     public Vector getAllergyWarnings(String atcCode, Vector allergies) {
-        List results = new ArrayList();
+        Vector results = new Vector();
         Vector vec = new Vector();
         Hashtable ha = new Hashtable();
-        Vector warning = new Vector();
-        ha.put("warnings", warning);
-        vec.add(ha);
+        Vector warning = new Vector();        
+        
         if (atcCode.matches("") || atcCode.matches("null")) {
+            ha.put("warnings", results);
+            vec.add(ha);
             return vec;
         }
         EntityManager em = JpaUtils.createEntityManager();
@@ -1051,14 +1050,29 @@ public class TablesDao {
             String aId = (String) alleHash.get("id");
             if (aType.matches("8")) {
 
-                Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tcAtc=(:aDesc)");
+                Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAtc=(:aDesc)");
                 query.setParameter("atcCode", atcCode);
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println(atcCode+" is in this1 Allergy group "+aDesc);
                     results.add(aId);
+                }else{
+                    System.out.println(atcCode+" is NOT in this group "+aDesc);
                 }
-            } else if (aType.matches("14")) {
+            } else if (aType.matches("10")){
+                Query query=em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAhfs=(:aDesc)");
+                query.setParameter("atcCode", atcCode);
+                query.setParameter("aDesc", aDesc);
+                List resultTcAtcNumber = query.getResultList();
+                if (resultTcAtcNumber.size() > 0) {
+                    System.out.println(atcCode+" is in this2 Allergy group "+aDesc);
+                    results.add(aId);
+                }else{
+                    System.out.println(atcCode+" is NOT in this group "+aDesc);
+                }
+            }
+            else if (aType.matches("14")) {
                 System.out.println("aType=14 is not implemented yet");
             } else if (aType.matches("11") || aType.matches("12")) {
                 Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) " +
@@ -1067,7 +1081,11 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println("warning allergic to "+aDesc);
                     results.add(aId);
+                }
+                else{
+                    System.out.println("NO warning for "+aDesc);
                 }
             } else if (aType.matches("13")) {
                 Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=tc.drugCode ");
@@ -1075,14 +1093,25 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println("warning allergic to "+aDesc);
                     results.add(aId);
+                }else{
+                    System.out.println("NO warning for "+aDesc);
                 }
             } else {
-                System.out.println("No Match.");
+                System.out.println("No Match YET desc "+aDesc+" type "+aType+" atccode "+atcCode);
             }
-            JpaUtils.close(em);
-
+            
         }
+
+        JpaUtils.close(em);
+
+        ha.put("warnings", results);
+        vec.add(ha);
+       // System.out.println("print out return values: ");
+       // Vector retlist=(Vector)((Hashtable)vec.get(0)).get("warnings");
+      //  for(int i=0;i<retlist.size();i++)
+      //      System.out.println("id="+retlist.get(i));
         return vec;
     }
 
@@ -1107,7 +1136,7 @@ public class TablesDao {
         drugCode  = ""+obj;
         System.out.println("now going to call getDrug with drugCode "+drugCode);
 
-        return getDrugByDrugCode(drugCode,html);
+        return getDrugByDrugCode(drugCode,formCode, html);
     }
 
 
@@ -1211,10 +1240,11 @@ public class TablesDao {
     }
 
 
-    public Vector getDrugByDrugCode(String pKey, boolean html) {
+    public Vector getDrugByDrugCode(String pKey,String formCode, boolean html) {
         String productId = "";
         String origId = pKey;
         Vector returnRows = new Vector();
+
 
         try {
             EntityManager em = JpaUtils.createEntityManager();
@@ -1232,7 +1262,11 @@ public class TablesDao {
             queryRegionalIdentifier.setParameter("pKey", Integer.parseInt(pKey));
             Query queryComponent = em.createQuery("select cai from CdActiveIngredients cai where cai.drugCode=(:pKey)");
             queryComponent.setParameter("pKey", Integer.parseInt(pKey));
-
+            Query queryForm = em.createQuery("select  cf from CdForm cf where cf.drugCode=(:pKey) and cf.pharmCdFormCode=(:formCode)");
+            queryForm.setParameter("pKey", Integer.parseInt(pKey));
+            queryForm.setParameter("formCode", Integer.parseInt(formCode));
+            Query queryRoute=em.createQuery("select cr from CdRoute cr where cr.drugCode=(:pKey)");
+            queryRoute.setParameter("pKey", Integer.parseInt(pKey));
 
             String name = "";
             String atc = "";
@@ -1241,7 +1275,7 @@ public class TablesDao {
             String regionalIdentifier = "";
 
             List resultName = queryName.getResultList();
-            if (resultName.size() > 0) {
+            if (resultName.size() > 0) {//always get the last result in the resultlist??
                 for (int i = 0; i <
                         resultName.size(); i++) {
                     name = (String) resultName.get(i);
@@ -1286,39 +1320,56 @@ public class TablesDao {
             String strength = "";
             String strengthUnit = "";
 
-            Hashtable ha = new Hashtable();
+            
             Vector component = new Vector();
             List<CdActiveIngredients> resultComponent = queryComponent.getResultList();
             if (resultComponent.size() > 0) {
-                for (int i = 0; i <
-                        resultComponent.size(); i++) {
+                for (int i = 0; i <resultComponent.size(); i++) {//always get the last component in the list??
                     ingredient = resultComponent.get(i).getIngredient();
                     strength =
                             resultComponent.get(i).getStrength();
                     strengthUnit =
                             resultComponent.get(i).getStrengthUnit();
+                    Hashtable ha = new Hashtable();
+                    ha.put("name", ingredient);
+                    ha.put("strength", Float.valueOf(strength.trim()).floatValue());
+                    ha.put("unit", strengthUnit);
+                    component.addElement(ha);
                 }
-
-                ha.put("name", ingredient);
-                ha.put("strength", Float.valueOf(strength.trim()).floatValue());
-                ha.put("unit", strengthUnit);
-                component.addElement(ha);
             }
-
+            
+            Vector drugRoute=new Vector();
+            List<CdRoute> resultRoute=queryRoute.getResultList();
+            if(resultRoute.size()>0){
+               for (int i = 0; i <resultRoute.size(); i++) {
+                        drugRoute.addElement(resultRoute.get(i).getRouteOfAdministration());
+                }
+            }
+            
+            String drugForm="";
+            List<CdForm> resultForm=queryForm.getResultList();
+            if(resultForm.size()>0){
+                assert resultForm.size()==1; // queryForm should return a unique result.
+                        drugForm=resultForm.get(0).getPharmaceuticalCdForm();
+            }
             Hashtable ha2 = new Hashtable();
             ha2.put("name", name);
             ha2.put("atc", atc);
             ha2.put("product", product);
             ha2.put("regional_identifier", regionalIdentifier);
             ha2.put("components", component);
+            ha2.put("drugForm",drugForm);
+            ha2.put("drugRoute",drugRoute);
 
             returnRows.addElement(ha2);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        System.out.println("returnRows in getDrugByDrugCode="+returnRows);
         return returnRows;
     }
+
+
 
 
 }

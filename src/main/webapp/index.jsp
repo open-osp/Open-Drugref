@@ -263,6 +263,7 @@ Object object = null;
 try{
 //System.out.println("server_url :"+server_url);
 XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8080/drugref2/DrugrefService");
+//XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/drugref2/DrugrefService");
 object = server.execute(procedureName, params);
 }catch (XmlRpcException exception) {
 
