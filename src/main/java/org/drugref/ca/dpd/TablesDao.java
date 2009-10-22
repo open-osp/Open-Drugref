@@ -147,7 +147,7 @@ public class TablesDao {
     public void p(String str) {
         System.out.println(str);
     }
-
+    //not used
     public Vector fakeFetch(){
         Vector v=new Vector();
         v.addElement("fakeFetch is always happy");
@@ -1049,14 +1049,29 @@ public class TablesDao {
             String aId = (String) alleHash.get("id");
             if (aType.matches("8")) {
 
-                Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tcAtc=(:aDesc)");
+                Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAtc=(:aDesc)");
                 query.setParameter("atcCode", atcCode);
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println(atcCode+" is in this Allergy group "+aDesc);
                     results.add(aId);
+                }else{
+                    System.out.println(atcCode+" is NOT in this group "+aDesc);
                 }
-            } else if (aType.matches("14")) {
+            } else if (aType.matches("10")){
+                Query query=em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAhfs=(:aDesc)");
+                query.setParameter("atcCode", atcCode);
+                query.setParameter("aDesc", aDesc);
+                List resultTcAtcNumber = query.getResultList();
+                if (resultTcAtcNumber.size() > 0) {
+                    System.out.println(atcCode+" is in this Allergy group "+aDesc);
+                    results.add(aId);
+                }else{
+                    System.out.println(atcCode+" is NOT in this group "+aDesc);
+                }
+            }
+            else if (aType.matches("14")) {
                 System.out.println("aType=14 is not implemented yet");
             } else if (aType.matches("11") || aType.matches("12")) {
                 Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) " +
@@ -1065,7 +1080,11 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println("warning allergic to "+aDesc);
                     results.add(aId);
+                }
+                else{
+                    System.out.println("NO warning for "+aDesc);
                 }
             } else if (aType.matches("13")) {
                 Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=tc.drugCode ");
@@ -1073,10 +1092,13 @@ public class TablesDao {
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
                 if (resultTcAtcNumber.size() > 0) {
+                    System.out.println("warning allergic to "+aDesc);
                     results.add(aId);
+                }else{
+                    System.out.println("NO warning for "+aDesc);
                 }
             } else {
-                System.out.println("No Match.");
+                System.out.println("No Match YET desc "+aDesc+" type "+aType+" atccode "+atcCode);
             }
             JpaUtils.close(em);
 
