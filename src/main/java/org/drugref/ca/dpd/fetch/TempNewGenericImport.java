@@ -119,7 +119,7 @@ public class TempNewGenericImport {
                     }
                 }else{
                     singles++;
-                    Query sgQuery = entityManager.createNativeQuery("select distinct cd_drug_product.ai_group_no,cd_active_ingredients.ingredient,cd_active_ingredients.strength, cd_active_ingredients.strength_unit,cd_form.pharmaceutical_CD_form, cd_form.pharm_CD_form_code   from cd_drug_product, cd_form, cd_active_ingredients where cd_drug_product.drug_code = cd_active_ingredients.drug_code and cd_drug_product.drug_code = cd_form.drug_code and  ai_group_no like '"+obj+"%'") ;
+                    Query sgQuery = entityManager.createNativeQuery("select distinct cd_drug_product.ai_group_no,cd_active_ingredients.ingredient,cd_active_ingredients.strength, cd_active_ingredients.strength_unit,cd_form.pharmaceutical_cd_form, cd_form.pharm_cd_form_code   from cd_drug_product, cd_form, cd_active_ingredients where cd_drug_product.drug_code = cd_active_ingredients.drug_code and cd_drug_product.drug_code = cd_form.drug_code and  ai_group_no like '"+obj+"%'") ;
                     List<Object[]> sgList = sgQuery.getResultList();
                     for(Object[] drug:sgList){
                         String drugName = ""+drug[1];
@@ -140,8 +140,8 @@ public class TempNewGenericImport {
                           1.cd_active_ingredients.ingredient
                           2.cd_active_ingredients.strength
                           3.cd_active_ingredients.strength_unit
-                          4.cd_form.pharmaceutical_CD_form
-                          5.cd_form.pharm_CD_form_code
+                          4.cd_form.pharmaceutical_cd_form
+                          5.cd_form.pharm_cd_form_code
                          */
                         //System.out.println(drug[0]+" "+drugName+" "+drug[2]+drug[3]+" "+drug[4]);
                     }
