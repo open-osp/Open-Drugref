@@ -144,6 +144,19 @@ public class DPDImport {
     public List importCompanyCodetoDrugProduct() {
         List<String> arrList = new ArrayList();
 
+        //?arrList.add("create index cd_drug_product_drug_code_idx on cd_drug_product(drug_code);");
+
+        arrList.add("create index  cd_active_ingredients_drug_code_idx on   cd_active_ingredients(drug_code);");
+       arrList.add("create index  cd_drug_status_drug_code_idx on   cd_drug_status(drug_code);");
+       arrList.add("create index  cd_form_drug_code_idx on    cd_form(drug_code);");
+       arrList.add("create index  cd_inactive_products_drug_code_idx on    cd_inactive_products(drug_code);");
+       arrList.add("create index  cd_packaging_drug_code_idx on   cd_packaging(drug_code);");
+       arrList.add("create index  cd_pharmaceutical_std_drug_code_idx on   cd_pharmaceutical_std(drug_code);");
+       arrList.add("create index  cd_route_drug_code_idx on     cd_route(drug_code);");
+       arrList.add("create index  cd_schedule_drug_code_idx on     cd_schedule(drug_code);");
+       arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
+       arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
+
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
         arrList.add("update cd_drug_product set company_code=(select company_code from cd_companies where cd_companies.drug_code =  cd_drug_product.drug_code);");
