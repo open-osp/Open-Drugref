@@ -120,6 +120,11 @@ public class Drugref {
                 return vec;
         }
 
+        public Vector get_inactive_date(String str ){
+             Vector vec=queryDao.getInactiveDate(str);
+             return vec;
+        }
+
        public Vector get_generic_name(String drugID) {
                 System.out.println("in get_generic_name,drugref.java");
                 //TablesDao queryDao = new TablesDao();
