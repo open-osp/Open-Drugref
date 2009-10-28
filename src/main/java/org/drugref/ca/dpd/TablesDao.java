@@ -577,6 +577,16 @@ public class TablesDao {
             for ( CdDrugSearch result: results){
             //for (int i = 0; i < results.size(); i++) {
                 if(result.getName().startsWith("APO-") || result.getName().startsWith("NOVO-") || result.getName().startsWith("MYLAN-")){
+                    /*
+                     APO-
+DOM-
+NOVO-
+PHL-
+PMS-
+RAN-
+RATIO-
+TARO-
+                     */
                     continue;
                 }
                 if (result.getCategory() == 13 || result.getCategory() == 18 ||result.getCategory() == 19){
@@ -948,6 +958,27 @@ public class TablesDao {
         }
     }
     //change to return Hashtable??
+
+    public Vector getInactiveDate(String pKey){
+        EntityManager em = JpaUtils.createEntityManager();
+        Vector vec = new Vector();
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        Query queryOne = em.createQuery("select cds from CdInactiveProducts cds where cds.drugIdentificationNumber = (:din)");
+        queryOne.setParameter("din", pKey);
+
+        List<CdInactiveProducts> inactiveCodes = queryOne.getResultList();
+
+
+
+        if (inactiveCodes != null) {
+            for(CdInactiveProducts inp:inactiveCodes){
+               vec.add(inp.getHistoryDate());
+            }
+        }
+        JpaUtils.close(em);
+        return vec;
+    }
 
     public Vector getForm(String pKey) {
         EntityManager em = JpaUtils.createEntityManager();
