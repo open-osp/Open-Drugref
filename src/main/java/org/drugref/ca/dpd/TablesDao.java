@@ -264,8 +264,8 @@ public class TablesDao {
     //using drugcode find din and atc codes
     public CdDrugProduct getDrugProduct(String drugcode){
         EntityManager em = JpaUtils.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         String queryStr = " select cds from CdDrugProduct cds where cds.drugCode = (:id) ";
         Query query = em.createQuery(queryStr);
         query.setParameter("id", drugcode);
@@ -278,8 +278,8 @@ public class TablesDao {
 
     public CdTherapeuticClass getATCCodes(String drugcode){
         EntityManager em = JpaUtils.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         String queryStr = " select cds from CdTherapeuticClass cds where cds.drugCode = (:id) ";
         Query query = em.createQuery(queryStr);
         query.setParameter("id", drugcode);
@@ -292,8 +292,8 @@ public class TablesDao {
 
     public CdDrugSearch getSearchedDrug(int id){
         EntityManager em = JpaUtils.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         String queryStr = " select cds from CdDrugSearch cds where cds.id = (:id) ";
         Query query = em.createQuery(queryStr);
         query.setParameter("id", id);
@@ -310,9 +310,9 @@ public class TablesDao {
         List<CdDrugSearch> ret = new ArrayList();
         try {
             log.debug("before tx definition");
-            EntityTransaction tx = em.getTransaction();
+            //EntityTransaction tx = em.getTransaction();
             log.debug("after txt definition");
-            tx.begin();
+            //tx.begin();
             if (listOfDrugCodes != null) {
                 System.out.println("list of drug sizes " + listOfDrugCodes.size());
                 for (String s : listOfDrugCodes) {
@@ -337,7 +337,7 @@ public class TablesDao {
                 ret.addAll(listDrugsbyAIGroup2(s));
             }
 
-            tx.commit();
+            //tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -353,9 +353,9 @@ public class TablesDao {
         List<Object[]> results = null;
         try {
             System.out.println("before tx definition");
-            EntityTransaction tx = em.getTransaction();
+            //EntityTransaction tx = em.getTransaction();
             System.out.println("after txt definition");
-            tx.begin();
+            //tx.begin();
             String queryStr = "select distinct cai.ingredient,cai.strength, cai.strengthUnit,cdf.pharmaceuticalCdForm   from CdDrugProduct cdp, CdForm cdf, CdActiveIngredients cai where cdp.drugCode = cai.drugCode and cdp.drugCode = cdf.drugCode and  cdp.aiGroupNo LIKE '"+ aiGroup + "%' order by cai.strength";//(:aiGroup) ";
             Query query = em.createQuery(queryStr);
             //query.setParameter("aiGroup", aiGroup+"%");
@@ -369,7 +369,7 @@ public class TablesDao {
                 System.out.println("---" + s[0]+"---"+ s[1]+"---"+ s[2]+"---"+ s[3]+"---");
             }
 
-            tx.commit();
+           // tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -386,9 +386,9 @@ public class TablesDao {
         List<CdDrugSearch> results = null;
         try {
             log.debug("before tx definition for"+aiGroup);
-            EntityTransaction tx = em.getTransaction();
+            //EntityTransaction tx = em.getTransaction();
             log.debug("after txt definition");
-            tx.begin();
+            //tx.begin();
             //String queryStr = "select distinct cai.ingredient,cai.strength, cai.strengthUnit,cdf.pharmaceuticalCdForm   from CdDrugProduct cdp, CdForm cdf, CdActiveIngredients cai where cdp.drugCode = cai.drugCode and cdp.drugCode = cdf.drugCode and  cdp.aiGroupNo LIKE '"+ aiGroup + "%' order by cai.strength";//(:aiGroup) ";
             String queryStr = "select cds from CdDrugSearch cds where cds.category in (18,19) and cds.drugCode like '"+ aiGroup + "%' ";
 
@@ -404,7 +404,7 @@ public class TablesDao {
 //                System.out.println("---" + s[0]+"---"+ s[1]+"---"+ s[2]+"---"+ s[3]+"---");
 //            }
 
-            tx.commit();
+            //tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -449,16 +449,16 @@ public class TablesDao {
         System.out.println(queryStr);
         try {
             System.out.println("before tx definition");
-            EntityTransaction tx = em.getTransaction();
+            //EntityTransaction tx = em.getTransaction();
             System.out.println("after txt definition");
-            tx.begin();
+            //tx.begin();
             Query query = em.createQuery(queryStr);
           //  System.out.println("before query");
 
             results =
                     query.getResultList();
 
-            tx.commit();
+            //tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -551,16 +551,16 @@ public class TablesDao {
         queryStr = queryStr + " order by cds.name";
         System.out.println(queryStr);
         try {
-            System.out.println("before tx definition");
-            EntityTransaction tx = em.getTransaction();
-            System.out.println("after txt definition");
-            tx.begin();
+            //System.out.println("before tx definition");
+           // EntityTransaction tx = em.getTransaction();
+            //System.out.println("after txt definition");
+            //tx.begin();
             Query query = em.createQuery(queryStr);
             System.out.println("before query");
 
             results = query.getResultList();
 
-            tx.commit();
+            //tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -597,8 +597,9 @@ TARO-
                     vec.addElement(ha);
                 }
             }
-
-            System.out.println(results);
+           
+            for(int i=0;i<vec.size();i++)
+                System.out.println("vec="+vec.get(i));
             return (vec);
         } else {
             Vector defaultVec = new Vector();
@@ -646,15 +647,15 @@ TARO-
         System.out.println(queryStr);
         try {
             System.out.println("before tx definition");
-            EntityTransaction tx = em.getTransaction();
+            //EntityTransaction tx = em.getTransaction();
             System.out.println("after txt definition");
-            tx.begin();
+            //tx.begin();
             Query query = em.createQuery(queryStr);
         //    System.out.println("before query");
 
             results = query.getResultList();
 
-            tx.commit();
+            //tx.commit();
 
         } catch (Exception e) {
             System.out.println("EXCEPTION-HERE");
@@ -708,8 +709,8 @@ TARO-
         List<CdDrugSearch> resultTwo = new ArrayList();
         System.out.println("queryOne :" + queryOne);
         try {
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            //EntityTransaction tx = em.getTransaction();
+            //tx.begin();
             Query queryFirst = em.createQuery(queryOne);
             //@SuppressWarnings("unchecked")
             resultOne = queryFirst.getResultList();
@@ -733,7 +734,7 @@ TARO-
             Query querySecond = em.createQuery(queryTwo + " and cds.drugCode in (:array) order by cds.name");
             querySecond.setParameter("array", strListOne);
             resultTwo = querySecond.getResultList();
-            tx.commit();
+            //tx.commit();
         } finally {
             JpaUtils.close(em);
         }
@@ -768,8 +769,8 @@ TARO-
         List<CdDrugSearch> results = new ArrayList();
 
         try {
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            //EntityTransaction tx = em.getTransaction();
+            //tx.begin();
 
 
             CdDrugSearch cdsResult = (CdDrugSearch) em.createQuery("select cds from CdDrugSearch cds where cds.id = " + drugID).getSingleResult();
@@ -879,12 +880,12 @@ TARO-
         List<CdDrugSearch> results = new ArrayList();
 
         try {
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            //EntityTransaction tx = em.getTransaction();
+            //tx.begin();
             Query query = em.createQuery(queryStr);
             //@SuppressWarnings("unchecked")
             results = query.getResultList();
-            tx.commit();
+            //tx.commit();
         } finally {
             JpaUtils.close(em);
         }
@@ -915,8 +916,8 @@ TARO-
         Vector vec = new Vector();
         EntityManager em = JpaUtils.createEntityManager();
         List<CdDrugSearch> results = new ArrayList();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         Query queryOne = em.createQuery("select lgb.id from LinkGenericBrand lgb ,CdDrugSearch cds where lgb.drugCode = cds.drugCode and cds.id=(:ID)");
         List resultDrugCode = new ArrayList();
         try {
@@ -962,8 +963,8 @@ TARO-
     public Vector getInactiveDate(String pKey){
         EntityManager em = JpaUtils.createEntityManager();
         Vector vec = new Vector();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         Query queryOne = em.createQuery("select cds from CdInactiveProducts cds where cds.drugIdentificationNumber = (:din)");
         queryOne.setParameter("din", pKey);
 
@@ -984,8 +985,8 @@ TARO-
         EntityManager em = JpaUtils.createEntityManager();
         List<CdForm> results = new ArrayList();
         Vector vec = new Vector();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         Query queryOne = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.id = (:ID)");
         queryOne.setParameter("ID", Integer.parseInt(pKey));
         List resultDrugCode = queryOne.getResultList();
@@ -1020,8 +1021,8 @@ TARO-
     public Vector listDrugClass(Vector Dclass) {
         EntityManager em = JpaUtils.createEntityManager();
         List results = new ArrayList();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
 
         String q1 = "select cds from  CdDrugSearch cds where ";
         for (int i = 0; i < Dclass.size(); i++) {
@@ -1071,8 +1072,8 @@ TARO-
             return vec;
         }
         EntityManager em = JpaUtils.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         Enumeration e = allergies.elements();
         while (e.hasMoreElements()) {
             Hashtable alleHash = new Hashtable((Hashtable) e.nextElement());
@@ -1165,8 +1166,8 @@ TARO-
         String drugCode = "";
         
         EntityManager em = JpaUtils.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        tx.begin();
+        //EntityTransaction tx = em.getTransaction();
+        //tx.begin();
         Query queryDrugCode = em.createQuery("select cdp.drugCode from CdDrugProduct cdp ,CdForm cf where cdp.aiGroupNo = (:groupNo) and cf.pharmCdFormCode = (:formCode) and cdp.drugCode = cf.drugCode");
         queryDrugCode.setParameter("groupNo", groupno);
         queryDrugCode.setParameter("formCode", Integer.parseInt(formCode));
@@ -1187,11 +1188,12 @@ TARO-
         String productId = "";
         String origId = pKey;
         Vector returnRows = new Vector();
-
+        if(origId==null)
+            System.out.println("origId is null.");
         try {
             EntityManager em = JpaUtils.createEntityManager();
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            //EntityTransaction tx = em.getTransaction();
+            //tx.begin();
             Query queryDrugCode = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.id=(:pKey)");
             queryDrugCode.setParameter("pKey", Integer.parseInt(pKey));
             String resultDrugCode = "";
@@ -1291,8 +1293,8 @@ TARO-
 
         try {
             EntityManager em = JpaUtils.createEntityManager();
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            //EntityTransaction tx = em.getTransaction();
+            //tx.begin();
             
 
             Query queryName = em.createQuery("select cai.ingredient from CdActiveIngredients cai where cai.drugCode=(:pKey)");
@@ -1392,7 +1394,7 @@ TARO-
             String drugForm="";
             List<CdForm> resultForm=queryForm.getResultList();
             if(resultForm.size()>0){
-                assert resultForm.size()==1; // queryForm should return a unique result.
+                //assert resultForm.size()==1; // queryForm should return a unique result.
                         drugForm=resultForm.get(0).getPharmaceuticalCdForm();
             }
             Hashtable ha2 = new Hashtable();

@@ -141,7 +141,7 @@ public class DPDImport {
         return arrList;
     }
 
-    public List importCompanyCodetoDrugProduct() {
+    public List addIndexToTables() {
         List<String> arrList = new ArrayList();
 
         //?arrList.add("create index cd_drug_product_drug_code_idx on cd_drug_product(drug_code);");
@@ -180,7 +180,7 @@ public class DPDImport {
         List<String> arrList = new ArrayList();
 
         arrList.add("CREATE TABLE  cd_drug_search  (id serial  PRIMARY KEY,   drug_code  varchar(30),   category   int,   name  text default NULL);");
-        arrList.add("create table link_generic_brand(pk_id serial  PRIMARY KEY,   id integer,    drug_code varchar(30));");
+        arrList.add("CREATE TABLE  link_generic_brand (pk_id serial  PRIMARY KEY,   id integer,    drug_code varchar(30));");
         return arrList;
     }
 
@@ -227,7 +227,7 @@ public class DPDImport {
             tx.begin();
 
             //drop tables only if they exist
-            if (!getDPDTablesDrop().isEmpty()) {
+            if (!getDPDTablesDrop().isEmpty()) {//if some tables are present
                 p("tables exist");
                 insertLines(entityManager, getDPDTablesDrop());
             }
@@ -239,7 +239,7 @@ public class DPDImport {
                 ZipInputStream zipStream = getZipStream();
                 ZipEntry ze = null;
                 while ((ze = zipStream.getNextEntry()) != null) {
-                    System.out.println("Files being open " + ze.getName());                    
+                    System.out.println("Files being open " + ze.getName());
                     recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
                     //entityManager.flush();
                 }
@@ -273,10 +273,6 @@ public class DPDImport {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
-
-
             tx.begin();
 
             //drop tables only if they exist
@@ -294,6 +290,12 @@ public class DPDImport {
             searchData.importSearchData(entityManager);
             System.out.println("committing");
             //tx.commit();
+
+            tx.begin();
+            //add indexes to tables.
+            insertLines(entityManager, addIndexToTables());
+            tx.commit();
+
         } finally {
             System.out.println("closing entityManager");
             JpaUtils.close(entityManager);
