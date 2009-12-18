@@ -40,7 +40,7 @@ public class TempNewGenericImport {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) { //ran separately to import only new generic import , that's category 18 and category 19 drugs.
         // TODO code application logic here
         TempNewGenericImport nt = new TempNewGenericImport();
         Long l=nt.run();
@@ -65,15 +65,11 @@ public class TempNewGenericImport {
             EntityTransaction tx = entityManager.getTransaction();
             tx.begin();
             String s="1";
-            String initialSQL = "select distinct ai_group_no from cd_drug_product where number_of_ais = '1' order by ai_group_no";
+            String initialSQL = "select distinct ai_group_no from cd_drug_product order by ai_group_no";
             Query query = entityManager.createNativeQuery(initialSQL);
-
-            List<String> aiGroupList = query.getResultList();
-
-           
+            List<String> aiGroupList = query.getResultList();           
             for (String obj: aiGroupList){
                 int numIng = Integer.parseInt(obj.substring(0, 2));
-
                // p("obj",obj);
                // p("numIng",Integer.toString(numIng));
                 
@@ -102,7 +98,6 @@ public class TempNewGenericImport {
                             form = ""+drug[4];
                             formCode = ""+drug[5];
                             aiNum = ""+drug[0];
-
                             first = false;
                         }
                         sb.append(" "+form);
@@ -111,11 +106,11 @@ public class TempNewGenericImport {
                          drugSearch.setName(sb.toString());
                          drugSearch.setDrugCode(aiNum+"+"+formCode);
                          drugSearch.setCategory(19);
-                        /*
+                        
                          entityManager.persist(drugSearch);
                         entityManager.flush();
                         entityManager.clear();
-                         */
+                         
                     }
                 }else{
                     singles++;
@@ -129,7 +124,7 @@ public class TempNewGenericImport {
                             //nameAltered++;
                         }
                         CdDrugSearch drugSearch = new CdDrugSearch();
-                        drugSearch.setName(drugName+" "+drug[2]+drug[3]+" "+drug[4]);
+                        drugSearch.setName(drugName+" "+drug[2]+drug[3]+" "+drug[4]);//example: ENALAPRIL MALEATE 20MG TABLET
                         drugSearch.setDrugCode(""+drug[0]+"+"+drug[5]);
                         drugSearch.setCategory(18);
                         entityManager.persist(drugSearch);
@@ -151,14 +146,13 @@ public class TempNewGenericImport {
             tx.commit();
         } finally {
 
-            System.out.println("closing entityManager");
+            //System.out.println("closing entityManager");
             JpaUtils.close(entityManager);
-            System.out.println("entityManagerClosed");
+            //System.out.println("entityManagerClosed");
         }
         System.out.println("COMP GEN "+coumpoundsWGeneric+" COMP "+coumpounds+" single "+singles+" singleWGen "+singlesWGeneric+" NAme Altered "+nameAltered);
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
-
     }
      
     String removeBrackets(String drugName){

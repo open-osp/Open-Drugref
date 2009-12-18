@@ -18,6 +18,8 @@
          <%
         org.drugref.ca.dpd.fetch.DPDImport dpdImport = new org.drugref.ca.dpd.fetch.DPDImport();
         dpdImport.doItDifferent();
+        org.drugref.ca.dpd.fetch.TempNewGenericImport newGenericImport=new org.drugref.ca.dpd.fetch.TempNewGenericImport();
+        newGenericImport.run();
         %>
     </body>
 </html>
