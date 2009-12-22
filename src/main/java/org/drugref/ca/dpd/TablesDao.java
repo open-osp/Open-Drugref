@@ -27,12 +27,13 @@ package org.drugref.ca.dpd;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
@@ -527,7 +528,7 @@ public class TablesDao {
     public Vector listSearchElement3(String str) {
         System.out.println("before create em in listSearchElement3");
         EntityManager em = JpaUtils.createEntityManager();
-        System.out.println("created entity manager");
+        //System.out.println("created entity manager");
 
         str = str.replace(",", " ");
         str = str.replace("'", "");
@@ -1037,14 +1038,17 @@ TARO-
         List<CdDrugSearch> listOne = queryOne.getResultList();
         if (listOne.size() > 0) {
             for (int i = 0; i < listOne.size(); i++) {
+                Integer id=listOne.get(i).getId();
                 Query queryTwo = em.createQuery("select cds2 from CdDrugSearch cds2 where cds2.drugCode in (select tc.tcAhfsNumber from   CdTherapeuticClass tc where tc.drugCode = (:cdIntDrugCode)) order by cds2.id");
                 queryTwo.setParameter("cdIntDrugCode", Integer.parseInt(listOne.get(i).getDrugCode().trim()));
-                CdDrugSearch resultTwo = (CdDrugSearch) queryTwo.getSingleResult();
-                Hashtable ha = new Hashtable();
-                ha.put("id_class", resultTwo.getId());
-                ha.put("name", resultTwo.getName());
-                ha.put("id_drug", listOne.get(i).getId());
-                vec.add(ha);
+                List<CdDrugSearch> listTwo=queryTwo.getResultList();
+                for(CdDrugSearch resultTwo:listTwo){
+                    Hashtable ha = new Hashtable();
+                    ha.put("id_class", resultTwo.getId());
+                    ha.put("name", resultTwo.getName());
+                    ha.put("id_drug", id);
+                    vec.add(ha);
+                }
             }
 
             JpaUtils.close(em);
