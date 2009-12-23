@@ -962,17 +962,16 @@ TARO-
     //change to return Hashtable??
 
     public Vector getInactiveDate(String pKey){
+        System.out.println("in getInactiveDate");
         EntityManager em = JpaUtils.createEntityManager();
         Vector vec = new Vector();
         //EntityTransaction tx = em.getTransaction();
         //tx.begin();
-        Query queryOne = em.createQuery("select cds from CdInactiveProducts cds where cds.drugIdentificationNumber = (:din)");
-        queryOne.setParameter("din", pKey);
+        //Query queryOne = em.createQuery("select cds from CdInactiveProducts cds where cds.drugIdentificationNumber = (:din)");
+        Query queryOne = em.createNamedQuery("CdInactiveProducts.findByDrugIdentificationNumber");
+        queryOne.setParameter("drugIdentificationNumber", pKey);
 
         List<CdInactiveProducts> inactiveCodes = queryOne.getResultList();
-
-
-
         if (inactiveCodes != null) {
             for(CdInactiveProducts inp:inactiveCodes){
                vec.add(inp.getHistoryDate());
@@ -1124,7 +1123,7 @@ TARO-
                 System.out.println("aType=14 is not implemented yet");
             } else if (aType.matches("11") || aType.matches("12")) {
                 Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) " +
-                        "and cds.drugCode=lgb.id and lgb.drug_code=tc.drug_code");
+                        "and cds.drugCode=lgb.id and lgb.drugCode=tc.drugCode");
                 query.setParameter("atcCode", atcCode);
                 query.setParameter("aDesc", aDesc);
                 List resultTcAtcNumber = query.getResultList();
