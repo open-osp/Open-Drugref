@@ -196,7 +196,7 @@ public class TablesDao {
             providers = new Vector((Vector) this.provided.get(attribute));
             p("in fetch, providers", providers.toString());
         } catch (Exception e) {
-            p("exception 1");
+            e.printStackTrace();
             String val = attribute + " not provided by an registered service";
             haError.put("Error", val);
             return haError;
@@ -1095,6 +1095,8 @@ public class TablesDao {
     }
 
     public Vector getAllergyWarnings(String atcCode, Vector allergies) {
+
+        System.out.println("in getAllergyWarnings: atcCode="+atcCode+",allergies="+allergies);
         Vector results = new Vector();
         Vector vec = new Vector();
         Hashtable ha = new Hashtable();
@@ -1153,7 +1155,8 @@ public class TablesDao {
                 } else if (aType.matches("14")) {
                     System.out.println("aType=14 is not implemented yet");
                 } else if (aType.matches("11") || aType.matches("12")) {
-                    Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) " +
+                    System.out.println("aType=11 or 12");
+                   /* Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) " +
                             "and cds.drugCode=lgb.id and lgb.drugCode=tc.drugCode");
                     query.setParameter("atcCode", atcCode);
                     query.setParameter("aDesc", aDesc);
@@ -1163,9 +1166,31 @@ public class TablesDao {
                         results.add(aId);
                     } else {
                         System.out.println("NO warning for " + aDesc);
-                    }
+                    }*/
+                    //ORIGINAL QUERY:select tc.tcAtcNumber from CdDrugSearch cds, LinkGenericBrand lgb, CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=lgb.id and lgb.drugCode=tc.drugCode
+                    //for category 11 and 12 drugs,cds.id=cds.drugCode
+                    Query q1=em.createQuery("select distinct tc.tcAtcNumber from CdDrugSearch cds, CdTherapeuticClass tc,LinkGenericBrand lgb  where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.id=lgb.id and lgb.drugCode in (:tcDrugCodeString)");
+                    q1.setParameter("atcCode", atcCode);
+                    q1.setParameter("aDesc", aDesc);              
+                    
+
+                        Query q3=em.createQuery("select distinct tc.drugCode from  CdTherapeuticClass tc where tc.tcAtcNumber=(:atcCode)");
+                        q3.setParameter("atcCode", atcCode);
+                        List<Integer> r3=q3.getResultList();
+                        List<String> r3String=new ArrayList();
+                        for(Integer ii:r3)
+                            r3String.add(ii.toString());
+                        q1.setParameter("tcDrugCodeString", r3String);
+                        List<String> r1=q1.getResultList();
+                        System.out.println("r1 size: "+r1.size());
+                        for(String r1str:r1)
+                            System.out.println("r1="+r1str);
+                        if(r1.size()>0) {
+                            results.add(aId);
+                            System.out.println("warning allergic to " + aDesc);
+                        }
                 } else if (aType.matches("13")) {
-                    Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=tc.drugCode ");
+                   /* Query query = em.createQuery("select tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=tc.drugCode ");
                     query.setParameter("atcCode", atcCode);
                     query.setParameter("aDesc", aDesc);
                     List resultTcAtcNumber = query.getResultList();
@@ -1174,7 +1199,25 @@ public class TablesDao {
                         results.add(aId);
                     } else {
                         System.out.println("NO warning for " + aDesc);
-                    }
+                    }*/
+
+                    //ORIGINAL QUERY:select tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and cds.drugCode=tc.drugCode
+                    Query q1=em.createQuery("select distinct tc.tcAtcNumber from CdDrugSearch cds,CdTherapeuticClass tc where tc.tcAtcNumber =(:atcCode) and cds.name=(:aDesc) and tc.drugCode in (:cdsDrugCodeInteger)");
+                   
+                    //Query q2=em.createQuery("select tc.drugCode from CdTherapeuticClass tc");
+                    Query q2=em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.category=13 and cds.name=(:aDesc)");
+                    q2.setParameter("aDesc", aDesc);
+                    List<String> r2=q2.getResultList();
+                    List<Integer> r2Integer=new ArrayList();
+                    for(String ss:r2)
+                        r2Integer.add(Integer.parseInt(ss));
+                    q1.setParameter("atcCode", atcCode);
+                    q1.setParameter("aDesc", aDesc);
+                    q1.setParameter("cdsDrugCodeInteger", r2Integer);
+                    List<String> r1=q1.getResultList();
+                    if(r1.size()>0)
+                        results.add(aId);
+
                 } else {
                     System.out.println("No Match YET desc " + aDesc + " type " + aType + " atccode " + atcCode);
                 }
