@@ -297,9 +297,9 @@ public class DPDImport {
             tx.commit();
 
         } finally {
-            System.out.println("closing entityManager");
+            
             JpaUtils.close(entityManager);
-            System.out.println("entityManagerClosed");
+            
         }
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
