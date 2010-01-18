@@ -172,13 +172,16 @@ public class DrugrefApi {
         haError.put("Error", valStr);
         try {
             Vector attr = (Vector) this.cache.get(attribute);
-            p("attr",attr.toString());
-            p("try1");
-            if (attr.get(1).equals(key)) {
-                p ("attr[0]=",attr.get(0).toString());
-                return attr.get(0);
-            }
+           if(attr!=null && attr.size()>1){
+                p("attr",attr.toString());
+                p("try1");
+                if (attr.get(1).equals(key)) {
+                    p ("attr[0]=",attr.get(0).toString());
+                    return attr.get(0);
+                }
+           }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("except1");
         }
         Hashtable queryinfo = new Hashtable();
