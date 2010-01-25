@@ -23,7 +23,7 @@
         System.out.println("vec "+vecListDrugs);
         out.write("list_search_element result: " + vecListDrugs + "\n");
 
-        Vector paramsGetDrug = new Vector();
+     /*   Vector paramsGetDrug = new Vector();
         boolean bool=true;
         paramsGetDrug.addElement("12188");
         paramsGetDrug.addElement(bool);
@@ -84,8 +84,9 @@
         Object vecListDrugClass = (Object) callWebserviceLite("list_drug_class",paramsListDrugClass);
         System.out.println("vec "+vecListDrugClass);
         out.write("list_drug_class : "+vecListDrugClass + "\n");
+  */
 
-        Vector paramsGetAlergyWarnings = new Vector();
+    /*    Vector paramsGetAlergyWarnings = new Vector();
         String drugs="73063";
         Vector allergies = new Vector();
         paramsGetAlergyWarnings.addElement(drugs);
@@ -94,7 +95,53 @@
         Object vecGetAlergyWarnings = (Object) callWebserviceLite("get_allergy_warnings",paramsGetAlergyWarnings);
         System.out.println("vec " + vecGetAlergyWarnings);
         out.write("getAlergyWarnings : " + vecGetAlergyWarnings + "\n");
+*/
+   /*    Vector paramsGetAlergyWarnings2 = new Vector();
+        String drugs2="B01AA03";
+        Vector allergies2 = new Vector();
+        Hashtable ht=new Hashtable();
+        ht.put("type","11");
+        ht.put("description","BLACK ALDER");
+        ht.put("id","0");
+        allergies2.add(ht) ;
+        */
+     /*   ht=new Hashtable();
+        ht.put("type","11");
+        ht.put("description","BLACK ROOT");
+        ht.put("id","1");
+        allergies2.add(ht);
+        */
+   /*     ht=new Hashtable();
+        ht.put("type","0");
+        ht.put("description","CA2");
+        ht.put("id","2");
+        allergies2.add(ht);
+        ht=new Hashtable();
+        ht.put("type","0");
+        ht.put("description","CUSTOM_ALLERGY");
+        ht.put("id","3");
+        allergies2.add(ht);
+        ht=new Hashtable();
+        ht.put("type","11");
+        ht.put("description","MUSTARD BLACK");
+        ht.put("id","4");
+        allergies2.add(ht);
+*/
+        /*
+        ht=new Hashtable();
+        ht.put("type","13");
+        ht.put("description","ACTONEL 35MG");
+        ht.put("id","5");
+        allergies2.add(ht);
+*/
 
+    /*    paramsGetAlergyWarnings2.addElement(drugs2);
+        paramsGetAlergyWarnings2.addElement(allergies2);
+        System.out.println("params    "+paramsGetAlergyWarnings2);
+        Object vecGetAlergyWarnings2 = (Object) callWebserviceLite("get_allergy_warnings",paramsGetAlergyWarnings2);
+        System.out.println("vec " + vecGetAlergyWarnings2);
+        out.write("getAlergyWarnings : " + vecGetAlergyWarnings2 + "\n");
+    */
         /*Vector paramsFakeFetch = new Vector();
         System.out.println("params    " + paramsFakeFetch);
         Object vecFakeFetch = (Object) callWebserviceLite("fake_fetch",paramsFakeFetch);
@@ -105,17 +152,12 @@
         Vector paramsFetch = new Vector();
         paramsFetch.addElement("interactions_byATC");
         Vector key=new Vector();
-
         //key= ['B01AA03', 'D10AF52', 'C10BX02', 'A12AX', 'H02AB07', 'B01AA03', 'M04AA01', 'C09DA01', 'C09AA01']
+        key.addElement("D01AC08");
+        key.addElement("J01FA01");
         key.addElement("B01AA03");
-        key.addElement("D10AF52");
-        key.addElement("C10BX02");
-        key.addElement("A12AX");
-        key.addElement("H02AB07");
         key.addElement("B01AA03");
-        key.addElement("M04AA01");
-        key.addElement("C09DA01");
-        key.addElement("C09AA01");
+        key.addElement("S01AA17");
 
         paramsFetch.addElement(key);
         //
@@ -127,6 +169,30 @@
         Object vecFetch = (Object) callWebserviceLite("fetch",paramsFetch);
         System.out.println("vec " + vecFetch);
         out.write("getFetch : " + vecFetch + "\n");
+
+
+   /*    Vector paramsFetch = new Vector();
+        paramsFetch.addElement("warnings_byATC,bulletins_byATC,interactions_byATC,get_guidelines");
+        Vector key=new Vector();
+
+        //key= [D01AC08, J01FA01, B01AA03]
+        key.addElement("D01AC08");
+        key.addElement("J01FA01");
+        key.addElement("B01AA03");
+
+        paramsFetch.addElement(key);
+        paramsFetch.addElement("jaygallagher@gmail.com");
+        //
+        //Vector services=new Vector();
+        //boolean b=true;
+        //paramsFetch.addElement(services);
+        //paramsFetch.addElement(b);
+        System.out.println("params    " + paramsFetch.toString());
+        Object vecFetch = (Object) callWebserviceLite("fetch",paramsFetch);
+        System.out.println("vec " + vecFetch);
+        out.write("getFetch : " + vecFetch + "\n");
+*/
+
         %>
 
     </body>
