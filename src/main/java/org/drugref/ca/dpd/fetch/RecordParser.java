@@ -47,7 +47,7 @@ import org.drugref.ca.dpd.CdRoute;
 import org.drugref.ca.dpd.CdSchedule;
 import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.drugref.ca.dpd.Interactions;
-import org.drugref.util.ConfigUtils;
+import org.drugref.util.DrugrefProperties;
 
 /**
  *
@@ -207,6 +207,7 @@ public class RecordParser {
             }
             InputStream ins = new ByteArrayInputStream(str.getBytes("UTF-8"));
             CSVParser csv2 = new CSVParser(ins);
+            DrugrefProperties dp=DrugrefProperties.getInstance();
             while ((items = csv2.getLine()) != null) {
                 //System.out.println(looksLike(items));
                 CdDrugProduct prod = new CdDrugProduct();
@@ -226,7 +227,8 @@ public class RecordParser {
                 prod.setNumberOfAis(items[7]);
                 prod.setLastUpdateDate(getDate(items[8]));
                 prod.setAiGroupNo(items[9]);
-                String all_drug_classes = ConfigUtils.getProperty("all_drug_classes");
+                
+                String all_drug_classes = dp.getAllDrugClasses();    //getProperty("all_drug_classes");
 
                 if("HUMAN".equals(prod.getClass1()) || ("YES".equalsIgnoreCase(all_drug_classes))  ){
                 em.persist(prod);
