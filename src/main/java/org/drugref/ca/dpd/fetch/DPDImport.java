@@ -39,7 +39,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
-import org.drugref.util.ConfigUtils;
+import org.drugref.util.DrugrefProperties;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.MiscUtils;
 
@@ -92,9 +92,10 @@ public class DPDImport {
     private boolean isTablePresent(String tableName) {//check if a table exists in the database
         boolean bool = false;
         Connection con = null;
-        String dbURL = ConfigUtils.getProperty("db_url");
-        String dbUser = ConfigUtils.getProperty("db_user");
-        String dbPassword = ConfigUtils.getProperty("db_password");
+        DrugrefProperties dp=DrugrefProperties.getInstance();
+        String dbURL = dp.getDbUrl();
+        String dbUser = dp.getDbUser();
+        String dbPassword = dp.getDbPassword();
 
         try {
             con = DriverManager.getConnection(dbURL, dbUser, dbPassword);
