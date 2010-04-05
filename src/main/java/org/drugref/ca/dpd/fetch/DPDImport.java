@@ -157,6 +157,11 @@ public class DPDImport {
        arrList.add("create index  cd_schedule_drug_code_idx on     cd_schedule(drug_code);");
        arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
        arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
+       //add indexing to every column in cd_drug_search
+       arrList.add("create index  cd_drug_search_id_idx on  cd_drug_search(id);");
+       arrList.add("create index  cd_drug_search_drug_code_idx on cd_drug_search(drug_code);");
+       arrList.add("create index  cd_drug_search_category_idx on cd_drug_search(category);");
+       arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name);");
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
@@ -285,17 +290,13 @@ public class DPDImport {
             insertLines(entityManager, getCreateSearchTables());
 
             tx.commit();
-
-            ConfigureSearchData searchData = new ConfigureSearchData();
-            //import search data
-            searchData.importSearchData(entityManager);
-            System.out.println("committing");
-            //tx.commit();
-
-            tx.begin();
             //add indexes to tables.
+            tx.begin();
             insertLines(entityManager, addIndexToTables());
             tx.commit();
+            //import search data
+            ConfigureSearchData searchData = new ConfigureSearchData();            
+            searchData.importSearchData(entityManager);       
 
         } finally {
             
