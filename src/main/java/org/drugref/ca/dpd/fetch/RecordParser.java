@@ -230,10 +230,11 @@ public class RecordParser {
                 
                 String all_drug_classes = dp.getAllDrugClasses();    //getProperty("all_drug_classes");
 
-                if("HUMAN".equals(prod.getClass1()) || ("YES".equalsIgnoreCase(all_drug_classes))  ){
-                em.persist(prod);
-                em.flush();
-                em.clear();
+                if("HUMAN".equalsIgnoreCase(prod.getClass1()) || ("YES".equalsIgnoreCase(all_drug_classes))  ){
+                    //p("true if in cdp");
+                    em.persist(prod);
+                    em.flush();
+                    em.clear();
                 }
                 prod = null;
 
