@@ -32,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -128,7 +129,7 @@ public class DPDImport {
         arrList.add("CREATE TABLE  cd_companies  (id serial  PRIMARY KEY,   drug_code   int default NULL,   mfr_code  varchar(5) default NULL,   company_code   int default NULL,   company_name  varchar(80) default NULL,   company_type  varchar(40) default NULL,   address_mailing_flag  char(1) default NULL,   address_billing_flag  char(1) default NULL,   address_notification_flag  char(1) default NULL,   address_other  varchar(20) default NULL,   suite_number  varchar(20) default NULL,   street_name  varchar(80) default NULL,   city_name  varchar(60) default NULL,   province  varchar(40) default NULL,   country  varchar(40) default NULL,   postal_code  varchar(20) default NULL,   post_office_box  varchar(15) default NULL);");
         arrList.add("CREATE TABLE  cd_active_ingredients  ( id serial  PRIMARY KEY,  drug_code   int default NULL,   active_ingredient_code   int default NULL,   ingredient  varchar(240) default NULL,   ingredient_supplied_ind  char(1) default NULL,   strength  varchar(20) default NULL,   strength_unit  varchar(40) default NULL,   strength_type  varchar(40) default NULL,   dosage_value  varchar(20) default NULL,   base  char(1) default NULL,   dosage_unit  varchar(40) default NULL,   notes  text);");
         arrList.add("CREATE TABLE  cd_drug_status  (id serial  PRIMARY KEY,   drug_code   int default NULL,   current_status_flag  char(1) default NULL,   status  varchar(40) default NULL,   history_date  date default NULL);");
-        arrList.add("CREATE TABLE  cd_form  (id serial  PRIMARY KEY,   drug_code   int default NULL,   pharm_cd_form_code   int default NULL,   pharmaceutical_cd_form  varchar(40) default NULL);");
+        arrList.add("CREATE TABLE  cd_form  (id serial  PRIMARY KEY,   drug_code   int default NULL,   pharm_cd_form_code   int default NULL,   pharmaceutical_cd_form  varchar(65) default NULL);");
         arrList.add("CREATE TABLE  cd_inactive_products  (id serial  PRIMARY KEY,   drug_code   int default NULL,   drug_identification_number  varchar(8) default NULL,   brand_name  varchar(200) default NULL,   history_date  date default NULL);");
         arrList.add("CREATE TABLE  cd_packaging  (id serial  PRIMARY KEY,   drug_code   int default NULL,   upc  varchar(12) default NULL,   package_size_unit  varchar(40) default NULL,   package_type  varchar(40) default NULL,   package_size  varchar(5) default NULL,   product_inforation  varchar(80) default NULL);");
         arrList.add("CREATE TABLE  cd_pharmaceutical_std  (id serial  PRIMARY KEY,   drug_code   int default NULL,   pharmaceutical_std  varchar(40) default NULL);");
@@ -157,16 +158,23 @@ public class DPDImport {
        arrList.add("create index  cd_schedule_drug_code_idx on     cd_schedule(drug_code);");
        arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
        arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
-       //add indexing to every column in cd_drug_search
-       arrList.add("create index  cd_drug_search_id_idx on  cd_drug_search(id);");
-       arrList.add("create index  cd_drug_search_drug_code_idx on cd_drug_search(drug_code);");
-       arrList.add("create index  cd_drug_search_category_idx on cd_drug_search(category);");
-       arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name);");
+       
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
         arrList.add("update cd_drug_product set company_code=(select company_code from cd_companies where cd_companies.drug_code =  cd_drug_product.drug_code);");
         return arrList;
+    }
+
+    public List addIndexToSearchTable(){
+        List<String> arrList = new ArrayList();
+        //add indexing to every column in cd_drug_search
+       arrList.add("create index  cd_drug_search_id_idx on  cd_drug_search(id);");
+       arrList.add("create index  cd_drug_search_drug_code_idx on cd_drug_search(drug_code);");
+       arrList.add("create index  cd_drug_search_category_idx on cd_drug_search(category);");
+       arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name);");
+       return arrList;
+
     }
 
     public List dropSearchTables() {
@@ -230,8 +238,9 @@ public class DPDImport {
         EntityManager entityManager = JpaUtils.createEntityManager();
         try {
             EntityTransaction tx = entityManager.getTransaction();
+            //p("%%1",""+tx.isActive());
             tx.begin();
-
+            //p("%%2",""+tx.isActive());
             //drop tables only if they exist
             if (!getDPDTablesDrop().isEmpty()) {//if some tables are present
                 p("tables exist");
@@ -240,8 +249,9 @@ public class DPDImport {
             insertLines(entityManager, getDPDTables());
 
             tx.commit();
+            //p("%%3",""+tx.isActive());
             RecordParser recordParse = new RecordParser();
-            try {
+           try {
                 ZipInputStream zipStream = getZipStream();
                 ZipEntry ze = null;
                 while ((ze = zipStream.getNextEntry()) != null) {
@@ -271,16 +281,28 @@ public class DPDImport {
                 p("populate interactions table with data");
 
                 // Stream to read file
-                    String url="/interactions-holbrook.txt";
-                    InputStream ins=getClass().getResourceAsStream(url);
+                   String url="/interactions-holbrook.txt";
+                    InputStream ins=this.getClass().getResourceAsStream(url);
                     if (ins==null) System.out.println("ins is null");
                     recordParse.getDPDObject("interactions-holbrook.txt",ins,entityManager);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            tx.begin();
-
+            //p("%%4",""+tx.isActive());
+            try{
+                tx.begin();
+            }
+            catch(org.apache.openjpa.persistence.InvalidStateException ise){
+                ise.printStackTrace();
+            }
+            catch(java.lang.IllegalStateException ee){
+                ee.printStackTrace();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            
             //drop tables only if they exist
             if (!dropSearchTables().isEmpty()) {
                 insertLines(entityManager, dropSearchTables());
@@ -296,7 +318,12 @@ public class DPDImport {
             tx.commit();
             //import search data
             ConfigureSearchData searchData = new ConfigureSearchData();            
-            searchData.importSearchData(entityManager);       
+            searchData.importSearchData(entityManager);
+
+            tx.begin();
+            insertLines(entityManager, addIndexToSearchTable());
+            tx.commit();
+
 
         } finally {
             
@@ -305,7 +332,62 @@ public class DPDImport {
         }
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
+    }
+    public HashMap numberTableRows(){
+        EntityManager em=JpaUtils.createEntityManager();
+        HashMap hm=new HashMap();
+        List<String> tableNames=new ArrayList();
+        tableNames.add("CdActiveIngredients");
+        tableNames.add("CdCompanies");
+        tableNames.add("CdDrugProduct");
+        tableNames.add("CdDrugSearch");
+        tableNames.add("CdDrugStatus");
+        tableNames.add("CdForm");
+        tableNames.add("CdInactiveProducts");
+        tableNames.add("CdPackaging");
+        tableNames.add("CdPharmaceuticalStd");
+        tableNames.add("CdRoute");
+        tableNames.add("CdSchedule");
+        tableNames.add("CdTherapeuticClass");
+        tableNames.add("CdVeterinarySpecies");
+        tableNames.add("Interactions");
+        tableNames.add("LinkGenericBrand");
+        for(String s:numberRowsQuery()){
+            Query sql=em.createQuery(s);
+            String tablename="";
+            for(String ss:tableNames){
+                if(s.contains(ss))
+                    tablename=ss;
+            }
+            List<Long> l = sql.getResultList();
+            Long n=0L;
+            for(Long i:l){
+                n=i;
+            }
+            hm.put(tablename, n);
+        }
+        JpaUtils.close(em);
+        return hm;
+    }
 
+    private List<String> numberRowsQuery(){
+        List<String> retList=new ArrayList();
+        retList.add("select count(t) from CdActiveIngredients t");
+        retList.add("select count(t) from CdCompanies t");
+        retList.add("select count(t) from CdDrugProduct t");
+        retList.add("select count(t) from CdDrugSearch t");
+        retList.add("select count(t) from CdDrugStatus t");
+        retList.add("select count(t) from CdForm t");
+        retList.add("select count(t) from CdInactiveProducts t");
+        retList.add("select count(t) from CdPackaging t");
+        retList.add("select count(t) from CdPharmaceuticalStd t");
+        retList.add("select count(t) from CdRoute t");
+        retList.add("select count(t) from CdSchedule t");
+        retList.add("select count(t) from CdTherapeuticClass t");
+        retList.add("select count(t) from CdVeterinarySpecies t");
+        retList.add("select count(t) from Interactions t");
+        retList.add("select count(t) from LinkGenericBrand t");
+        return retList;
     }
 }
 //    private static final Localizer _loc = Localizer.forPackage(DPDImport.class);
