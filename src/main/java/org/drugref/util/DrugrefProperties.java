@@ -54,8 +54,8 @@ public class DrugrefProperties extends Properties{
             Enumeration em=drugrefProperties.propertyNames();
             while(em.hasMoreElements()){
                 String ss=(String)em.nextElement();
-                System.out.println("property="+ss);
-                System.out.println("value="+drugrefProperties.getProperty(ss));
+                //System.out.println("property="+ss);
+                //System.out.println("value="+drugrefProperties.getProperty(ss));
 
         }
 		return drugrefProperties;
@@ -115,6 +115,18 @@ public class DrugrefProperties extends Properties{
             return getProperty("all_drug_classes");
         }
 
+        public boolean isMysql(){
+            if(getDbUrl().contains("mysql"))
+                return true;
+            else
+                return false;
+        }
+        public boolean isPostgres(){
+            if(getDbUrl().contains("postgresql"))
+                return true;
+            else
+                return false;
+        }
 
 }
 
