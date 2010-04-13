@@ -549,8 +549,7 @@ public class TablesDao {
         str = str.replace("'", "");
         String[] strArray = str.split("\\s+");
 
-        for (int i = 0; i <
-                strArray.length; i++) {
+        for (int i = 0; i < strArray.length; i++) {
             System.out.println(strArray[i]);
         }
 
@@ -1360,6 +1359,7 @@ public class TablesDao {
             ha2.put("components", component);
 
             returnRows.addElement(ha2);
+           // System.out.println("returned when cat=13:"+returnRows);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -1458,7 +1458,10 @@ public class TablesDao {
                             resultComponent.get(i).getStrengthUnit();
                     Hashtable ha = new Hashtable();
                     ha.put("name", ingredient);
-                    ha.put("strength", Float.valueOf(strength.trim()).floatValue());
+                    if(strength.trim().length()>0)
+                        ha.put("strength", Float.valueOf(strength.trim()).floatValue());
+                    else
+                        ha.put("strength", 0f);
                     ha.put("unit", strengthUnit);
                     component.addElement(ha);
                 }
