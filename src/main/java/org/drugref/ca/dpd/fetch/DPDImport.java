@@ -172,7 +172,11 @@ public class DPDImport {
        arrList.add("create index  cd_drug_search_id_idx on  cd_drug_search(id);");
        arrList.add("create index  cd_drug_search_drug_code_idx on cd_drug_search(drug_code);");
        arrList.add("create index  cd_drug_search_category_idx on cd_drug_search(category);");
-       arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name);");
+       DrugrefProperties dp=DrugrefProperties.getInstance();
+       if(dp.isPostgres())
+            arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name);");
+       else if(dp.isMysql())
+            arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name(70));");
        return arrList;
 
     }
