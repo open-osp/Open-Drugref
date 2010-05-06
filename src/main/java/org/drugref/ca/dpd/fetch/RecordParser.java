@@ -222,11 +222,12 @@ public class RecordParser {
                 prod.setCompanyCode(0);
                 prod.setDrugIdentificationNumber(items[3]);
                 prod.setBrandName(items[4]);
-                prod.setGpFlag(items[5]);//.charAt(0));
-                prod.setAccessionNumber(items[6]);
-                prod.setNumberOfAis(items[7]);
-                prod.setLastUpdateDate(getDate(items[8]));
-                prod.setAiGroupNo(items[9]);
+                prod.setDescriptor(items[5]);
+                prod.setPediatricFlag(items[6]);//.charAt(0));
+                prod.setAccessionNumber(items[7]);
+                prod.setNumberOfAis(items[8]);
+                prod.setLastUpdateDate(getDate(items[9]));
+                prod.setAiGroupNo(items[10]);
                 
                 String all_drug_classes = dp.getAllDrugClasses();    //getProperty("all_drug_classes");
 
