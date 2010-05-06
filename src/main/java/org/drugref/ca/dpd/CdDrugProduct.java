@@ -44,7 +44,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "cd_drug_product", catalog = "drugref2")
-@NamedQueries({@NamedQuery(name = "CdDrugProduct.findAll", query = "SELECT c FROM CdDrugProduct c"), @NamedQuery(name = "CdDrugProduct.findByDrugCode", query = "SELECT c FROM CdDrugProduct c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdDrugProduct.findByProductCategorization", query = "SELECT c FROM CdDrugProduct c WHERE c.productCategorization = :productCategorization"), @NamedQuery(name = "CdDrugProduct.findByClass1", query = "SELECT c FROM CdDrugProduct c WHERE c.class1 = :class1"), @NamedQuery(name = "CdDrugProduct.findByDrugIdentificationNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.drugIdentificationNumber = :drugIdentificationNumber"), @NamedQuery(name = "CdDrugProduct.findByBrandName", query = "SELECT c FROM CdDrugProduct c WHERE c.brandName = :brandName"), @NamedQuery(name = "CdDrugProduct.findByGpFlag", query = "SELECT c FROM CdDrugProduct c WHERE c.gpFlag = :gpFlag"), @NamedQuery(name = "CdDrugProduct.findByAccessionNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.accessionNumber = :accessionNumber"), @NamedQuery(name = "CdDrugProduct.findByNumberOfAis", query = "SELECT c FROM CdDrugProduct c WHERE c.numberOfAis = :numberOfAis"), @NamedQuery(name = "CdDrugProduct.findByLastUpdateDate", query = "SELECT c FROM CdDrugProduct c WHERE c.lastUpdateDate = :lastUpdateDate"), @NamedQuery(name = "CdDrugProduct.findByAiGroupNo", query = "SELECT c FROM CdDrugProduct c WHERE c.aiGroupNo = :aiGroupNo"), @NamedQuery(name = "CdDrugProduct.findByCompanyCode", query = "SELECT c FROM CdDrugProduct c WHERE c.companyCode = :companyCode"), @NamedQuery(name = "CdDrugProduct.findById", query = "SELECT c FROM CdDrugProduct c WHERE c.id = :id")})
+@NamedQueries({@NamedQuery(name = "CdDrugProduct.findAll", query = "SELECT c FROM CdDrugProduct c"), @NamedQuery(name = "CdDrugProduct.findByDrugCode", query = "SELECT c FROM CdDrugProduct c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdDrugProduct.findByProductCategorization", query = "SELECT c FROM CdDrugProduct c WHERE c.productCategorization = :productCategorization"), @NamedQuery(name = "CdDrugProduct.findByClass1", query = "SELECT c FROM CdDrugProduct c WHERE c.class1 = :class1"), @NamedQuery(name = "CdDrugProduct.findByDrugIdentificationNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.drugIdentificationNumber = :drugIdentificationNumber"), @NamedQuery(name = "CdDrugProduct.findByBrandName", query = "SELECT c FROM CdDrugProduct c WHERE c.brandName = :brandName"), @NamedQuery(name = "CdDrugProduct.findByPediatricFlag", query = "SELECT c FROM CdDrugProduct c WHERE c.pediatricFlag = :pediatricFlag"), @NamedQuery(name = "CdDrugProduct.findByAccessionNumber", query = "SELECT c FROM CdDrugProduct c WHERE c.accessionNumber = :accessionNumber"), @NamedQuery(name = "CdDrugProduct.findByNumberOfAis", query = "SELECT c FROM CdDrugProduct c WHERE c.numberOfAis = :numberOfAis"), @NamedQuery(name = "CdDrugProduct.findByLastUpdateDate", query = "SELECT c FROM CdDrugProduct c WHERE c.lastUpdateDate = :lastUpdateDate"), @NamedQuery(name = "CdDrugProduct.findByAiGroupNo", query = "SELECT c FROM CdDrugProduct c WHERE c.aiGroupNo = :aiGroupNo"), @NamedQuery(name = "CdDrugProduct.findByCompanyCode", query = "SELECT c FROM CdDrugProduct c WHERE c.companyCode = :companyCode"), @NamedQuery(name = "CdDrugProduct.findById", query = "SELECT c FROM CdDrugProduct c WHERE c.id = :id")})
 public class CdDrugProduct implements Serializable {
     private static final long serialVersionUID = 1L;
     @Column(name = "drug_code")
@@ -57,8 +57,10 @@ public class CdDrugProduct implements Serializable {
     private String drugIdentificationNumber;
     @Column(name = "brand_name", length = 200)
     private String brandName;
-    @Column(name = "gp_flag")
-    private String gpFlag;
+    @Column(name="descriptor",length=150)
+    private String descriptor;
+    @Column(name = "pediatric_flag")
+    private String pediatricFlag;
     @Column(name = "accession_number", length = 5)
     private String accessionNumber;
     @Column(name = "number_of_ais", length = 10)
@@ -122,12 +124,20 @@ public class CdDrugProduct implements Serializable {
         this.brandName = brandName;
     }
 
-    public String getGpFlag() {
-        return gpFlag;
+    public String getDescriptor(){
+        return descriptor;
     }
 
-    public void setGpFlag(String gpFlag) {
-        this.gpFlag = gpFlag;
+    public void setDescriptor(String descriptor){
+        this.descriptor=descriptor;
+    }
+
+    public String getPediatricFlag() {
+        return pediatricFlag;
+    }
+
+    public void setPediatricFlag(String pediatricFlag) {
+        this.pediatricFlag = pediatricFlag;
     }
 
     public String getAccessionNumber() {
