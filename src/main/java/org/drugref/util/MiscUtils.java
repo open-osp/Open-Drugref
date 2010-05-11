@@ -20,6 +20,8 @@ package org.drugref.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 /**
@@ -53,6 +55,26 @@ public class MiscUtils {
     		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
     		String caller = ste[2].getClassName();
     		return(Logger.getLogger(caller));
+    }
+
+    public static boolean isStringToInteger(String s){
+        if(s==null) return false;
+
+        boolean retBool=false;
+        Pattern p1=Pattern.compile("\\d+");
+        Matcher m1=p1.matcher(s);
+        if(m1.find()){
+            String numStr=s.substring(m1.start(), m1.end());
+            String restStr=s.replace(numStr, "").trim();
+            if(restStr!=null&&restStr.length()>0)
+                retBool=false;
+            else
+                retBool=true;
+        }else
+            retBool=false;
+
+        return retBool;
+
     }
 
 
