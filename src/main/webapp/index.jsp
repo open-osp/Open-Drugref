@@ -26,7 +26,7 @@ if (request.getParameter("searchVal") != null){
 
 Vector params = new Vector();
 params.addElement(request.getParameter("searchVal"));
-Object obj = callWebserviceLite("list_search_element2",params);
+Object obj = callWebserviceLite("list_search_element3",params);
 System.out.println("obj "+obj.getClass().getName());
 
 if(obj instanceof org.apache.xmlrpc.XmlRpcException){
