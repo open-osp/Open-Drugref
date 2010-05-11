@@ -26,11 +26,9 @@ package org.drugref.ca.dpd;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -57,6 +55,7 @@ public class TablesDao {
     private String db;
     private String user;
     private String pwd;
+    private List<Integer> inactiveDrugs=new ArrayList();
 
     public TablesDao() {
         p("=========start tablesdao constructor======");
@@ -113,7 +112,7 @@ public class TablesDao {
                 this.provided.put(provided, nameVec);
                 p("in constructor exception");
             }
-        }
+        }        
         p("value of this.plugin after constructor", this.plugins.toString());
         p("value of this.provided after constructor", this.provided.toString());
         p("=========end tablesdao constructor======");
@@ -260,6 +259,28 @@ public class TablesDao {
     //   public get(String attribute, String key){
 //
     //   }
+    
+    //write inactiveDrugs hashtable
+    public List<Integer> getInactiveDrugs(){
+        List<Integer> retLs=new ArrayList();
+        EntityManager em=JpaUtils.createEntityManager();
+        try{
+            String sql="select cip from CdInactiveProducts cip";
+            Query q=em.createQuery(sql);
+            List<CdInactiveProducts> list=q.getResultList();
+            if(list!=null && list.size()>0){
+                for(CdInactiveProducts cip:list){
+                    retLs.add(cip.getDrugCode());
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally{
+            JpaUtils.close(em);
+        }
+        return retLs;
+    }
+
     //using drugcode find din and atc codes
     public CdDrugProduct getDrugProduct(String drugcode) {
         EntityManager em = JpaUtils.createEntityManager();
@@ -542,6 +563,9 @@ public class TablesDao {
 
     public Vector listSearchElement3(String str) {
         System.out.println("before create em in listSearchElement3");
+        if(inactiveDrugs.size()==0)
+            inactiveDrugs=getInactiveDrugs();
+        System.out.println("inactiveDrugs size ="+inactiveDrugs.size());
         EntityManager em = JpaUtils.createEntityManager();
         //System.out.println("created entity manager");
 
@@ -579,41 +603,53 @@ public class TablesDao {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            JpaUtils.close(em);
-        }
+        } 
 
         if (results.size() > 0) {
             ArrayList drugCodeList = new ArrayList();
             System.out.println("Looping results  updated in 3");
 
             Vector vec = new Vector();
-            for (CdDrugSearch result : results) {
-                //for (int i = 0; i < results.size(); i++) {
-                if (result.getName().startsWith("APO-") || result.getName().startsWith("NOVO-") || result.getName().startsWith("MYLAN-")) {
-                    /*
-                    APO-
-                    DOM-
-                    NOVO-
-                    PHL-
-                    PMS-
-                    RAN-
-                    RATIO-
-                    TARO-
-                     */
-                    continue;
+        try{
+               for (CdDrugSearch result : results) {
+                    //for (int i = 0; i < results.size(); i++) {
+                    if (result.getName().startsWith("APO-") || result.getName().startsWith("NOVO-") || result.getName().startsWith("MYLAN-")) {
+                        /*
+                        APO-
+                        DOM-
+                        NOVO-
+                        PHL-
+                        PMS-
+                        RAN-
+                        RATIO-
+                        TARO-
+                         */
+                        continue;
+                    }
+                    if (result.getCategory() == 13 || result.getCategory() == 18 || result.getCategory() == 19) {
+                        boolean isInactive=false;
+                        String drugCode=result.getDrugCode();
+                        if(MiscUtils.isStringToInteger(drugCode)){
+                            //check if result is inactive.
+                            if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
+                                    isInactive=true;
+                        }
+                        Hashtable ha = new Hashtable();
+                        ha.put("name", result.getName());
+                        ha.put("category", result.getCategory());
+                        ha.put("id", result.getId());
+                        ha.put("isInactive", isInactive);
+                        vec.addElement(ha);
+                    }
                 }
-                if (result.getCategory() == 13 || result.getCategory() == 18 || result.getCategory() == 19) {
-                    Hashtable ha = new Hashtable();
-                    ha.put("name", result.getName());// results.get(i).getName());
-                    ha.put("category", result.getCategory());   //get(i).getCategory());
-                    ha.put("id", result.getId());//get(i).getId());
-                    vec.addElement(ha);
+                System.out.println("NUMBER OF DRUGS RETURNED: " + vec.size());
+                for (int i = 0; i < vec.size(); i++) {
+                    System.out.println("vec=" + vec.get(i));
                 }
-            }
-
-            for (int i = 0; i < vec.size(); i++) {
-                System.out.println("vec=" + vec.get(i));
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                JpaUtils.close(em);
             }
             return (vec);
         } else {
