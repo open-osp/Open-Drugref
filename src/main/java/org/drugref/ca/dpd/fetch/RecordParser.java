@@ -108,7 +108,12 @@ public class RecordParser {
         String[] items = null;
         EntityTransaction tx = em.getTransaction();
         tx.begin();
-
+        long start=System.currentTimeMillis();
+        //System.out.println(csv.getLine());
+       //System.out.println(csv.getLine().length);
+        //if(csv.getLine().length>0)
+          //  System.out.println(csv.getLine()[0]);
+        
         if ("vet.txt".equals(type) || "vet_ia.txt".equals(type)) {
 
             while ((items = csv.getLine()) != null) {
@@ -141,9 +146,10 @@ public class RecordParser {
 
             InputStream ins = new ByteArrayInputStream(str.getBytes("UTF-8"));
             CSVParser csv2 = new CSVParser(ins);
-
+            int count=0;
             while ((items = csv2.getLine()) != null) {
-                // System.out.println(looksLike(items));
+                //System.out.println("reading comps,line number="+count);
+                //System.out.println(looksLike(items));
                 CdCompanies vet = new CdCompanies();
                 /*
                 DRUG_CODE                              NOT NULL  NUMBER(8)
@@ -189,6 +195,7 @@ public class RecordParser {
                 em.flush();
                 em.clear();
                 vet = null;
+                count++;
             }
         } else if ("drug.txt".equals(type) || "drug_ia.txt".equals(type)) {
             //change encoding from ISO-8859-1 to UTF-8
@@ -352,7 +359,7 @@ public class RecordParser {
             ROUTE_OF_ADMINISTRATION                          VARCHAR2(40)
              */
             while ((items = csv.getLine()) != null) {
-                //   System.out.println(looksLike(items));
+                //System.out.println(looksLike(items));
                 CdRoute vet = new CdRoute();
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setRouteOfAdministrationCode(new Integer(items[1]));
@@ -432,13 +439,7 @@ public class RecordParser {
             }
 
         }else if("interactions-holbrook.txt".equals(type)){
-            //put data into interactions table.
-            //p(is.toString());
            while ((items = csv.getLine()) != null) {
-           //     for(String s:items){
-           //         System.out.print(s+"--");
-           //     }
-             //   p("");
                 Interactions inter = new Interactions();
                 inter.setId(Integer.parseInt(items[0]));
                 inter.setAffectingatc(items[1]);
@@ -455,7 +456,8 @@ public class RecordParser {
             }
         }
         tx.commit();
-
+        long end=System.currentTimeMillis();
+        System.out.println("========time spent on type "+type+" is "+(end-start));
         return null;
     }
 }
