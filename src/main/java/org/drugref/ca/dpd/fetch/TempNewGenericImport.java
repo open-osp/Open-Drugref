@@ -46,13 +46,13 @@ public class TempNewGenericImport {
         Long l=nt.run();
         System.out.println("***time spent="+l);
     }
-    public void p(String str, String s) {
+    /*public void p(String str, String s) {
         System.out.println(str + "=" + s);
     }
 
     public void p(String str) {
         System.out.println(str);
-    }
+    }*/
      public long run() {
         long startTime = System.currentTimeMillis();
          int coumpoundsWGeneric = 0;
@@ -101,7 +101,7 @@ public class TempNewGenericImport {
                             first = false;
                         }
                         sb.append(" "+form);
-                        System.out.println("*"+aiNum+" "+sb.toString());
+                        //System.out.println("*"+aiNum+" "+sb.toString());
                         CdDrugSearch drugSearch = new CdDrugSearch();
                          drugSearch.setName(sb.toString());
                          drugSearch.setDrugCode(aiNum+"+"+formCode);
