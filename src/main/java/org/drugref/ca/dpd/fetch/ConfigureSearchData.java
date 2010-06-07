@@ -43,25 +43,32 @@ import org.drugref.ca.dpd.LinkGenericBrand;
 public class ConfigureSearchData {
    
     public void importSearchData(EntityManager em){
+        long startBN=System.currentTimeMillis();
         ////Importing Brand Information
         importAllBrandName(em);
-        
+        long afterBN=System.currentTimeMillis();
+        System.out.println("============time import BN="+(afterBN-startBN));
         ////print "Import ATC Names"
         importAllATCCodeName(em);
-
+        long afterATC=System.currentTimeMillis();
+        System.out.println("============time import ATC="+(afterATC-afterBN));
         ////Import AFHC Names
         importAllAHFSCodeName(em);
-
+        long afterAHFS=System.currentTimeMillis();
+        System.out.println("============time import AHFS="+(afterAHFS-afterATC));
         ////Import Generic Data
         importGenerics(em);
-        
+        long afterGenerics=System.currentTimeMillis();
+        System.out.println("============time import Generics="+(afterGenerics-afterAHFS));
         ////Import Ingredients
         importAllIngredients(em);
-
+        long afterIngredients=System.currentTimeMillis();
+        System.out.println("============time import Ingredients="+(afterIngredients-afterGenerics));
 
         ////Cleaning up Search Names
         cleanUpSearchNames(em);
-
+        long afterClean=System.currentTimeMillis();
+        System.out.println("============time  Clean="+(afterClean-afterIngredients));
 
         
         //print "Should check for duplicates and ones that need forms and strength added ie ones from generic companys with the form and strength is not included in the name"
@@ -109,7 +116,7 @@ public class ConfigureSearchData {
             em.clear();
             
         }
-        p("DONE Import Brand Name");
+        System.out.println("DONE Import Brand Name");
         tx.commit();
       }
 
@@ -177,13 +184,13 @@ public class ConfigureSearchData {
 
         */
 
-           public void p(String str, String s) {
+       /*    public void p(String str, String s) {
         System.out.println(str + "=" + s);
     }
 
     public void p(String str) {
         System.out.println(str);
-    }
+    }*/
        public void importAllAHFSCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
