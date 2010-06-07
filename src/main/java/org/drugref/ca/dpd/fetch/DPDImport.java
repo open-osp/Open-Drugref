@@ -259,8 +259,16 @@ public class DPDImport {
                 ZipInputStream zipStream = getZipStream();
                 ZipEntry ze = null;
                 while ((ze = zipStream.getNextEntry()) != null) {
-                    System.out.println("Files being open " + ze.getName());
-                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
+                    String fn=ze.getName();
+                    System.out.println("Files being open " + fn);
+                    if(fn.contains("zip")){
+                        ZipInputStream zis=new ZipInputStream(zipStream);
+                        ZipEntry z=zis.getNextEntry();//assume contains only one file
+                        System.out.println("unzipped="+z.getName());
+                        recordParse.getDPDObject(z.getName(), zis, entityManager);
+                    }
+                    else
+                        recordParse.getDPDObject(fn,zipStream,entityManager);
                     //entityManager.flush();
                 }
 
@@ -269,6 +277,14 @@ public class DPDImport {
                 ze = null;
                 while ((ze = zipStream.getNextEntry()) != null) {
                     System.out.println("Files being open " + ze.getName());
+                    String fn=ze.getName();
+                    if(fn.contains("zip")){
+                        ZipInputStream zis=new ZipInputStream(zipStream);
+                        ZipEntry z=zis.getNextEntry();//assume contains only one file
+                        System.out.println("unzipped="+z.getName());
+                        recordParse.getDPDObject(z.getName(), zis, entityManager);
+                    }
+                    else
                     recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
                     //entityManager.flush();
                 }
@@ -321,7 +337,9 @@ public class DPDImport {
             insertLines(entityManager, addIndexToTables());
             tx.commit();
             //import search data
-            ConfigureSearchData searchData = new ConfigureSearchData();            
+            ConfigureSearchData searchData = new ConfigureSearchData();
+            long beforeSD=System.currentTimeMillis();
+            System.out.println("=============time spent before importing search data="+(beforeSD-startTime));
             searchData.importSearchData(entityManager);
 
             tx.begin();
@@ -394,159 +412,3 @@ public class DPDImport {
         return retList;
     }
 }
-//    private static final Localizer _loc = Localizer.forPackage(DPDImport.class);
-//    //(MappingToolTask.class);
-//    protected MappingTool.Flags flags = new MappingTool.Flags();
-//    public void executeOn(String[] files)
-//            throws Exception {
-//        //if (MappingTool.ACTION_IMPORT.equals(flags.action))
-//        //    assertFiles(files);
-//        StringWriter sWriter = new StringWriter();
-//        ClassLoader toolLoader = AccessController.doPrivileged(J2DoPrivHelper.getClassLoaderAction(MappingTool.class));
-//        ClassLoader loader = toolLoader;
-//        MultiLoaderClassResolver resolver = new MultiLoaderClassResolver();
-//
-//        String file = new String("/Users/jaygallagher/dd.dd");
-//
-//        String schemaFile = new String("/Users/jaygallagher/schemaFiledd.dd");
-//        String sqlFile = new String("/Users/jaygallagher/sqlFiledd.dd");
-//
-//
-//        resolver.addClassLoader(this.getClass().getClassLoader());
-//        //if (tmpClassLoader) {
-////            loader = AccessController.doPrivileged(J2DoPrivHelper
-////                    .newTemporaryClassLoaderAction(getClassLoader()));
-////            resolver.addClassLoader(loader);
-//        //}
-//        resolver.addClassLoader(toolLoader);
-//
-//        if (flags.meta && MappingTool.ACTION_ADD.equals(flags.action)) {
-//            flags.metaDataFile = Files.getFile(file, loader);
-//        } else {
-//            flags.mappingWriter = Files.getWriter(file, loader);
-//        }
-//
-//        flags.schemaWriter = Files.getWriter(schemaFile, loader);
-//        flags.sqlWriter = Files.getWriter(sqlFile, loader);
-//
-//        //JDBCConfiguration conf = (JDBCConfiguration) newConfiguration();
-//        //conf.setClassResolver(resolver);
-//
-//        //System.out.println(SpringUtils.getBean("JDBCConfiguration").getClass().getName());
-//
-//        JDBCConfiguration conf = new JDBCConfigurationImpl();//;(JDBCConfigurationImpl)super.newConfiguration();
-//
-//        //conf.setConnectionDriverName(ConfigUtils.getProperty("db_driver"));
-//        //conf.setConnectionURL(ConfigUtils.getProperty("db_url"));
-//        //conf.setConnectionUserName(ConfigUtils.getProperty("db_user"));
-//        //conf.setConnectionPassword(ConfigUtils.getProperty("db_password"));
-//
-//
-//        //MetaDataRepository repo = conf.getMetaDataRepositoryInstance(); //.getMetaDataFactory().;
-//        //repo.endConfiguration();
-//        conf.setClassResolver(resolver);
-//
-//        MetaDataFactory mdf2 = conf.newMetaDataFactoryInstance();
-//        System.out.println("mdf2 " + mdf2);
-//
-//
-//        Collection classes = null;
-//
-//        ObjectValue metaRepositoryPlugin = new MetaDataRepositoryValue();
-//
-//        ObjectValue ObValue = new ObjectValue("MetaDataRepository");
-//
-//
-//        Configurations.newInstance("org.apache.openjpa.meta.MetaDataRepository", conf, "", loader);
-//
-//
-//        Object ob = ObValue.newInstance("org.apache.openjpa.meta.MetaDataRepository", MetaDataRepository.class, conf, true);
-//
-//        metaRepositoryPlugin.instantiate(MetaDataRepository.class, conf);
-//
-//
-//        //classes
-//        MetaDataFactory mdf = conf.newMetaDataFactoryInstance();
-//        System.out.println("MDF " + mdf + "  " + conf.getMetaDataRepository());
-//        MappingRepository mappingRepo = conf.getMappingRepositoryInstance();
-//        mappingRepo.loadPersistentTypes(true, loader);
-//        System.out.println(classes);
-//
-//
-//
-//
-//        System.out.println("db url " + conf.getConnectionURL());
-//        System.out.println("PASSWPRD " + conf.getConnectionPassword());
-//
-//        if (!MappingTool.run(conf, files, flags, loader)) {
-//            System.out.println("Didn't load!");
-//        }
-//        //throw new BuildException(_loc.get("bad-conf", "MappingToolTask").getMessage());
-//    }
-//    public ConfigurationImpl newConfiguration() {
-//        //System.setProperty("catalina.base", System.getProperty("java.io.tmpdir"));
-//
-//        JDBCConfigurationImpl conf = new JDBCConfigurationImpl();//;(JDBCConfigurationImpl)super.newConfiguration();
-//        //conf;
-//                /*
-//        conf.setConnectionDriverName("com.mysql.jdbc.Driver");//org.gjt.mm.mysql.Driver");//ConfigUtils.getProperty("db_driver"));
-//        conf.setConnectionURL("jdbc:mysql://127.0.0.1:3306/drugref");//ConfigUtils.getProperty("db_url"));
-//        conf.setConnectionUserName("root");//ConfigUtils.getProperty("db_user"));
-//        conf.setConnectionPassword("liyi");//ConfigUtils.getProperty("db_password"));
-//         */
-//
-//        conf.setConnectionDriverName(ConfigUtils.getProperty("db_driver"));
-//        conf.setConnectionURL(ConfigUtils.getProperty("db_url"));
-//        conf.setConnectionUserName(ConfigUtils.getProperty("db_user"));
-//        conf.setConnectionPassword(ConfigUtils.getProperty("db_password"));
-//
-//
-//        return (conf);
-//
-//    }
-//}
-/*
-echo "downloading some 3 MB drug data from the web, might take a while ...\n"
-#wget -c http://www.hc-sc.gc.ca/hpfb-dgpsa/tpd-dpt/txt/allfiles.zip
-mkdir drugrefImport
-cd drugrefImport
-wget -c http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles.zip
-# unzip the data into the current directory
-unzip allfiles.zip
-cd ..
-# create the temporary tables for import purposes
-echo "\n --> creating temporary tables for import purposes ...\n"
-$PATH_TO_PSQL/psql drugref2 -f create_dpd_tables.psql
-# convert the comma separated text files into proper importable tab spearated unquoted data
-echo "\n --> converting the text files into a proper importable format ...\n"
-#cp ../strip_quotation.py .
-python import_dpd.py
-# import the converted tab separated unquoted data into the temporary tables
-echo "\n --> now importig the data into the temporary tables ...\n"
-$PATH_TO_PSQL/psql drugref2 -f import_dpd_tables.psql
-# do some house keeping with the imported tables
-echo "\n --> cleaning up the imported table, preparing the import into drugref ...\n"
-$PATH_TO_PSQL/psql drugref2 -f dpd_nodupes.psql
-
-# create extra tables to make searching easier
-echo "\n --> creating extra tables  ...\n"
-$PATH_TO_PSQL/psql drugref2 -f create_extra_tables.psql
-
-#import the data into extra tables for easier searching
-echo "\n --> importing data into searching  tables ...\n"
-python import_search_data.py
-
-
-#create tables for interaction data
-echo "\n --> creating interaction tables ... \n"
-$PATH_TO_PSQL/psql drugref2 -f holbrooktables.psql
-
-#import interaction data
-echo "\n --> importing interaction data ... \n"
-$PATH_TO_PSQL/psql drugref2 -f interactions-holbrook.dump
-
-
-#clean up the temp tables
-oscar@oscar01:/usr/local/drugref/DPD$
-
- */
