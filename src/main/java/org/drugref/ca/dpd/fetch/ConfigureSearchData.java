@@ -24,6 +24,7 @@
 
 package org.drugref.ca.dpd.fetch;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -32,16 +33,69 @@ import javax.persistence.Query;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 import org.apache.openjpa.persistence.jdbc.JDBCFetchPlan;
+import org.drugref.ca.dpd.CdActiveIngredients;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.LinkGenericBrand;
+import org.drugref.util.JpaUtils;
 
 /**
  *
  * @author jaygallagher
  */
 public class ConfigureSearchData {
-   
+    private Hashtable<String, List<String>> name_drugcode_cat13=new Hashtable();
+    private Hashtable<String,List<String[]>> ingred_info=new Hashtable();
+    public ConfigureSearchData(){
+        
+        initIngredInfo();
+        
+        //System.out.println("ingred_info="+ingred_info);
+    }
+   private void initIngredInfo(){
+            EntityManager em=JpaUtils.createEntityManager();
+            Query q=em.createQuery("select cai from CdActiveIngredients cai ");
+            List<CdActiveIngredients> ls=q.getResultList();
+            for(CdActiveIngredients cai:ls){
+                String dc=""+cai.getDrugCode();
+                if(ingred_info.containsKey(dc)){
+                    List<String[]> l=ingred_info.get(dc);
+                    String[] arr=new String[] {cai.getIngredient(),cai.getStrength(),cai.getStrengthUnit()};
+                    l.add(arr);
+                    ingred_info.put(dc, l);
+                }else{
+                    List<String[]> larr=new ArrayList();
+                    String[] arr=new String[] {cai.getIngredient(),cai.getStrength(),cai.getStrengthUnit()};
+                    larr.add(arr);
+                    ingred_info.put(""+cai.getDrugCode(), larr);
+                }
+            }
+            JpaUtils.close(em);
+        }
+    private void initNameDrugCode(){
+            EntityManager em=JpaUtils.createEntityManager();
+            Query query = em.createQuery("select cds from CdDrugSearch cds where cds.category=13");
+
+            List<CdDrugSearch> productList = query.getResultList();
+            System.out.println("in initNameDrugCode, productList.size="+productList.size());
+            for(CdDrugSearch cds:productList){
+                String name=cds.getName();
+                String drugcode=cds.getDrugCode();
+                System.out.println("in initNameDrugCode, name="+name+"--drugcode="+drugcode);
+                if(name_drugcode_cat13.containsKey(name)){
+                    List<String> dc=name_drugcode_cat13.get(name);
+                    dc.add(drugcode);
+                    name_drugcode_cat13.put(name, dc);
+                }else{
+                    List<String> ls=new ArrayList();
+                    ls.add(drugcode);
+                    name_drugcode_cat13.put(name, ls);
+                }
+
+            }
+            JpaUtils.close(em);
+        }
+
     public void importSearchData(EntityManager em){
         long startBN=System.currentTimeMillis();
         ////Importing Brand Information
@@ -64,7 +118,8 @@ public class ConfigureSearchData {
         importAllIngredients(em);
         long afterIngredients=System.currentTimeMillis();
         System.out.println("============time import Ingredients="+(afterIngredients-afterGenerics));
-
+        initNameDrugCode();
+        //System.out.println("name_drugcode_cat13="+name_drugcode_cat13);
         ////Cleaning up Search Names
         cleanUpSearchNames(em);
         long afterClean=System.currentTimeMillis();
@@ -76,19 +131,7 @@ public class ConfigureSearchData {
 
     }
 
-    /*
-     def import_all_brand_name(self):
-		con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-		query = "select * from cd_drug_product"
-                print query
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        ida = ImportSearchData()
-                        for result in results:
-                        	ida.insert_into_drug_search(con,result['drug_code'],result['brand_name'],'13')
-      */
+  
       public void importAllBrandName(EntityManager em){
         EntityTransaction tx = em.getTransaction();
         tx.begin();
@@ -120,22 +163,7 @@ public class ConfigureSearchData {
         tx.commit();
       }
 
-      /*
-        def import_all_ATC_code_name(self):
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "select distinct tc_atc_number, tc_atc from cd_therapeutic_class"
-
-                print query
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        ida = ImportSearchData()
-                        for result in results:
-                                if result['tc_atc_number'] != "" :
-                                        ida.insert_into_drug_search(con,result['tc_atc_number'],result['tc_atc'],'8')
-
-       */
+    
        public void importAllATCCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
@@ -167,30 +195,7 @@ public class ConfigureSearchData {
         System.out.println("DONE Import ATC Code Name");
         tx.commit();
        }
-       /*
-        def import_all_AHFS_code_name(self):
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "select distinct tc_ahfs_number, tc_ahfs from cd_therapeutic_class"
-
-                print query
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        ida = ImportSearchData()
-                        for result in results:
-                                if result['tc_ahfs_number'] != "" :
-                                        ida.insert_into_drug_search(con,result['tc_ahfs_number'],result['tc_ahfs'],'10')
-
-        */
-
-       /*    public void p(String str, String s) {
-        System.out.println(str + "=" + s);
-    }
-
-    public void p(String str) {
-        System.out.println(str);
-    }*/
+      
        public void importAllAHFSCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
@@ -223,58 +228,11 @@ public class ConfigureSearchData {
        }
 
 
-       /*
-        def import_Generics(self):
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                cur2 = con.cursor()
-                query = "select drug_code from cd_drug_product"
-                ida = ImportSearchData()
-                genHash = {}
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        for result in results:
-                                get_ingredient_query = "select ingredient from cd_active_ingredients where drug_code = '%s' " % result['drug_code']
-                                cur2.execute(get_ingredient_query)
-                                ingredients = cur2.fetchall()
-                                bool = 0
-                                compositeGeneric = 0
-                                genName = ""
-                                if len(ingredients) >0:
-                                        for ingredient in ingredients:
-                                                if bool:
-                                                        genName = genName + "/ "
-                                                        compositeGeneric = 1
-                                                genName = genName + ingredient['ingredient']
-                                                bool = 1
-                                        if genHash.has_key(genName):
-                                                #print " just add %s to linking table " % genName
-                                                ida.insert_into_link_generic_brand(genHash[genName],result['drug_code'])
-                                        else:
-                                           if compositeGeneric:
-                                                ida.insert_into_drug_search(con,'',genName ,'12')
-                                           else:
-                                                ida.insert_into_drug_search(con,'',genName ,'11')
-                                           id_drug = ida.getCurrVal(con,'cd_drug_search_id_seq')
-                                           genHash[genName] = id_drug
-                        cur.execute("update cd_drug_search set drug_code = id where category = 11 or category = 12")
-                        con.commit()
-        *
-        
-        def insert_into_link_generic_brand(self, id_drug, drug_code):
-		con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "insert into link_generic_brand (id,drug_code) values (%s,%s) "
-                """print query"""
-                cur.execute(query,id_drug,drug_code)
-                con.commit()
-        */
         public void importGenerics(EntityManager em){
             Hashtable genHash = new Hashtable();
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Import Generics");
+            //System.out.println("Import Generics");
             Query queryDrugProduct = em.createQuery("SELECT cdp.drugCode from CdDrugProduct cdp");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
             JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
@@ -336,7 +294,7 @@ public class ConfigureSearchData {
                             genBrand.setDrugCode(""+drug);
                             em.persist(genBrand);
                             em.flush();
-                    //        System.out.println("id added to genBrand="+genBrandId+" || drugCode added to genBrand="+drug.toString());
+                    // System.out.println("id added to genBrand="+genBrandId+" || drugCode added to genBrand="+drug.toString());
                             em.clear();
                         }                  
                     }
@@ -346,7 +304,7 @@ public class ConfigureSearchData {
             updateQuery.executeUpdate();
             em.flush();
             em.clear();
-             System.out.println("DONE Import Generics");
+            // System.out.println("DONE Import Generics");
             tx.commit();
         }
 
@@ -373,7 +331,7 @@ public class ConfigureSearchData {
          public void importAllIngredients(EntityManager em){
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Import Ingredients");
+            //System.out.println("Import Ingredients");
 
             Query queryDrugProduct = em.createQuery("SELECT distinct cai.ingredient, cai.activeIngredientCode from CdActiveIngredients cai");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
@@ -397,42 +355,27 @@ public class ConfigureSearchData {
 
 
             }
-System.out.println("DONE Import Ingredients");
+//System.out.println("DONE Import Ingredients");
             tx.commit();
        }
 
 
-       /*
-        """
-        Used to find duplicate names in the database and add there strength if its not included in the drug name.
-        EG 4 duplicates of FOSAMAX would be come FOSAMAX 70MG, FOSAMAX 10MG, FOSAMAX 40MG, FOSAMAX 5MG
-        """
-        def clean_up_search_names(self):
-                isd = ImportSearchData()
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "select name ,count(name) as name_count from cd_drug_search where category = '13' group by name order by name_count desc"
-                cur.execute(query)
-                results = cur.fetchall()
-                drug_code_name = []
-                if len(results)>0:
-                        for result in results:
-                                name = result['name']
-                                name_count = result['name_count']
-                                if name_count > 1:
-                                        drug_code_list = isd.get_drug_codes_for_name(con,name)
-                                        for code in drug_code_list:
-                                                strens = isd.get_strengths_from_drug_code(con,code)
-                                                suggName = isd.suggest_new_name(name,strens)
-                                                if suggName != "":
-                                                        drug_code_name.append({'drug_code':code,'name':suggName})
+    
 
-                isd.update_name_by_drug_code(drug_code_name)
-        */
+
+        public List<String> getDrugCodeFromName(String name){
+            if(name_drugcode_cat13.containsKey(name))
+                    return name_drugcode_cat13.get(name);
+            else{
+                List<String> emptyList=new ArrayList();
+                return emptyList;
+            }
+        }
+
         public void cleanUpSearchNames(EntityManager em){
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            System.out.println("Clean Up Search Names");
+            //System.out.println("Clean Up Search Names");
 
             Query queryDrugProduct = em.createQuery("select cds.name ,count(cds.name)  from CdDrugSearch cds where cds.category = 13 group by cds.name ");
             OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
@@ -441,22 +384,25 @@ System.out.println("DONE Import Ingredients");
 
             List<Object[]> productList = queryDrugProduct.getResultList();
 
-            System.out.println("Have got all the products in memory");
+            //System.out.println("Have got all the products in memory");
 
             for (Object[] drug:productList){
-                //System.out.println(drug.getClass().getName()+" "+drug[0]);
+                //System.out.println(drug.getClass().getName()+" "+drug[0]+"---"+drug[1]);
                 String name = ""+drug[0];
                 Long num = (Long) drug[1];
                 if (num > 1){
-              //      System.out.println("Donig something with "+drug[0]);
-                    List<String> drugCodeList = getDrugCodeForName( em, ""+drug[0]);
+                    //System.out.println("Donig something with "+drug[0]);
+                    //List<String> drugCodeList = getDrugCodeForName( em, ""+drug[0]);
+                    List<String> drugCodeList=getDrugCodeFromName(name);
+
                     Query updateDrugSearch = em.createQuery("update CdDrugSearch cds set cds.name = (:NAME) where cds.drugCode = (:DRUGCODE) and cds.category = 13");
                     for (String code :drugCodeList){
-                //        System.out.println("Going to work on "+code);
-                                                List<Object[]> strens = getStrengthsFromDrugCode(em,code);
-                                   //             System.out.println(code+":"+strens.size());
+                        //System.out.println("Going to work on "+code);
+                                                List<String[]> strens=new ArrayList();
+                                                strens= getIngredInfoFromDrugCode(code);
+                                                //System.out.println(code+"--:--"+name+"--:--"+strens.size());
                                                 String suggName = getSuggestedNewName(name, strens);
-                                //                System.out.println(suggName);
+                                                //System.out.println(suggName);
                                                 if (!suggName.equals("")){
                                                     updateDrugSearch.setParameter("NAME", suggName);
                                                     updateDrugSearch.setParameter("DRUGCODE", code);
@@ -476,29 +422,7 @@ System.out.println("DONE Import Ingredients");
         }
 
 
-        /*
-         """
-        Function should try to suggest an altername for the drug, using its strength and forms
-        loop through strengths (eg 2,3 14.3) and text search the drug name to see if they can be found ie Coumadin 4mg '4' would be found
-
-        if none of the strengths are found and there is only 1 ingredient
-                suggest name strength strength_unit
-
-        """
-        def suggest_new_name(self,name,strengths):
-                suggested_name = ""
-                numStrenFoundInName = 0
-                for strens in strengths:
-                        strenFoundInName = name.rfind(strens['strength'])
-                        if strenFoundInName != -1:
-                                numStrenFoundInName = numStrenFoundInName + 1
-
-                if numStrenFoundInName == 0 and len(strengths) == 1:
-                        suggested_name = "%s %s%s" % (name, strengths[0]['strength'], strengths[0]['strength_unit'])
-
-                return suggested_name
-         */
-        private String getSuggestedNewName(String name,List<Object[]> strengths){
+      /*  private String getSuggestedNewName(String name,List<Object[]> strengths){
             String suggested_name = "";
             int  numStrenFoundInName = 0;
                 for (Object[] strens : strengths){
@@ -514,21 +438,25 @@ System.out.println("DONE Import Ingredients");
                 }
                 return suggested_name;
         }
-
-
-        /*
-                def get_drug_codes_for_name(self,con,name):
-                cur = con.cursor()
-                query = "select drug_code from cd_drug_search where category = '13' and  name = %s "
-                drug_code_list = []
-                cur.execute(query,name)
-                results = cur.fetchall()
-                if len(results)>0:
-                        for result in results:
-                                drug_code_list.append(result['drug_code'])
-
-                return drug_code_list
         */
+           private String getSuggestedNewName(String name,List<String[]> strengths){
+            String suggested_name = "";
+            int  numStrenFoundInName = 0;
+                for (String[] strens : strengths){
+                        boolean strenFoundInName = name.contains(""+strens[1]);
+                        if (strenFoundInName){
+                                numStrenFoundInName++;
+                        }
+
+                }
+                if (numStrenFoundInName == 0 && strengths.size() == 1){
+                        String[] strens = strengths.get(0);
+                        suggested_name = name+" " +strens[1]+""+strens[2];
+                }
+                return suggested_name;
+        }
+
+
         private List<String> getDrugCodeForName(EntityManager em, String name){
             
             Query queryDrugProduct = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.category = 13 and cds.name = (:NAME)");
@@ -540,29 +468,17 @@ System.out.println("DONE Import Ingredients");
             return productList;
         }
 
-        /*
-        def update_name_by_drug_code(self,drug_code_name):
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "update cd_drug_search set name = %s where drug_code = %s and category = '13' "
-                for pair in drug_code_name:
-                        cur.execute(query,pair['name'],pair['drug_code'])
-                con.commit()
-
+ 
         
-
-        def get_strengths_from_drug_code(self,con,drug_code):
-                ret = []
-                cur = con.cursor()
-                query = "select ingredient, strength, strength_unit from cd_active_ingredients where drug_code = %s"
-                cur.execute(query,drug_code)
-                results = cur.fetchall()
-                if len(results)>0:
-                        ret = queryresult2rowdict(results)
-
-                return ret
-
-        */
+        private List<String[]> getIngredInfoFromDrugCode(String drugCode){
+                List<String[]> retls=new ArrayList();
+                retls=ingred_info.get(drugCode);
+                if(retls==null){
+                    List<String[]> r=new ArrayList();
+                    return r;
+                }
+                return retls;
+        }
         private List<Object[]> getStrengthsFromDrugCode(EntityManager em, String drugCode){
 
             Query queryDrugProduct = em.createQuery("select cai.ingredient, cai.strength, cai.strengthUnit from CdActiveIngredients cai where cai.drugCode = (:drugCode)");
@@ -574,145 +490,3 @@ System.out.println("DONE Import Ingredients");
             return productList;
         }
 }
- /*
-#!/usr/bin/python
-############################################################
-# Create tables to help searching the Canadian DPD
-#
-# (c) by McMaster University, released under the GPL free software
-# license, details see http://www.gnu.org
-############################################################
-
-import string
-from pyPgSQL import PgSQL as dbapi
-
-def queryresult2rowdict(queryresult):
-	rows = []
-	for row in queryresult:
-		d = {}
-		for f in row.keys():
-			d[f]=row[f]
-		rows.append(d)
-	return rows
-
-
-class ImportSearchData:
-        """This class allows to search a PostgreSQL database for drug names, ATC codes, and
-        drug-drug interaction information"""
-
-        def __init__(self, database="drugref2", user=None, password=None):
-                """works only if the Postgres server is local.
-                Parameters are database name, username and password"""
-                self._db = database
-                self._user = user
-                self._pwd = password
-
-
-
-
-
-        """
-        Function should try to suggest an altername for the drug, using its strength and forms
-        loop through strengths (eg 2,3 14.3) and text search the drug name to see if they can be found ie Coumadin 4mg '4' would be found
-
-        if none of the strengths are found and there is only 1 ingredient
-                suggest name strength strength_unit
-
-        """
-        def suggest_new_name(self,name,strengths):
-                suggested_name = ""
-                numStrenFoundInName = 0
-                for strens in strengths:
-                        strenFoundInName = name.rfind(strens['strength'])
-                        if strenFoundInName != -1:
-                                numStrenFoundInName = numStrenFoundInName + 1
-
-                if numStrenFoundInName == 0 and len(strengths) == 1:
-                        suggested_name = "%s %s%s" % (name, strengths[0]['strength'], strengths[0]['strength_unit'])
-
-                return suggested_name
-
-
-	def insert_into_drug_search(self, drug_code, name, cat):
-		con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "insert into cd_drug_search (drug_code, category,name) values (%s,%s,%s) "
-                """print query"""
-                cur.execute(query,drug_code,cat,name)
-                con.commit()
-
-        def insert_into_drug_search(self,con, drug_code, name, cat):
-                cur = con.cursor()
-                query = "insert into cd_drug_search (drug_code, category,name) values (%s,%s,%s) "
-                """print query"""
-                cur.execute(query,drug_code,cat,name)
-                con.commit()
-
-        """def insert_into_drug_search_with_key(self, drug_code, name, cat):
-		con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                query = "insert into cd_drug_search (id,drug_code, category,name) values (%s,%s,%s,%s) "
-                #print query
-                cur.execute(query,drug_code,drug_code,cat,name)
-                con.commit()
-
-        def insert_into_drug_search_with_key(self,con, drug_code, name, cat):
-                cur = con.cursor()
-                query = "insert into cd_drug_search (id,drug_code, category,name) values (%s,%s,%s,%s) "
-                #print query
-                cur.execute(query,drug_code,drug_code,cat,name)
-                con.commit()
-        """
-
-
-        """
-        create table link_generic_brand(
-            id integer,
-            drug_code varchar(30));
-
-
-        def getNextVal(self,seq):
-                con = dbapi.connect(database=self._db)
-                cur = con.cursor()
-                id = 0
-                query = "select nextval('%s'::text) as n" % seq
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        for result in results:
-                                id = result['n']
-
-                return id
-
-        def getCurrVal(self,con,seq):
-                cur = con.cursor()
-                id = 0
-                query = "select currval('%s'::text) as n" % seq
-                cur.execute(query)
-                results = cur.fetchall()
-                if len(results)>0:
-                        for result in results:
-                                id = result['n']
-
-                return id
-
-
-if __name__=='__main__' :
-	import sys
-
-        idata = ImportSearchData()
-        print "Importing Brand Information"
-        idata.import_all_brand_name()
-        print "Should check for duplicates and ones that need forms and strength added ie ones from generic companys with the form and strength is not included in the name"
-        print "Import ATC Names"
-        idata.import_all_ATC_code_name()
-        print "Import AFHC Names"
-        idata.import_all_AHFS_code_name()
-        print "Import Generic Data"
-        idata.import_Generics()
-        print "Import Ingredients"
-        idata.import_all_Ingredients()
-        print "Cleaning up Search Names"
-        idata.clean_up_search_names()
-
-*/
