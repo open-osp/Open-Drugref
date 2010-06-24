@@ -56,9 +56,10 @@ public class TablesDao {
     private String user;
     private String pwd;
     private List<Integer> inactiveDrugs=new ArrayList();
+    private final int MAX_NO_ROWS=60;
 
     public TablesDao() {
-        p("=========start tablesdao constructor======");
+        //p("=========start tablesdao constructor======");
         this.plugindir = "plugins";
         this.name = "Drugref Service";
         this.version = "1.0";
@@ -74,7 +75,7 @@ public class TablesDao {
         //PluginImpl module = new PluginImpl
         DrugrefPlugin dp = new DrugrefPlugin();
         this.plugins.addElement(dp);
-        p("DrugrefPlugin.register()", dp.register().toString());
+        //p("DrugrefPlugin.register()", dp.register().toString());
         String name;
         String version;
         Hashtable haProvides = new Hashtable();
@@ -84,10 +85,10 @@ public class TablesDao {
         haProvides = (Hashtable) dp.register().get(2);
         thePlugin = (Holbrook) dp.register().get(3);
 
-        p("name", name);
-        p("version", version);
-        p("provides", haProvides.toString());
-        p("theplugin", thePlugin.toString());
+        //p("name", name);
+        //p("version", version);
+        //p("provides", haProvides.toString());
+        //p("theplugin", thePlugin.toString());
 
         Hashtable haService = new Hashtable();
         haService.put("version", version);
@@ -95,7 +96,7 @@ public class TablesDao {
         haService.put("provides", haProvides);
 
         this.services.put(name, haService);
-        p("this.services", this.services.toString());
+        //p("this.services", this.services.toString());
         //loop through all provides
         Enumeration em = haProvides.keys();
         while (em.hasMoreElements()) {
@@ -105,17 +106,17 @@ public class TablesDao {
                 Vector v = new Vector();
                 v = (Vector) this.provided.get(provided);
                 v.addElement(name);
-                p("in constructor try");
+                //p("in constructor try");
             } catch (Exception e) {
                 Vector nameVec = new Vector();
                 nameVec.addElement(name);
                 this.provided.put(provided, nameVec);
-                p("in constructor exception");
+                //p("in constructor exception");
             }
         }        
-        p("value of this.plugin after constructor", this.plugins.toString());
-        p("value of this.provided after constructor", this.provided.toString());
-        p("=========end tablesdao constructor======");
+        //p("value of this.plugin after constructor", this.plugins.toString());
+        //p("value of this.provided after constructor", this.provided.toString());
+        //p("=========end tablesdao constructor======");
     }
 
     public String identify() {
@@ -140,13 +141,13 @@ public class TablesDao {
         System.out.println(msg);
     }
 
-    public void p(String str, String s) {
+    /*public void p(String str, String s) {
         System.out.println(str + "=" + s);
     }
 
     public void p(String str) {
         System.out.println(str);
-    }
+    }*/
     //not used
   /*  public Vector fakeFetch(){
     Vector v=new Vector();
@@ -178,9 +179,9 @@ public class TablesDao {
     }*/
 
     public Object fetch(String attribute, Vector key, Vector services, boolean feelingLucky) {
-        p("===start of fetch===");
-        p("attribute", attribute);
-        p("key", key.toString());
+        //p("===start of fetch===");
+        //p("attribute", attribute);
+        //p("key", key.toString());
 
         feelingLucky = true;
         Hashtable results = new Hashtable();
@@ -191,9 +192,9 @@ public class TablesDao {
         Vector myservices = new Vector();
 
         try {
-            p("try 1");
+            //p("try 1");
             providers = new Vector((Vector) this.provided.get(attribute));
-            p("in fetch, providers", providers.toString());
+            //p("in fetch, providers", providers.toString());
         } catch (Exception e) {
             e.printStackTrace();
             String val = attribute + " not provided by an registered service";
@@ -203,25 +204,25 @@ public class TablesDao {
 
 
         if (services.size() > 0) {
-            p("in if");
+            //p("in if");
             Collections.copy(myservices, services);
-            p("myservices and services should be identical");
-            p("myservices", myservices.toString());
-            p("services", services.toString());
+            //p("myservices and services should be identical");
+            //p("myservices", myservices.toString());
+            //p("services", services.toString());
         } else {
-            p("in else");
+            //p("in else");
             Enumeration em = this.services.keys();
             while (em.hasMoreElements()) {
                 myservices.addElement(em.nextElement());
             }
         }
-        p("myservices", myservices.toString());
+        //p("myservices", myservices.toString());
         Hashtable module = new Hashtable();
         for (int i = 0; i < myservices.size(); i++) {
             String service = myservices.get(i).toString();
             Hashtable mod = new Hashtable((Hashtable) this.services.get(service));
             module = new Hashtable(mod);
-            p("module", module.toString());
+            //p("module", module.toString());
             Holbrook ah = (Holbrook) module.get("plugin");
             Object result = ah.get(attribute, key);
             //call plugin function
@@ -234,8 +235,8 @@ public class TablesDao {
                         results.put(service, vec);
                     }
                     if (feelingLucky) {
-                        p("results", results.toString());
-                        p("===end of fetch222===");
+                        //p("results", results.toString());
+                        //p("===end of fetch222===");
                         return results;
                     }
                 } else if (result instanceof Hashtable) {
@@ -244,15 +245,15 @@ public class TablesDao {
                         results.put(service, ha2);
                     }
                     if (feelingLucky) {
-                        p("results", results.toString());
-                        p("===end of fetch222===");
+                        //p("results", results.toString());
+                        //p("===end of fetch222===");
                         return results;
                     }
                 }
             }
         }
-        p("results", results.toString());
-        p("=== end of fetch===");
+       //p("results", results.toString());
+       //p("=== end of fetch===");
         return results;
     }
 
@@ -561,7 +562,160 @@ public class TablesDao {
 
     }
 
-    public Vector listSearchElement3(String str) {
+    public Vector listSearchElement4(String str){//use 2 separate queries to speed up search which returns huge number of results.
+        //System.out.println("before create em in listSearchElement4");
+        String matchKey=str.toUpperCase();
+        matchKey=matchKey.replace(",", " ");
+        matchKey=matchKey.replace("'", "");
+        //Vector directMatch = new Vector();
+       // Vector indirectMatch=new Vector();
+        List<CdDrugSearch> results1=new ArrayList();
+        List<CdDrugSearch> results2=new ArrayList();
+        int max_rows_for_result2=0;
+        boolean onlyDirectMatch=false;//if there are more than 60 direct match result return only direct match results
+        if(inactiveDrugs.size()==0)
+            inactiveDrugs=getInactiveDrugs();
+        //System.out.println("inactiveDrugs size ="+inactiveDrugs.size());
+        EntityManager em = JpaUtils.createEntityManager();
+        //System.out.println("created entity manager");
+        String q1="select cds from CdDrugSearch cds where upper(cds.name) like '%"+matchKey+"%' and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
+       //System.out.println("q1 ="+q1);
+        try{
+            Query query=em.createQuery(q1);
+            query.setMaxResults(MAX_NO_ROWS);
+            results1=query.getResultList();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        if(results1.size()>=MAX_NO_ROWS){
+                onlyDirectMatch=true;
+        }else{
+            max_rows_for_result2=MAX_NO_ROWS-results1.size();
+        }
+        if(!onlyDirectMatch){
+                    //second part
+                    str = str.replace(",", " ");
+                    str = str.replace("'", "");
+                    String[] strArray = str.split("\\s+");
+
+                //    for (int i = 0; i < strArray.length; i++) {
+                //        System.out.println(strArray[i]);
+                //    }
+
+            //String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
+                    String queryStr = "select cds from CdDrugSearch cds where (";
+                    for (int i = 0; i < strArray.length; i++) {
+                        queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
+                        if (i < strArray.length - 1) {
+                            queryStr = queryStr + " and ";
+                        }
+
+                    }
+
+                    queryStr = queryStr + ") and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) "
+                            + "and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
+                    //System.out.println(queryStr);
+                    try {                        
+                        Query query = em.createQuery(queryStr);
+                        //System.out.println("before query");
+                        query.setMaxResults(max_rows_for_result2);
+                        results2 = query.getResultList();
+                        //System.out.println("after query");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    
+        }
+        //System.out.println("number of results1="+results1.size()+";results2="+results2.size());
+        if (results1.size() > 0 || results2.size() > 0) {
+            
+
+            Vector vec = new Vector();
+        try{
+               for (CdDrugSearch result : results1) {
+
+                        boolean isInactive=false;
+                        String drugCode=result.getDrugCode();
+                        if(MiscUtils.isStringToInteger(drugCode)){
+                            //check if result is inactive.
+                            if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
+                                    isInactive=true;
+                        }
+                        Hashtable ha = new Hashtable();
+                        ha.put("name", result.getName());
+                        ha.put("category", result.getCategory());
+                        ha.put("id", result.getId());
+                        ha.put("isInactive", isInactive);
+                        vec.addElement(ha);
+                   // }
+                }
+               for (CdDrugSearch result : results2) {
+
+                        boolean isInactive=false;
+                        String drugCode=result.getDrugCode();
+                        if(MiscUtils.isStringToInteger(drugCode)){
+                            //check if result is inactive.
+                            if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
+                                    isInactive=true;
+                        }
+                        Hashtable ha = new Hashtable();
+                        ha.put("name", result.getName());
+                        ha.put("category", result.getCategory());
+                        ha.put("id", result.getId());
+                        ha.put("isInactive", isInactive);
+                        vec.addElement(ha);
+                   // }
+                }
+                System.out.println("NUMBER OF DRUGS RETURNED: " + vec.size());
+
+            /*    for(int i=0;i<vec.size();i++){
+                    Hashtable h=(Hashtable)vec.get(i);
+                    String name=(String)h.get("name");
+                    if(name.contains(matchKey)){
+                        directMatch.add(h);
+                        if(directMatch.size()>60){
+                            onlyDirectMatch=true;
+                            break;
+                        }
+                    }else{
+                        indirectMatch.add(h);
+                    }
+                }
+                if(!onlyDirectMatch){
+                    directMatch.addAll(indirectMatch);
+                    Vector tmpV=new Vector();
+                    for(int i=0;i<60 && i<directMatch.size();i++){
+                        tmpV.add(directMatch.get(i));
+                    }
+                    directMatch=tmpV;
+                }
+                System.out.println("directMatch.size()="+directMatch.size());*/
+                /*for (int i = 0; i < vec.size(); i++) {
+                    System.out.println("vec=" + vec.get(i));
+                }
+                for (int i = 0; i < indirectMatch.size(); i++) {
+                    System.out.println("indirectMatch=" + indirectMatch.get(i));
+                }*/
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                JpaUtils.close(em);
+            }
+            return (vec);
+        } else {
+            Vector defaultVec = new Vector();
+            Hashtable ha = new Hashtable();
+            ha.put("id", "0");
+            ha.put("category", "");
+            ha.put("name", "None found");
+            defaultVec.addElement(ha);
+            return defaultVec;
+        }
+
+
+    }
+    public Vector listSearchElement3(String str) {//not used, replaced by faster listSearchElement4
         System.out.println("before create em in listSearchElement3");
         if(inactiveDrugs.size()==0)
             inactiveDrugs=getInactiveDrugs();
