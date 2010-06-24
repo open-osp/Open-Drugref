@@ -59,7 +59,7 @@ public class Drugref {
 
         public Vector list_search_element3(String searchStr){
                 //TablesDao queryDao = new TablesDao();
-                Vector vec=queryDao.listSearchElement3(searchStr);
+                Vector vec=queryDao.listSearchElement4(searchStr);
                 return vec;
         }
 
