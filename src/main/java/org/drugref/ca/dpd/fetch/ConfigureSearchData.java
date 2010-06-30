@@ -77,11 +77,11 @@ public class ConfigureSearchData {
             Query query = em.createQuery("select cds from CdDrugSearch cds where cds.category=13");
 
             List<CdDrugSearch> productList = query.getResultList();
-            System.out.println("in initNameDrugCode, productList.size="+productList.size());
+            //System.out.println("in initNameDrugCode, productList.size="+productList.size());
             for(CdDrugSearch cds:productList){
                 String name=cds.getName();
                 String drugcode=cds.getDrugCode();
-                System.out.println("in initNameDrugCode, name="+name+"--drugcode="+drugcode);
+                //System.out.println("in initNameDrugCode, name="+name+"--drugcode="+drugcode);
                 if(name_drugcode_cat13.containsKey(name)){
                     List<String> dc=name_drugcode_cat13.get(name);
                     dc.add(drugcode);
