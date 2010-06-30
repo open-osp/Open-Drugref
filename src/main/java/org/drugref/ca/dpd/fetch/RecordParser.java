@@ -124,8 +124,8 @@ public class RecordParser {
                 vet.setVetSpecies(items[1]);
                 vet.setVetSubSpecies(items[2]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
                 vet = null;
             }
         } else if ("comp.txt".equals(type) || "comp_ia.txt".equals(type)) {
@@ -192,8 +192,8 @@ public class RecordParser {
                 //  System.out.println("addrBillingFlag>"+vet.getAddressBillingFlag()+"<");
 
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
                 vet = null;
                 count++;
             }
@@ -241,8 +241,8 @@ public class RecordParser {
                 if("HUMAN".equalsIgnoreCase(prod.getClass1()) || ("YES".equalsIgnoreCase(all_drug_classes))  ){
                     //p("true if in cdp");
                     em.persist(prod);
-                    em.flush();
-                    em.clear();
+                    //em.flush();
+                    //em.clear();
                 }
                 prod = null;
 
@@ -261,8 +261,8 @@ public class RecordParser {
                 vet.setPharmCdFormCode(new Integer((items[1])));
                 vet.setPharmaceuticalCdForm(items[2]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
                 vet = null;
             }
         } else if ( "ingred.txt".equals(type) ||"ingred_ia.txt".equals(type)) {
@@ -312,8 +312,8 @@ public class RecordParser {
                 vet.setDosageUnit(items[9]);
                 vet.setNotes(items[10]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
                 vet = null;
             }
         } else if ("package.txt".equals(type) || "package_ia.txt".equals(type)) {
@@ -335,8 +335,8 @@ public class RecordParser {
                 vet.setPackageSize(items[4]);
                 vet.setProductInforation(items[5]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
         } else if ("pharm.txt".equals(type) || "pharm_ia.txt".equals(type)) {
             /*
@@ -349,8 +349,8 @@ public class RecordParser {
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setPharmaceuticalStd(items[1]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
         } else if ("route.txt".equals(type) || "route_ia.txt".equals(type)) {
             /*
@@ -365,10 +365,10 @@ public class RecordParser {
                 vet.setRouteOfAdministrationCode(new Integer(items[1]));
                 vet.setRouteOfAdministration(items[2]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
-
+               // tx.commit();
         } else if ("schedule.txt".equals(type) || "schedule_ia.txt".equals(type)) {
             /*
             DRUG_CODE                              NOT NULL  NUMBER(8)
@@ -380,8 +380,8 @@ public class RecordParser {
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setSchedule(items[1]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
         } else if ("status.txt".equals(type) || "status_ia.txt".equals(type)) {
             /*
@@ -399,8 +399,8 @@ public class RecordParser {
                 vet.setStatus(items[2]);
                 vet.setHistoryDate(getDate(items[3]));
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
         } else if ("ther.txt".equals(type) || "ther_ia.txt".equals(type)) {
             /*
@@ -420,8 +420,8 @@ public class RecordParser {
                 vet.setTcAhfsNumber(items[3]);
                 vet.setTcAhfs(items[4]);
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
 
         }else if ("inactive.txt".equals(type)) {
@@ -434,8 +434,8 @@ public class RecordParser {
                 vet.setBrandName(items[2]);
                 vet.setHistoryDate(getDate(items[3]));
                 em.persist(vet);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
 
         }else if("interactions-holbrook.txt".equals(type)){
@@ -451,11 +451,11 @@ public class RecordParser {
                 inter.setAffectingdrug(items[7]);
                 inter.setAffecteddrug(items[8]);                
                 em.persist(inter);
-                em.flush();
-                em.clear();
+                //em.flush();
+                //em.clear();
             }
         }
-        tx.commit();
+       tx.commit();
         long end=System.currentTimeMillis();
         System.out.println("========time spent on type "+type+" is "+(end-start));
         return null;
