@@ -580,6 +580,7 @@ public class TablesDao {
         //System.out.println("created entity manager");
         String q1="select cds from CdDrugSearch cds where upper(cds.name) like '%"+matchKey+"%' and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
        //System.out.println("q1 ="+q1);
+        String q2="select cdss.name from CdDrugSearch cdss where upper(cdss.name) like '%"+matchKey+"%'";
         try{
             Query query=em.createQuery(q1);
             query.setMaxResults(MAX_NO_ROWS);
@@ -613,7 +614,7 @@ public class TablesDao {
                     }
 
                     queryStr = queryStr + ") and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) "
-                            + "and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
+                            + "and (cds.category=13 or cds.category=18 or cds.category=19) and cds.name NOT IN ("+q2+") order by cds.name";//q2 prevents duplication of result.
                     //System.out.println(queryStr);
                     try {                        
                         Query query = em.createQuery(queryStr);
