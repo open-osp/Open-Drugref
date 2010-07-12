@@ -1321,26 +1321,27 @@ public class TablesDao {
                     }
                 } else if (aType.matches("10")) {
 
-                    Query queryAHFSNumber = em.createQuery("select tc.tcAhfsNumber from CdTherapeuticClass tc where tc.tcAhfs=(:aDesc)");
+                    Query queryAHFSNumber = em.createQuery("select distinct tc.tcAhfsNumber from CdTherapeuticClass tc where tc.tcAhfs=(:aDesc)");
                     queryAHFSNumber.setParameter("aDesc", aDesc);
-                    List list = (List) queryAHFSNumber.getResultList();
-                    System.out.println("LIST SIZE " + list.size());
-                    String s = (String) list.get(0);
-                    System.out.println("GET ALLERGY WARNIGN" + s + " atc code " + atcCode);
-                    /*
-                    select tc.tc_atc_number from cd_therapeutic_class tc where tc.tc_atc_number= 'J01CA08' and tc.tc_ahfs_number like ('08:12.16%');+---------------+
+                    List<String> list = (List) queryAHFSNumber.getResultList();
+                    log.debug("LIST SIZE " + list.size());
+                    for(String s: list){
+                        log.debug("GET ALLERGY WARNIGN" + s + " atc code " + atcCode);
+                        /*
+                        select tc.tc_atc_number from cd_therapeutic_class tc where tc.tc_atc_number= 'J01CA08' and tc.tc_ahfs_number like ('08:12.16%');+---------------+
 
-                     */
+                         */
 
-                    Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAhfsNumber like '" + s + "%'");
-                    query.setParameter("atcCode", atcCode);
-                    //query.setParameter("aDesc", s+"%");
-                    List resultTcAtcNumber = query.getResultList();
-                    if (resultTcAtcNumber.size() > 0) {
-                        System.out.println(atcCode + " is in this2 Allergy group " + aDesc);
-                        results.add(aId);
-                    } else {
-                        System.out.println(atcCode + " is NOT in this group " + aDesc);
+                        Query query = em.createQuery("select tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAtcNumber= (:atcCode) and tc.tcAhfsNumber like '" + s + "%'");
+                        query.setParameter("atcCode", atcCode);
+                        //query.setParameter("aDesc", s+"%");
+                        List resultTcAtcNumber = query.getResultList();
+                        if (resultTcAtcNumber.size() > 0) {
+                            System.out.println(atcCode + " is in this2 Allergy group " + aDesc);
+                            results.add(aId);
+                        } else {
+                            System.out.println(atcCode + " is NOT in this group " + aDesc);
+                        }
                     }
                 } else if (aType.matches("14")) {
                     System.out.println("aType=14 is not implemented yet");
