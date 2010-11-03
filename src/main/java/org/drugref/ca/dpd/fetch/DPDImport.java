@@ -34,12 +34,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import org.drugref.ca.dpd.CdActiveIngredients;
+import org.drugref.ca.dpd.CdDrugProduct;
+import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.util.DrugrefProperties;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.MiscUtils;
@@ -208,9 +213,12 @@ public class DPDImport {
     public static void main(String[] args) throws Exception {
 
         
-        DPDImport imp = new DPDImport();
+        /*DPDImport imp = new DPDImport();
         long timeTaken = imp.doItDifferent();  // executeOn(entities);
-        System.out.println("GOING OUT after " + timeTaken);
+        System.out.println("GOING OUT after " + timeTaken);*/
+        //DPDImport imp = new DPDImport();
+        //imp.addStrengthToBrandName();
+       // imp.addDescriptorToSearchName();
     }
 
     private void insertLines(EntityManager entityManager, List<String> sqlLines) {
@@ -236,7 +244,132 @@ public class DPDImport {
     public void p(String str) {
         System.out.println(str);
     }
+    public List addDescriptorToSearchName(){
+        //select all search drugs for each row check if there is a descriptor according to drugcode, check if descriptor is contained in the search name.
+        //append descriptor.
+        EntityManager em=JpaUtils.createEntityManager();
+        EntityTransaction tx=em.getTransaction();
+        tx.begin();
+        String q="select cds from CdDrugSearch cds where cds.category=13";
+        Query qy=em.createQuery(q);
+        List<CdDrugSearch> r=qy.getResultList();
+        String drugcode,drugName,descriptor;
+        StringBuffer newName=new StringBuffer();
+        int count=0;
+        List changedDrugName=new ArrayList();
+        for(CdDrugSearch cds:r){
+            drugcode=cds.getDrugCode();
+            if(isNumber(drugcode)){
+                drugName=cds.getName();
+                q="select cdp from CdDrugProduct cdp where cdp.drugCode=(:drugCode)";
+                qy=em.createQuery(q);
+                qy.setParameter("drugCode", Integer.parseInt(drugcode));
+                List<CdDrugProduct> p=qy.getResultList();
+                for(CdDrugProduct cdp: p){
+                    descriptor=cdp.getDescriptor();
+                    if(descriptor!=null){
+                        descriptor=descriptor.trim();
+                        if(descriptor.length()>0&&!drugName.contains(descriptor)){
+                            //update cd drug search row
+                            newName.append(drugName).append(" ").append(descriptor);
+                            //System.out.println("**new name of drug search="+newName.toString()+"--drugCode="+cds.getDrugCode());
+                            changedDrugName.add(cds.getId());
+                            qy=em.createQuery("update CdDrugSearch cds set cds.name=(:name) where cds.id=(:id)");
+                            qy.setParameter("name", newName.toString());
+                            qy.setParameter("id", cds.getId());
+                            qy.executeUpdate();
+                            count++;
+                            em.flush();
+                        }
+                    }
+                    newName.setLength(0);//reuse newName
+                }
+            }
+        }
 
+        System.out.println("number of new name with descriptor is "+count);
+            em.clear();
+            tx.commit();
+            JpaUtils.close(em);
+
+            return changedDrugName;
+            
+    }
+    private boolean isNumber(String s){
+        Pattern p=Pattern.compile("^\\n*[0-9]+\\n*$");
+        Matcher m=p.matcher(s);
+        if(m.matches()){
+            return true;
+        }else return false;
+    }
+    public List addStrengthToBrandName(){
+        EntityManager em=JpaUtils.createEntityManager();
+        EntityTransaction tx=em.getTransaction();
+        tx.begin();
+        String q="select cds from CdDrugSearch cds where cds.category<>18 and cds.category<>19 and  cds.name not like '%0%' and cds.name not like '%1%' "
+                + "and cds.name not like '%2%' and cds.name not like '%3%' and cds.name not like '%4%' and cds.name not like '%5%' and cds.name not like '%6%'"
+                + " and cds.name not like '%7%' and cds.name not like '%8%' and cds.name not like '%9%'";
+        Query qy=em.createQuery(q);
+        List<CdDrugSearch> r=qy.getResultList();
+        String drugcode,brandname;
+        StringBuffer sb;
+        String q2,q3;
+         List<CdActiveIngredients> r2;
+         List changedDrugName=new ArrayList();
+       try{
+           for(CdDrugSearch cds:r){
+                 drugcode=cds.getDrugCode();
+                 if(isNumber(drugcode)){
+                      brandname=cds.getName();
+                      q2="select cai from CdActiveIngredients cai where cai.drugCode=(:drugcode)";
+                      qy=em.createQuery(q2);
+                      qy.setParameter("drugcode", Integer.parseInt(drugcode));
+                      r2=qy.getResultList();
+                      sb=new StringBuffer();
+                      for(CdActiveIngredients cai:r2){
+                          if(brandname.contains(cai.getStrength())){
+                            //do nothing if brandname already contain strength
+                          }else{
+                                  if(sb.length()==0){
+                                      sb.append(" ");
+                                  }else{
+                                      sb.append("/");
+                                  }
+                                    //check if it's already in the name, if it is, don't need to add
+                                    sb.append(cai.getStrength()).append(cai.getStrengthUnit());
+                          }
+                      }
+                      if(sb.length()>0){
+                        brandname+=sb.toString();
+                        /*if(brandname.contains("'")){
+                            brandname=brandname.replace("'", "\\'");
+                        }*/
+
+                        //System.out.println("** new name after adding strength="+brandname+"--drugcode="+cds.getDrugCode());
+                        changedDrugName.add(cds.getId());
+
+                        q3="update CdDrugSearch cds set cds.name=(:bn) where cds.id=(:cdsid)";
+                        Query qy3=em.createQuery(q3);
+                        qy3.setParameter("bn", brandname);
+                        qy3.setParameter("cdsid", cds.getId());
+                        //System.out.println("q3="+q3);
+                        qy3.executeUpdate();
+                        em.flush();
+                      }
+
+                    em.clear();
+                 }else{;}
+           }
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            tx.commit();
+            JpaUtils.close(em);
+            
+        }
+        System.out.println("number of drug names added strength="+changedDrugName.size());
+        return changedDrugName;
+    }
     public long doItDifferent() {
         long startTime = System.currentTimeMillis();
         EntityManager entityManager = JpaUtils.createEntityManager();
