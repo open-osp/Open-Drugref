@@ -147,12 +147,8 @@ public class ConfigureSearchData {
         
         for (CdDrugProduct drug:productList){
             CdDrugSearch drugSearch = new CdDrugSearch();
-
-            String str=drug.getBrandName();
-            
-          
             drugSearch.setDrugCode(""+drug.getDrugCode());
-            drugSearch.setName(str);
+            drugSearch.setName(drug.getBrandName());
             drugSearch.setCategory(13);
             em.persist(drugSearch);
             em.flush();
