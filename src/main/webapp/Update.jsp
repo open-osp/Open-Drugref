@@ -48,5 +48,14 @@
         </table>
         <p>Time spent on importing data: <%=timeDataImport%> minutes</p>
         <p>Time spent on new generic import: <%=timeGenericImport%> minutes</p>
+        <h1>Added Descriptor and Strength</h1>
+         <%
+        List addedDescriptor=dpdImport.addDescriptorToSearchName();
+        List addedStrength=dpdImport.addStrengthToBrandName();
+        %>
+        <div  style="color: blue;" >Number of drug names being added descriptor: <a><%=addedDescriptor.size()%></a></div>
+        <br><div id="des" style="display:none">ids in cd_drug_search <%=addedDescriptor%></div>
+        <br><div style="color: blue;">Number of drug names being added strength: <a><%=addedStrength.size()%></a></div>
+        <br><div id="str" style="display:none">ids in cd_drug_search <%=addedStrength%></div>
     </body>
 </html>
