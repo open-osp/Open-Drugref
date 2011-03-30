@@ -147,7 +147,12 @@ public class DPDImport {
 
         return arrList;
     }
+    private List getHistoryTable(){
+        List<String> l=new ArrayList();
+        l.add("CREATE TABLE history (id serial PRIMARY KEY,date_time datetime,action varchar(20))");
+        return l;
 
+    }
     public List addIndexToTables() {
         List<String> arrList = new ArrayList();
 
@@ -244,7 +249,7 @@ public class DPDImport {
     public void p(String str) {
         System.out.println(str);
     }
-    public List addDescriptorToSearchName(){
+    public List<Integer> addDescriptorToSearchName(){
         //select all search drugs for each row check if there is a descriptor according to drugcode, check if descriptor is contained in the search name.
         //append descriptor.
         EntityManager em=JpaUtils.createEntityManager();
@@ -256,7 +261,7 @@ public class DPDImport {
         String drugcode,drugName,descriptor;
         StringBuffer newName=new StringBuffer();
         int count=0;
-        List changedDrugName=new ArrayList();
+        List<Integer> changedDrugName=new ArrayList<Integer>();
         for(CdDrugSearch cds:r){
             drugcode=cds.getDrugCode();
             if(isNumber(drugcode)){
@@ -302,7 +307,7 @@ public class DPDImport {
             return true;
         }else return false;
     }
-    public List addStrengthToBrandName(){
+     public List<Integer> addStrengthToBrandName(){
         EntityManager em=JpaUtils.createEntityManager();
         EntityTransaction tx=em.getTransaction();
         tx.begin();
@@ -315,7 +320,7 @@ public class DPDImport {
         StringBuffer sb;
         String q2,q3;
          List<CdActiveIngredients> r2;
-         List changedDrugName=new ArrayList();
+         List<Integer> changedDrugName=new ArrayList<Integer>();
        try{
            for(CdDrugSearch cds:r){
                  drugcode=cds.getDrugCode();
@@ -375,15 +380,20 @@ public class DPDImport {
         EntityManager entityManager = JpaUtils.createEntityManager();
         try {
             EntityTransaction tx = entityManager.getTransaction();
-            //p("%%1",""+tx.isActive());
+            
             tx.begin();
-            //p("%%2",""+tx.isActive());
+            
             //drop tables only if they exist
             if (!getDPDTablesDrop().isEmpty()) {//if some tables are present
                 p("tables exist");
-                insertLines(entityManager, getDPDTablesDrop());
+                insertLines(entityManager, getDPDTablesDrop());//drop tables here
             }
-            insertLines(entityManager, getDPDTables());
+            insertLines(entityManager, getDPDTables());//create table here
+
+            //create table if history is not present, do nothing if present.
+            if(!isTablePresent("history")){
+                insertLines(entityManager, getHistoryTable());
+            }
 
             tx.commit();
             //p("%%3",""+tx.isActive());
@@ -406,7 +416,7 @@ public class DPDImport {
                 }
 
 
-                zipStream = getInactiveZipStream() ;
+                zipStream = getInactiveZipStream();
                 ze = null;
                 while ((ze = zipStream.getNextEntry()) != null) {
                     System.out.println("Files being open " + ze.getName());
@@ -488,9 +498,9 @@ public class DPDImport {
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
     }
-    public HashMap numberTableRows(){
+    public HashMap<String,Long> numberTableRows(){
         EntityManager em=JpaUtils.createEntityManager();
-        HashMap hm=new HashMap();
+        HashMap<String,Long> hm=new HashMap<String,Long>();
         List<String> tableNames=new ArrayList();
         tableNames.add("CdActiveIngredients");
         tableNames.add("CdCompanies");
