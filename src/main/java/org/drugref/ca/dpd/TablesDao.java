@@ -456,8 +456,6 @@ public class TablesDao {
 
     public Vector listSearchElement2(
             String str) {
-        //EntityManagerFactory emf = (EntityManagerFactory) SpringUtils.getBean("entityManagerFactory");
-        //EntityManager em = emf.createEntityManager();
         System.out.println("before create em in listSearchElement2");
         EntityManager em = JpaUtils.createEntityManager();
         System.out.println("created entity manager");
@@ -692,34 +690,6 @@ public class TablesDao {
                 }
                 System.out.println("NUMBER OF DRUGS RETURNED: " + vec.size());
 
-            /*    for(int i=0;i<vec.size();i++){
-                    Hashtable h=(Hashtable)vec.get(i);
-                    String name=(String)h.get("name");
-                    if(name.contains(matchKey)){
-                        directMatch.add(h);
-                        if(directMatch.size()>60){
-                            onlyDirectMatch=true;
-                            break;
-                        }
-                    }else{
-                        indirectMatch.add(h);
-                    }
-                }
-                if(!onlyDirectMatch){
-                    directMatch.addAll(indirectMatch);
-                    Vector tmpV=new Vector();
-                    for(int i=0;i<60 && i<directMatch.size();i++){
-                        tmpV.add(directMatch.get(i));
-                    }
-                    directMatch=tmpV;
-                }
-                System.out.println("directMatch.size()="+directMatch.size());*/
-                /*for (int i = 0; i < vec.size(); i++) {
-                    System.out.println("vec=" + vec.get(i));
-                }
-                for (int i = 0; i < indirectMatch.size(); i++) {
-                    System.out.println("indirectMatch=" + indirectMatch.get(i));
-                }*/
             }catch(Exception e){
                 e.printStackTrace();
             }finally{
@@ -750,9 +720,6 @@ public class TablesDao {
         str = str.replace("'", "");
         String[] strArray = str.split("\\s+");
 
-       // for (int i = 0; i < strArray.length; i++) {
-        //    System.out.println(strArray[i]);
-       // }
 
 //String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
         String queryStr = "select cds from CdDrugSearch cds where ";
