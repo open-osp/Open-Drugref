@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="MacRoman"%>
-<%@page import="java.util.*" %>
+<%@page import="java.util.*,org.drugref.ca.dpd.history.*" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 
@@ -25,6 +25,9 @@
         long timeGenericImport=0L;
         timeGenericImport=newGenericImport.run();//in miliseconds
         timeGenericImport=(timeGenericImport/1000)/60;
+        HistoryUtil h=new HistoryUtil();
+        h.addUpdateHistory();
+
         HashMap hm=dpdImport.numberTableRows();
         Set keys=hm.keySet();
         Iterator iter=keys.iterator();
