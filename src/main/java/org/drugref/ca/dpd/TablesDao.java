@@ -1474,7 +1474,8 @@ public class TablesDao {
             queryRegionalIdentifier.setParameter("pKey", Integer.parseInt(pKey));
             Query queryComponent = em.createQuery("select cai from CdActiveIngredients cai where cai.drugCode=(:pKey)");
             queryComponent.setParameter("pKey", Integer.parseInt(pKey));
-
+            Query queryForm = em.createQuery("select  cf from CdForm cf where cf.drugCode=(:pKey)");
+            queryForm.setParameter("pKey", Integer.parseInt(pKey));
 
             String name = "";
             String atc = "";
@@ -1532,13 +1533,26 @@ public class TablesDao {
                 ha.put("unit", strengthUnit);
                 component.addElement(ha);
             }
+            
+            StringBuilder drugForm = new StringBuilder();
+            List<CdForm> resultForm = queryForm.getResultList();
+            if (resultForm.size() > 0) {
+            	for(CdForm f:resultForm) {
+            		String temp = f.getPharmaceuticalCdForm();
+            		if(drugForm.length()>0) {
+            			drugForm.append(",");
+            		}
+            		drugForm.append(temp);            		
+            	}                
+            }
+            
             Hashtable ha2 = new Hashtable();
             ha2.put("name", name);
             ha2.put("atc", atc);
             ha2.put("product", product);
             ha2.put("regional_identifier", regionalIdentifier);
             ha2.put("components", component);
-
+            ha2.put("drugForm", drugForm.toString());
             returnRows.addElement(ha2);
            // System.out.println("returned when cat=13:"+returnRows);
         } catch (Exception e) {
