@@ -1040,6 +1040,10 @@ public class TablesDao {
     }
 
     public Vector listSearchElementSelectCategories(String str, Vector cat) {
+    	return listSearchElementSelectCategories(str,cat,true,true);
+    }
+    
+    public Vector listSearchElementSelectCategories(String str, Vector cat, boolean wildcardLeft, boolean wildcardRight) {
         EntityManager em = JpaUtils.createEntityManager();
 
         str = str.replace(",", " ");
@@ -1052,7 +1056,7 @@ public class TablesDao {
         String queryStr = "select cds from CdDrugSearch cds where ";
 
         for (int i = 0; i < strArray.length; i++) {
-            queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
+            queryStr = queryStr + "upper(cds.name) like " + "'" + ((wildcardLeft)?"%":"") + strArray[i].toUpperCase() + ((wildcardRight)?"%":"") + "'";
             queryStr = queryStr + " and ";
         }
 

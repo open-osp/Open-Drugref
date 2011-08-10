@@ -151,6 +151,11 @@ public class Drugref {
                 Vector vec=queryDao.listSearchElementSelectCategories(str,cat);
                 return vec;
         }
+        
+        public Vector list_search_element_select_categories_right(String str, Vector cat) {
+            Vector vec=queryDao.listSearchElementSelectCategories(str,cat,false,true);
+            return vec;
+        }
 
         public Vector get_inactive_date(String str ){
              Vector vec=queryDao.getInactiveDate(str);
