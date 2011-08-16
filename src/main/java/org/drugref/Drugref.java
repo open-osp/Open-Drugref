@@ -187,6 +187,12 @@ public class Drugref {
                 Vector vec=queryDao.getAllergyWarnings(atcCode,allergies);
                 return vec;
     }
+     
+     public Vector get_allergy_classes(Vector allergies) {
+         Vector vec=queryDao.getAllergyClasses(allergies);
+         return vec; 
+     }
+     
      public Vector get_drug(String pKey, boolean html) {
                 Vector vec=queryDao.getDrug(pKey,html);
                 return vec;

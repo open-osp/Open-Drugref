@@ -40,7 +40,7 @@ public class SpringUtils
 {
 	private static final String[] configs={"spring_config.xml"};
 
-	private static final ClassPathXmlApplicationContext beanFactory=new ClassPathXmlApplicationContext(configs);
+	public static ClassPathXmlApplicationContext beanFactory=new ClassPathXmlApplicationContext(configs);
 
 
 	public static Object getBean(String beanName) {

@@ -1698,4 +1698,82 @@ public class TablesDao {
         System.out.println("returnRows in getDrugByDrugCode=" + returnRows);
         return returnRows;
     }
+    
+    
+    public Vector getAllergyClasses(Vector allergies) {    	
+    	Vector vec = new Vector();       
+        EntityManager em = JpaUtils.createEntityManager();
+        
+        try {
+            Enumeration e = allergies.elements();
+            while (e.hasMoreElements()) {
+                Hashtable alleHash = new Hashtable((Hashtable) e.nextElement());
+                String aType = (String) alleHash.get("type");
+                String aDesc = (String) alleHash.get("description");
+                String aId = (String) alleHash.get("id");
+
+                if (aType.matches("8")) {
+                	//ATC
+                	Query q1 = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.name=(:descr) and cds.category=(:cat)");
+                	q1.setParameter("descr", aDesc);
+                	q1.setParameter("cat", Integer.valueOf(aType));                	
+                	String cdsDrugCode =(String)q1.getSingleResult();
+                	vec.add(cdsDrugCode);
+                	
+                } else if(aType.matches("10")) {
+                	//AHFS
+                    Query queryAHFSNumber = em.createQuery("select distinct tc.tcAhfsNumber from CdTherapeuticClass tc where tc.tcAhfs=(:aDesc)");
+                    queryAHFSNumber.setParameter("aDesc", aDesc);
+                    List<String> list = (List) queryAHFSNumber.getResultList();
+                    for(String s:list) {
+                    	Query query = em.createQuery("select distinct tc.tcAtcNumber from CdTherapeuticClass tc where tc.tcAhfsNumber like '" + s + "%'");                       
+                        List<String> resultTcAtcNumber = query.getResultList();
+                        vec.addAll(resultTcAtcNumber);
+                    }
+                } else if (aType.matches("11") || aType.matches("12")) {
+                	//GENERIC and GENERIC COMPOUND
+                	//get drug code we can lookup class with using link table
+                	Query q1 = em.createQuery("select cds.id from CdDrugSearch cds where cds.name=(:descr) and cds.category=(:cat)");
+                	q1.setParameter("descr", aDesc);
+                	q1.setParameter("cat", Integer.valueOf(aType));
+                	
+                	Integer cdsId =(Integer)q1.getSingleResult();
+                	if(cdsId != null) {                	
+	                	Query q = em.createQuery("select lgb.drugCode from LinkGenericBrand lgb where lgb.id=(:x)");
+	                	q.setParameter("x", cdsId);
+	                	List<String> drugCodes = q.getResultList();
+	                	
+	                	Query q2 = em.createQuery("select distinct tc.tcAtcNumber from CdTherapeuticClass tc where tc.drugCode in (:codes)");
+	                	q2.setParameter("codes", drugCodes);
+	                	List<String> atcCodes = q2.getResultList();
+	                	vec.addAll(atcCodes);
+                	}
+                } else if(aType.matches("13")) {
+                	//BRAND NAME
+                	Query q1 = em.createQuery("select cds.drugCode from CdDrugSearch cds where cds.name=(:descr) and cds.category=(:cat)");
+                	q1.setParameter("descr", aDesc);
+                	q1.setParameter("cat", Integer.valueOf(aType));
+                	String cdsDrugCode =(String)q1.getSingleResult();
+                	
+                	if(cdsDrugCode != null) {
+                		Query q2 = em.createQuery("select distinct tc.tcAtcNumber from CdTherapeuticClass tc where tc.drugCode = (:drugCode)");
+                		q2.setParameter("drugCode", Integer.valueOf(cdsDrugCode));
+                		List<String> atcCodes = q2.getResultList();
+                		vec.addAll(atcCodes);
+                	}
+                } else if(aType.matches("14")) {
+                	//INGREDIENT
+                } else {                	  
+                	System.out.println("No Match YET desc " + aDesc + " type " + aType + " id " + aId);
+                }
+                
+            }
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }finally {
+        	em.close();
+        }
+        
+    	return vec;
+    }
 }
