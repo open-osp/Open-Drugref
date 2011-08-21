@@ -560,7 +560,7 @@ public class TablesDao {
 
     }
 
-    public Vector listSearchElement4(String str){//use 2 separate queries to speed up search which returns huge number of results.
+    public Vector listSearchElement4(String str, boolean rightOnly){//use 2 separate queries to speed up search which returns huge number of results.
         //System.out.println("before create em in listSearchElement4");
         String matchKey=str.toUpperCase();
         matchKey=matchKey.replace(",", " ");
@@ -576,9 +576,9 @@ public class TablesDao {
         //System.out.println("inactiveDrugs size ="+inactiveDrugs.size());
         EntityManager em = JpaUtils.createEntityManager();
         //System.out.println("created entity manager");
-        String q1="select cds from CdDrugSearch cds where upper(cds.name) like '%"+matchKey+"%' and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
+        String q1="select cds from CdDrugSearch cds where upper(cds.name) like '"+ ((rightOnly)?"":"%") +""+matchKey+"%' and cds.name NOT IN (select cc.name from CdDrugSearch cc where upper(cc.name) like 'APO-%' or upper(cc.name) like 'NOVO-%' or upper(cc.name) like 'MYLAN-%' ) and (cds.category=13 or cds.category=18 or cds.category=19)  order by cds.name";
        //System.out.println("q1 ="+q1);
-        String q2="select cdss.name from CdDrugSearch cdss where upper(cdss.name) like '%"+matchKey+"%'";
+        String q2="select cdss.name from CdDrugSearch cdss where upper(cdss.name) like '"+((rightOnly)?"":"%")+""+matchKey+"%'";
         try{
             Query query=em.createQuery(q1);
             query.setMaxResults(MAX_NO_ROWS);
@@ -626,7 +626,7 @@ public class TablesDao {
             //String queryStr = "select cds.id, cds.category, cds.name from CdDrugSearch cds where ";
                     String queryStr = "select cds from CdDrugSearch cds where (";
                     for (int i = 0; i < strArray.length; i++) {
-                        queryStr = queryStr + "upper(cds.name) like " + "'" + "%" + strArray[i].toUpperCase() + "%" + "'";
+                        queryStr = queryStr + "upper(cds.name) like " + "'" + ((rightOnly)?"":"%") + strArray[i].toUpperCase() + "%" + "'";
                         if (i < strArray.length - 1) {
                             queryStr = queryStr + " and ";
                         }

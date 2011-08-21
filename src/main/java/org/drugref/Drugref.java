@@ -96,9 +96,14 @@ public class Drugref {
         }
 
         public Vector list_search_element3(String searchStr){
-                Vector vec=queryDao.listSearchElement4(searchStr);
+                Vector vec=queryDao.listSearchElement4(searchStr,false);
                 return vec;
         }
+        
+        public Vector list_search_element3_right(String searchStr){
+            Vector vec=queryDao.listSearchElement4(searchStr,true);
+            return vec;
+    }
 
 
         /*
