@@ -559,6 +559,22 @@ public class TablesDao {
         }
 
     }
+    
+    public String getFirstDinInAIGroup(String aiGroupNo) {
+    	String q1="select cdp from CdDrugProduct cdp where cdp.aiGroupNo = (:groupNo)";
+    	EntityManager em = JpaUtils.createEntityManager();
+         try{
+             Query query=em.createQuery(q1);
+             query.setParameter("groupNo", aiGroupNo);
+             List rs = query.getResultList();
+             if(rs.size()>0) {
+            	 return ((CdDrugProduct)rs.get(0)).getDrugIdentificationNumber();
+             }
+         }catch(Exception e){
+             e.printStackTrace();
+         }
+         return null;
+    }
 
     public Vector listSearchElement4(String str, boolean rightOnly){//use 2 separate queries to speed up search which returns huge number of results.
         //System.out.println("before create em in listSearchElement4");
@@ -657,11 +673,22 @@ public class TablesDao {
                for (CdDrugSearch result : results1) {
 
                         boolean isInactive=false;
-                        String drugCode=result.getDrugCode();
+                        String drugCode=result.getDrugCode();                        
                         if(MiscUtils.isStringToInteger(drugCode)){
                             //check if result is inactive.
                             if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
                                     isInactive=true;
+                        }
+                        if(result.getCategory().intValue() == 18) {
+                        	if(drugCode.indexOf("+")!=-1) {
+                        		drugCode = drugCode.substring(0,drugCode.indexOf("+"));
+                        	}
+                        	String din=null;
+                        	if((din=getFirstDinInAIGroup(drugCode))!=null) {
+                        		if(this.getInactiveDate(din).size()>0) {
+                        			isInactive=true;
+                        		}
+                        	}
                         }
                         Hashtable ha = new Hashtable();
                         ha.put("name", result.getName());
@@ -679,6 +706,17 @@ public class TablesDao {
                             //check if result is inactive.
                             if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
                                     isInactive=true;
+                        }
+                        if(result.getCategory().intValue() == 18) {
+                        	if(drugCode.indexOf("+")!=-1) {
+                        		drugCode = drugCode.substring(0,drugCode.indexOf("+"));
+                        	}
+                        	String din=null;
+                        	if((din=getFirstDinInAIGroup(drugCode))!=null) {
+                        		if(this.getInactiveDate(din).size()>0) {
+                        			isInactive=true;
+                        		}
+                        	}
                         }
                         Hashtable ha = new Hashtable();
                         ha.put("name", result.getName());
