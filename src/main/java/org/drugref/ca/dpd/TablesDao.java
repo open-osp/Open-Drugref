@@ -679,7 +679,7 @@ public class TablesDao {
                             if(inactiveDrugs.contains(Integer.parseInt(drugCode)))
                                     isInactive=true;
                         }
-                        if(result.getCategory().intValue() == 18) {
+                        if(result.getCategory().intValue() == 18 || result.getCategory().intValue() == 19) {
                         	if(drugCode.indexOf("+")!=-1) {
                         		drugCode = drugCode.substring(0,drugCode.indexOf("+"));
                         	}
