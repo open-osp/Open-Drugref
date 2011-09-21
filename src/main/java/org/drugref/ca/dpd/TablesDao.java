@@ -561,7 +561,7 @@ public class TablesDao {
     }
     
     public String getFirstDinInAIGroup(String aiGroupNo) {
-    	String q1="select cdp from CdDrugProduct cdp where cdp.aiGroupNo = (:groupNo)";
+    	String q1="select cdp from CdDrugProduct cdp where cdp.aiGroupNo = (:groupNo) order by cdp.lastUpdateDate";
     	EntityManager em = JpaUtils.createEntityManager();
          try{
              Query query=em.createQuery(q1);
