@@ -13,7 +13,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. *
  *
- * 
+ *
  *
  * This software was written for the
  * Department of Family Medicine
@@ -58,17 +58,17 @@ public class DPDImport {
     private static Logger logger = MiscUtils.getLogger();
 
     public ZipInputStream getZipStream() throws Exception {
-        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles.zip";
+        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles.zip";
         return getZipStream(sUrl);
     }
 
     public ZipInputStream getInactiveZipStream() throws Exception {
-            String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/allfiles_ia.zip";
+            String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles_ia.zip";
                     return getZipStream(sUrl);
     }
 
     public ZipInputStream getInactiveTableZipStream() throws Exception {
-        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/prodpharma/databasdon/txt/inactive.zip";
+        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/inactive.zip";
         return getZipStream(sUrl);
     }
 
@@ -129,7 +129,7 @@ public class DPDImport {
 
     public List getDPDTables() {
         List<String> arrList = new ArrayList();
-        
+
         arrList.add("CREATE TABLE  cd_drug_product  (id serial  PRIMARY KEY,drug_code  int default NULL,product_categorization  varchar(80) default NULL,   class  varchar(40) default NULL,   drug_identification_number  varchar(8) default NULL,   brand_name  varchar(200) default NULL, descriptor varchar(150) default NULL, pediatric_flag  char(1) default NULL,   accession_number  varchar(5) default NULL,   number_of_ais  varchar(10) default NULL,   last_update_date  date default NULL,ai_group_no  varchar(10) default NULL,company_code int);");
         arrList.add("CREATE TABLE  cd_companies  (id serial  PRIMARY KEY,   drug_code   int default NULL,   mfr_code  varchar(5) default NULL,   company_code   int default NULL,   company_name  varchar(80) default NULL,   company_type  varchar(40) default NULL,   address_mailing_flag  char(1) default NULL,   address_billing_flag  char(1) default NULL,   address_notification_flag  char(1) default NULL,   address_other  varchar(20) default NULL,   suite_number  varchar(20) default NULL,   street_name  varchar(80) default NULL,   city_name  varchar(60) default NULL,   province  varchar(40) default NULL,   country  varchar(40) default NULL,   postal_code  varchar(20) default NULL,   post_office_box  varchar(15) default NULL);");
         arrList.add("CREATE TABLE  cd_active_ingredients  ( id serial  PRIMARY KEY,  drug_code   int default NULL,   active_ingredient_code   int default NULL,   ingredient  varchar(240) default NULL,   ingredient_supplied_ind  char(1) default NULL,   strength  varchar(20) default NULL,   strength_unit  varchar(40) default NULL,   strength_type  varchar(40) default NULL,   dosage_value  varchar(20) default NULL,   base  char(1) default NULL,   dosage_unit  varchar(40) default NULL,   notes  text);");
@@ -142,7 +142,7 @@ public class DPDImport {
         arrList.add("CREATE TABLE  cd_schedule  (id serial  PRIMARY KEY,   drug_code   int default NULL,   schedule  varchar(40) default NULL);");
         arrList.add("CREATE TABLE  cd_therapeutic_class  (id serial  PRIMARY KEY,   drug_code   int default NULL,   tc_atc_number  varchar(8) default NULL,   tc_atc  varchar(120) default NULL,   tc_ahfs_number  varchar(20) default NULL,   tc_ahfs  varchar(80) default NULL);");
         arrList.add("CREATE TABLE  cd_veterinary_species  (id serial  PRIMARY KEY,   drug_code   int default NULL,   vet_species  varchar(80) default NULL,   vet_sub_species  varchar(80) default NULL);");
-         
+
         arrList.add("CREATE TABLE  interactions  (id serial PRIMARY KEY, affectingatc varchar(7), affectedatc varchar(7) default NULL, effect char(1) default NULL, significance char(1) default NULL, evidence char(1) default NULL, comment text default NULL, affectingdrug text default NULL, affecteddrug text default NULL, CONSTRAINT UNQ_ATC_EFFECT UNIQUE (affectingatc, affectedatc, effect));");
 
         return arrList;
@@ -168,7 +168,7 @@ public class DPDImport {
        arrList.add("create index  cd_schedule_drug_code_idx on     cd_schedule(drug_code);");
        arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
        arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
-       
+
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
@@ -217,7 +217,7 @@ public class DPDImport {
      */
     public static void main(String[] args) throws Exception {
 
-        
+
         /*DPDImport imp = new DPDImport();
         long timeTaken = imp.doItDifferent();  // executeOn(entities);
         System.out.println("GOING OUT after " + timeTaken);*/
@@ -298,7 +298,7 @@ public class DPDImport {
             JpaUtils.close(em);
 
             return changedDrugName;
-            
+
     }
     private boolean isNumber(String s){
         Pattern p=Pattern.compile("^\\n*[0-9]+\\n*$");
@@ -370,7 +370,7 @@ public class DPDImport {
         } finally {
             tx.commit();
             JpaUtils.close(em);
-            
+
         }
         System.out.println("number of drug names added strength="+changedDrugName.size());
         return changedDrugName;
@@ -380,9 +380,9 @@ public class DPDImport {
         EntityManager entityManager = JpaUtils.createEntityManager();
         try {
             EntityTransaction tx = entityManager.getTransaction();
-            
+
             tx.begin();
-            
+
             //drop tables only if they exist
             if (!getDPDTablesDrop().isEmpty()) {//if some tables are present
                 p("tables exist");
@@ -465,7 +465,7 @@ public class DPDImport {
             catch(Exception e){
                 e.printStackTrace();
             }
-            
+
             //drop tables only if they exist
             if (!dropSearchTables().isEmpty()) {
                 insertLines(entityManager, dropSearchTables());
@@ -491,9 +491,9 @@ public class DPDImport {
 
 
         } finally {
-            
+
             JpaUtils.close(entityManager);
-            
+
         }
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
