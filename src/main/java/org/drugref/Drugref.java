@@ -26,6 +26,9 @@ package org.drugref;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import org.drugref.ca.dpd.CdDrugProduct;
+import org.drugref.ca.dpd.CdTherapeuticClass;
 import java.util.List;
 import org.drugref.ca.dpd.TablesDao;
 import java.util.Vector;
@@ -36,6 +39,8 @@ import org.drugref.ca.dpd.History;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
 import org.drugref.util.SpringUtils;
+import org.apache.log4j.Logger;
+import org.drugref.util.MiscUtils;
 
 /**
  *
@@ -48,6 +53,8 @@ public class Drugref {
         public static HashMap<String,Object> DB_INFO=new HashMap<String,Object>();
         
         public static Boolean UPDATE_DB=false;
+        
+        Logger logger = MiscUtils.getLogger();
 
         public String getLastUpdateTime(){
 
@@ -229,5 +236,40 @@ public class Drugref {
 
         return queryDao.list_capabilities();
     }
+    
+   /**
+     * Get a set of drugs by their DIN number.
+     * 
+     * @param din
+     *            the DIN number to search on.
+     * @return A Vector containing the result of the query.
+     */
+    @SuppressWarnings("unchecked")
+    public Vector<String> get_atcs_by_din(String din) {
+
+       Vector<String> answer = new Vector<String>();
+       EntityManager em = JpaUtils.createEntityManager();
+       List<CdTherapeuticClass> searchAtcResults;
+        
+       String queryStr = "select cds from CdTherapeuticClass cds, CdDrugProduct cdp where cdp.drugIdentificationNumber = "+ din + " and cds.drugCode = cdp.drugCode";
+        
+       try {
+            // Attempt to search with the named query
+          Query query = em.createQuery(queryStr);
+        	searchAtcResults = query.getResultList();
+          for (CdTherapeuticClass resultAtc: searchAtcResults)answer.add(resultAtc.getTcAtcNumber());
+
+	     } catch (IllegalStateException e) {
+	        logger.error("Failed to retrieve drug by DIN: object persistence entity manager was closed.");
+	     } catch (IllegalArgumentException e) {
+	        logger.error("Failed to retrieve drug by DIN: named query or parameter has not been defined.");
+	     } finally {
+          JpaUtils.close(em);
+       }
+
+       // Return the results 
+       return answer;
+    }
+
 
 }
