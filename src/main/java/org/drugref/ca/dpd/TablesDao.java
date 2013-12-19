@@ -1814,4 +1814,36 @@ public class TablesDao {
         
     	return vec;
     }
+    
+    public Vector getTcATC(String atc) {
+        EntityManager em = JpaUtils.createEntityManager();
+        Vector result = new Vector();
+        List<CdTherapeuticClass> drugs = new ArrayList<CdTherapeuticClass>();
+        try {
+            String queryStr = " select cds from CdTherapeuticClass cds where cds.tcAtcNumber = (:atc) ";
+            Query query = em.createQuery(queryStr);
+            query.setParameter("atc", atc);
+            
+            drugs = query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            JpaUtils.close(em);
+        }
+        
+        if(drugs.size() > 0) {
+            CdTherapeuticClass drug = drugs.get(0);
+            Hashtable ha = new Hashtable();
+            ha.put("tc_atc", drug.getTcAtc());
+            result.add(ha);
+        } else {
+            Hashtable ha = new Hashtable();
+            ha.put("tc_atc", "Not found");
+            result.add(ha);
+        }
+        
+        return result;
+    }
+
+    
 }
