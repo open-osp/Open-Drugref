@@ -272,4 +272,10 @@ public class Drugref {
     }
 
 
+    public Vector get_atc_name(String atc){
+        Vector result = queryDao.getTcATC(atc);
+        return result;
+    }
+
+
 }
