@@ -1527,9 +1527,16 @@ public class TablesDao {
 
             List resultName = queryName.getResultList();
             if (resultName.size() > 0) {
+            	StringBuilder sb = new StringBuilder();
+            	boolean first = true;
                 for (int i = 0; i < resultName.size(); i++) {
-                    name = (String) resultName.get(i);
+                	if(!first){
+                		sb.append("/ ");
+                	}
+                    sb.append((String) resultName.get(i));
+                    first = false;
                 }
+                name = sb.toString();
             }
 
             List resultAtc = queryAtc.getResultList();
@@ -1569,11 +1576,12 @@ public class TablesDao {
                     ingredient = resultComponent.get(i).getIngredient();
                     strength = resultComponent.get(i).getStrength();
                     strengthUnit = resultComponent.get(i).getStrengthUnit();
+                
+	                ha.put("name", ingredient);
+	                ha.put("strength", Float.valueOf(strength.trim()).floatValue());
+	                ha.put("unit", strengthUnit);
+	                component.addElement(ha);
                 }
-                ha.put("name", ingredient);
-                ha.put("strength", Float.valueOf(strength.trim()).floatValue());
-                ha.put("unit", strengthUnit);
-                component.addElement(ha);
             }
             
             StringBuilder drugForm = new StringBuilder();
