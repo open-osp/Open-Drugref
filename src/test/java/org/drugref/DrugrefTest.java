@@ -28,6 +28,7 @@ public class DrugrefTest extends TestCase {
 		assertEquals(result.size(),1);
 		assertEquals((String)result.get(0),"M04AA03");		
 		
+		/* No longer an active drug
 		allergies = new Vector();
 		h = new Hashtable();
 		h.put("type", "13");
@@ -37,7 +38,8 @@ public class DrugrefTest extends TestCase {
 		result = d.get_allergy_classes(allergies);
 		assertEquals(result.size(),1);		
 		assertEquals((String)result.get(0),"M04AA03");
-				
+		*/
+		
 		allergies = new Vector();
 		h = new Hashtable();
 		h.put("type", "8");
