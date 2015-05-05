@@ -23,24 +23,23 @@
  */
 package org.drugref.ca.dpd.fetch;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.drugref.ca.dpd.CdActiveIngredients;
 import org.drugref.ca.dpd.CdDrugProduct;
@@ -57,25 +56,41 @@ public class DPDImport {
 
     private static Logger logger = MiscUtils.getLogger();
 
-    public ZipInputStream getZipStream() throws Exception {
+    public File getZipStream() throws Exception {
         String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles.zip";
         return getZipStream(sUrl);
     }
 
-    public ZipInputStream getInactiveZipStream() throws Exception {
+    public File getInactiveZipStream() throws Exception {
             String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles_ia.zip";
                     return getZipStream(sUrl);
     }
 
-    public ZipInputStream getInactiveTableZipStream() throws Exception {
+    public File getInactiveTableZipStream() throws Exception {
         String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/inactive.zip";
         return getZipStream(sUrl);
     }
 
-    private  ZipInputStream getZipStream(String sUrl) throws Exception {
+    private File getZipStream(String sUrl) throws IOException {
+        // Get stream from URL
         URL url = new URL(sUrl);
-        ZipInputStream in = new ZipInputStream(new BufferedInputStream(url.openStream()));
-        return in;
+        InputStream is = url.openStream();
+
+        // Create output on local disk
+        File f = File.createTempFile("stream", ".zip");
+        FileOutputStream fos = new FileOutputStream(f);
+
+        // Copy contents to disk
+        try {
+            IOUtils.copy(is, fos);
+        } catch(IOException e) {
+            System.out.println("Could not open stream temp file");
+        } finally {
+            is.close();
+            fos.flush();
+            fos.close();
+        }
+        return f;
     }
 
     public List getDPDTablesDrop() {
@@ -375,12 +390,40 @@ public class DPDImport {
         System.out.println("number of drug names added strength="+changedDrugName.size());
         return changedDrugName;
     }
+
+    private void createDrugRecords(File drugFile, EntityManager em)
+            throws Exception {
+        // Parse into Zip File
+        ZipFile drugZip = new ZipFile(drugFile);
+
+        // Enumerate entries contained within Zip
+        try {
+            Enumeration<? extends ZipEntry> drugEntries = drugZip.entries();
+            while (drugEntries.hasMoreElements()) {
+                // Get entry and stream
+                ZipEntry entry = drugEntries.nextElement();
+
+                // Parse the entry
+                if (!entry.isDirectory()) {
+                    InputStream is = drugZip.getInputStream(entry);
+                    RecordParser.getDPDObject(entry.getName(), is, em);
+                }
+            }
+        } finally {
+            drugZip.close();
+        }
+
+        // Remove temporary file
+        if(!drugFile.delete()) {
+            System.err.println("Could not delete temporary stream file");
+        }
+    }
+
     public long doItDifferent() {
         long startTime = System.currentTimeMillis();
         EntityManager entityManager = JpaUtils.createEntityManager();
         try {
             EntityTransaction tx = entityManager.getTransaction();
-
             tx.begin();
 
             //drop tables only if they exist
@@ -394,65 +437,24 @@ public class DPDImport {
             if(!isTablePresent("history")){
                 insertLines(entityManager, getHistoryTable());
             }
-
             tx.commit();
             //p("%%3",""+tx.isActive());
-            RecordParser recordParse = new RecordParser();
-           try {
-                ZipInputStream zipStream = getZipStream();
-                ZipEntry ze = null;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    String fn=ze.getName();
-                    System.out.println("Files being open " + fn);
-                    if(fn.contains("zip")){
-                        ZipInputStream zis=new ZipInputStream(zipStream);
-                        ZipEntry z=zis.getNextEntry();//assume contains only one file
-                        System.out.println("unzipped="+z.getName());
-                        recordParse.getDPDObject(z.getName(), zis, entityManager);
-                    }
-                    else
-                        recordParse.getDPDObject(fn,zipStream,entityManager);
-                    //entityManager.flush();
-                }
 
-
-                zipStream = getInactiveZipStream();
-                ze = null;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    System.out.println("Files being open " + ze.getName());
-                    String fn=ze.getName();
-                    if(fn.contains("zip")){
-                        ZipInputStream zis=new ZipInputStream(zipStream);
-                        ZipEntry z=zis.getNextEntry();//assume contains only one file
-                        System.out.println("unzipped="+z.getName());
-                        recordParse.getDPDObject(z.getName(), zis, entityManager);
-                    }
-                    else
-                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
-                    //entityManager.flush();
-                }
-
-
-                zipStream = getInactiveTableZipStream() ;
-                ze = null;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    System.out.println("Files being open " + ze.getName());
-                    recordParse.getDPDObject(ze.getName(),zipStream,entityManager);
-                    //entityManager.flush();
-                }
+            try {
+                createDrugRecords(getZipStream(), entityManager);
+                createDrugRecords(getInactiveZipStream(), entityManager);
+                createDrugRecords(getInactiveTableZipStream(), entityManager);
 
                 p("populate interactions table with data");
 
                 // Stream to read file
-                   String url="/interactions-holbrook.txt";
-                    InputStream ins=this.getClass().getResourceAsStream(url);
-                    if (ins==null) System.out.println("ins is null");
-                    recordParse.getDPDObject("interactions-holbrook.txt",ins,entityManager);
-
+                String url="/interactions-holbrook.txt";
+                InputStream ins=this.getClass().getResourceAsStream(url);
+                if (ins==null) System.out.println("ins is null");
+                RecordParser.getDPDObject("interactions-holbrook.txt", ins, entityManager);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //p("%%4",""+tx.isActive());
             try{
                 tx.begin();
             }
