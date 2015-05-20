@@ -26,7 +26,7 @@ public class SpringPropertyConfigurer extends PropertyPlaceholderConfigurer {
 
     public SpringPropertyConfigurer() {
         //setProperties(ConfigUtils.getProperties());
-        System.out.println(" SpringPropertyConfigurer is called");
+        //System.out.println(" SpringPropertyConfigurer is called");
         setProperties(DrugrefProperties.getInstance());
     }
 }

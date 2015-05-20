@@ -26,55 +26,80 @@
 package org.drugref.util;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
+
 /**
  *
  * @author jackson
  */
 public class DrugrefProperties extends Properties{
-    //private static final long serialVersionUID = -5965807410049845132L; ??
+    private static Logger logger = MiscUtils.getLogger();
+    private static final long serialVersionUID = -5965807410049845132L;
+	private static final String DEFAULT_PROPERTIES = "/drugref.properties";
     private static DrugrefProperties drugrefProperties = new DrugrefProperties();
     private static boolean loaded = false;
-
     static{
-        try{
-            System.out.println("static initializer of drugrefproperties");
-            readFromFile("/drugref.properties",drugrefProperties);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+            logger.debug("static initializer of drugrefproperties");
+            readFromFile(DEFAULT_PROPERTIES,drugrefProperties);
+    }
+    
+
+    private DrugrefProperties() {
+		logger.debug("DRUGREF PROPS CONSTRUCTOR");
+	}
+
+    public static DrugrefProperties getInstance() {
+    	return getInstance(DEFAULT_PROPERTIES);
     }
     	/**
 	 * @return DrugrefProperties the instance of DrugrefProperties
 	 */
-	public static DrugrefProperties getInstance() {
+	public static DrugrefProperties getInstance(String url) {
             Enumeration em=drugrefProperties.propertyNames();
             while(em.hasMoreElements()){
                 String ss=(String)em.nextElement();
-                //System.out.println("property="+ss);
-                //System.out.println("value="+drugrefProperties.getProperty(ss));
+//                logger.debug("property="+ss);
+//                logger.debug("value="+drugrefProperties.getProperty(ss));
 
         }
+
 		return drugrefProperties;
 	}
-        private static void readFromFile(String url, Properties p) throws IOException {
-		InputStream is = DrugrefProperties.class.getResourceAsStream(url);
-		if (is == null) is = new FileInputStream(url);
-
+	
+	
+	
+    private static void readFromFile(String url, Properties p) {
+    	
+		InputStream is = null;
+	
 		try {
+			is = DrugrefProperties.class.getResourceAsStream(url);
+			if (is == null) {
+				is = new FileInputStream(url);
+			}
 			p.load(is);
+			
+		} catch (FileNotFoundException e1) {
+			logger.error("file not found at:  " + url, e1);
+		} catch (IOException e1) {
+			logger.error("IO while retrieving: " + url, e1);
 		} finally {
-			is.close();
+			try {
+				if(is != null) {
+					is.close();
+				}
+			} catch (IOException e) {
+				logger.error("IO Error: ", e);
+			}
 		}
-	}
 
-        private DrugrefProperties() {
-		System.out.println("DRUGREF PROPS CONSTRUCTOR");
 	}
-
 
 	public void loader(InputStream propertyStream) {
 		if (!loaded) {
@@ -83,7 +108,7 @@ public class DrugrefProperties extends Properties{
 				propertyStream.close();
 				loaded = true;
 			} catch (IOException ex) {
-				System.err.println("IO Error: " + ex.getMessage());
+				logger.error("IO Error: " + ex.getMessage());
 			}
 		}
 	}
@@ -96,7 +121,7 @@ public class DrugrefProperties extends Properties{
 				fis2.close();
 				loaded = true;
 			} catch (IOException ex) {
-				System.err.println("IO Error: " + ex.getMessage());
+				logger.error("IO Error: " + ex.getMessage());
 			}
 		}
 	}

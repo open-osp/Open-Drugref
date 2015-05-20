@@ -31,7 +31,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.xmlrpc.XmlRpcServer;
-
+import org.apache.log4j.Logger;
+import org.drugref.util.MiscUtils;
 /**
  *
  * @author jaygallagher
@@ -39,9 +40,10 @@ import org.apache.xmlrpc.XmlRpcServer;
 public class DrugrefService extends HttpServlet {
 
     public static XmlRpcServer xmlrpc = new XmlRpcServer();
-
+    private static Logger logger = MiscUtils.getLogger();
+    
     public void init(ServletConfig config) throws ServletException {
-        System.out.println("HERE-INIT");
+        logger.debug("HERE-INIT");
         xmlrpc = new XmlRpcServer();
         xmlrpc.addHandler("$default", new Drugref());
     }
@@ -55,7 +57,7 @@ public class DrugrefService extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("HERE-POST");
+        logger.debug("HERE-POST");
         byte[] result = xmlrpc.execute(request.getInputStream(), null, null);
         response.setContentType("text/xml");
         response.setContentLength(result.length);
@@ -78,7 +80,7 @@ public class DrugrefService extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-    System.out.println("HERE-GET");
+    logger.debug("HERE-GET");
     processRequest(request, response);
     }
      */

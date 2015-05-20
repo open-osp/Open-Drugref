@@ -53,6 +53,6 @@
     <tx:annotation-driven transaction-manager="txManager" />
 
 	<!-- Managed JPA Beans -->
-    <context:component-scan base-package="org.drugref"/>
+    <context:component-scan base-package="org.drugref" />
 
 </beans>

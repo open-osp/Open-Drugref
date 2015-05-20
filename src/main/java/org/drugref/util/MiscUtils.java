@@ -45,7 +45,7 @@ public class MiscUtils {
 
         for (int i = 0; i < strList.size(); i++) {
             Integer element = Integer.parseInt(strList.get(i).toString());
-            System.out.println("in  toIntegerArrayList: "+element);
+            //System.out.println("in  toIntegerArrayList: "+element);
             intArrayList.add(element);
         }
         return intArrayList;

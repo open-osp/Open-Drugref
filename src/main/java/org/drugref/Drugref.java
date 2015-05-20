@@ -22,23 +22,26 @@
  * Ontario, Canada
  */
 package org.drugref;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import org.drugref.ca.dpd.CdDrugProduct;
+
 import org.drugref.ca.dpd.CdTherapeuticClass;
+
 import java.util.List;
+
 import org.drugref.ca.dpd.TablesDao;
+
 import java.util.Vector;
+
 import javax.persistence.Query;
 import javax.persistence.EntityManager;
+
 import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.History;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
 import org.drugref.util.SpringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.drugref.util.MiscUtils;
 
@@ -48,16 +51,70 @@ import org.drugref.util.MiscUtils;
  */
 
 public class Drugref {
+	
         TablesDao queryDao = (TablesDao) SpringUtils.getBean("tablesDao");
-
-        public static HashMap<String,Object> DB_INFO=new HashMap<String,Object>();
+        public static HashMap<String,Object> DB_INFO=new HashMap<String,Object>();       
+        public static Boolean UPDATE_DB=false;        
+        private static Logger logger = MiscUtils.getLogger();
         
-        public static Boolean UPDATE_DB=false;
+        /**
+         * Dennis Warren Colcamex Resources
+         * @param DIN
+         * @param bvalue
+         * @return
+         */
+        public synchronized Vector get_drug_by_DIN(String DIN, boolean bvalue) {
+        	Vector drug = null;
+        	int pKey = get_drug_pkey_from_DIN(DIN); 
+        	
+        	if( pKey > 0 ) {
+        		drug = get_drug(pKey, bvalue);
+        	}
+        	return drug;
+        }
         
-        Logger logger = MiscUtils.getLogger();
-
+        /**
+         * Dennis Warren Colcamex Resources
+         * @param DIN
+         * @return
+         */
+        public synchronized int get_drug_pkey_from_DIN( String DIN ) {
+        	return queryDao.getDrugpKeyFromDIN(DIN);
+        }
+        
+        /**
+         * Dennis Warren Colcamex Resources
+         * @param drugId
+         * @return
+         */
+        public synchronized int get_drug_pkey_from_drug_id( String drugId ) {
+        	int pKey = 0;
+        	if(StringUtils.isNumeric(drugId)) {
+        		pKey = Integer.parseInt(drugId);
+        	}
+        	if(pKey > 0) {
+        		return queryDao.getDrugpKeyFromDrugId(pKey);
+        	}
+        	return pKey;
+        }
+        
+        /**
+         * Dennis Warren Colcamex Resources
+         * @param DIN
+         * @return
+         */
+        public synchronized int get_drug_id_from_DIN( String DIN ) {        	
+        	Integer drugId = null; 
+        	if( ! DIN.isEmpty() ) {
+        		drugId = queryDao.getDrugIdFromDIN(DIN);
+        	}        	
+        	if( drugId == null ) {
+        		drugId = 0;
+        	}
+        	return drugId;
+        }
+        
         public String getLastUpdateTime(){
-
             if(UPDATE_DB){
                 return "updating";
             }else{
@@ -117,17 +174,18 @@ public class Drugref {
          * Returns ATC, DIN, Route, Form
          */
         public Vector get_drug_2(String pkey,boolean html){
-                System.out.println("IN get_drug_2 "+pkey);
+                logger.debug("IN get_drug_2 "+pkey);
                 Hashtable returnHash = new Hashtable();
                 Integer id = Integer.parseInt(pkey);
                 
                 CdDrugSearch cds = queryDao.getSearchedDrug(id);
+                
                 if (cds != null){
                     cds.getDrugCode();
                     cds.getCategory();
                     returnHash.put("drugCode",cds.getDrugCode());
                     returnHash.put("cat",cds.getCategory());
-                    System.out.println("drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
+                    logger.debug("drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
 
                     if (cds.getCategory() == 13){
                        return queryDao.getDrug(pkey, true);
@@ -149,12 +207,12 @@ public class Drugref {
         }
 
         public Vector list_brands_from_element(String drugID) {
-                System.out.println("in drugref.java list_brands_from_element");
-                System.out.println("drugID="+drugID);
+                logger.debug("in drugref.java list_brands_from_element");
+                logger.debug("drugID="+drugID);
                 Vector vec=queryDao.listBrandsFromElement(drugID);
-                System.out.println("after listBrandsFromElement.");
+                logger.debug("after listBrandsFromElement.");
                 for(int i=0;i<vec.size();i++){
-                        System.out.println("vector="+vec.get(i));
+                        logger.debug("vector="+vec.get(i));
                 }
                 return vec;
         }
@@ -175,14 +233,14 @@ public class Drugref {
         }
 
        public Vector get_generic_name(String drugID) {
-                System.out.println("in get_generic_name,drugref.java");
+                logger.debug("in get_generic_name,drugref.java");
                 Vector vec=new Vector();
                 try{
                     vec=queryDao.getGenericName(drugID);
                 }
                 catch(Exception e){e.printStackTrace();}
                 for (int i=0; i<vec.size();i++){
-                        System.out.println("the returned vec: vec.get(i)="+vec.get(i));
+                        logger.debug("the returned vec: vec.get(i)="+vec.get(i));
                 }
                 return vec;
         }
@@ -203,6 +261,10 @@ public class Drugref {
      public Vector get_allergy_classes(Vector allergies) {
          Vector vec=queryDao.getAllergyClasses(allergies);
          return vec; 
+     }
+     
+     public Vector get_drug(int pKey, boolean html) {
+    	 return get_drug(pKey+"", html);
      }
      
      public Vector get_drug(String pKey, boolean html) {

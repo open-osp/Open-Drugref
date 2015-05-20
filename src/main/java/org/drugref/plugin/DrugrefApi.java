@@ -49,21 +49,21 @@ Object obj3=new Object();
 
 obj1=api.get("attribute", key1);
 if(obj1 instanceof Vector)
-System.out.println("obj1 is a vector");
+//System.out.println("obj1 is a vector");
 else if(obj1 instanceof Hashtable)
-System.out.println("obj1 is a hashtable");
+//System.out.println("obj1 is a hashtable");
 
 obj2=api.get("attribute2", key2);
 if(obj2 instanceof Vector)
-System.out.println("obj2 is a vector");
+//System.out.println("obj2 is a vector");
 else if(obj2 instanceof Hashtable)
-System.out.println("obj2 is a hashtable");
+//System.out.println("obj2 is a hashtable");
 
 obj3=api.get("found", key3);
 if(obj3 instanceof Vector)
-System.out.println("obj3 is a vector");
+//System.out.println("obj3 is a vector");
 else if(obj3 instanceof Hashtable)
-System.out.println("obj3 is a hashtable");
+//System.out.println("obj3 is a hashtable");
 
 }
  */
@@ -118,7 +118,7 @@ public class DrugrefApi {
             ha.put("requires", requires);
             this.provided.put(provides.get(i), ha);
         }
-        System.out.println("this.provided=" + this.provided.toString());
+        //System.out.println("this.provided=" + this.provided.toString());
     }
 
     public void addquery() {
@@ -133,9 +133,9 @@ public class DrugrefApi {
     char[] char1 = str1.toCharArray();
     char[] char2 = str2.toCharArray();
     for (int i = 0; i < char1.length; i++) {
-    //System.out.println("HERE");
-    //System.out.println(char1[i]);
-    //System.out.println(char2[i]);
+    ////System.out.println("HERE");
+    ////System.out.println(char1[i]);
+    ////System.out.println(char2[i]);
     assertEquals(char1[i], char2[i]);
     }
     }
@@ -147,26 +147,26 @@ public class DrugrefApi {
     char[] char1 = str1.toCharArray();
     char[] char2 = str2.toCharArray();
     for (int i = 0; i < char1.length; i++) {
-    // System.out.println("HERE");
-    //System.out.println(char1[i]);
-    //System.out.println(char2[i]);
+    // //System.out.println("HERE");
+    ////System.out.println(char1[i]);
+    ////System.out.println(char2[i]);
     assertEquals(char1[i], char2[i]);
     }
     }
      */
 
     public void p(String str, String s) {
-        System.out.println(str + "=" + s);
+        ////System.out.println(str + "=" + s);
     }
 
     public void p(String str) {
-        System.out.println(str);
+        //System.out.println(str);
     }
 
     public Object get(String attribute, Vector key) {
-        System.out.println("======in get======");
-        System.out.println("attribute=" + attribute);
-        System.out.println("key=" + key.toString());
+        //System.out.println("======in get======");
+        //System.out.println("attribute=" + attribute);
+        //System.out.println("key=" + key.toString());
         Hashtable haError = new Hashtable();
         String valStr = "Attribute " + attribute + " not available";
         haError.put("Error", valStr);
@@ -182,7 +182,7 @@ public class DrugrefApi {
            }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("except1");
+            //System.out.println("except1");
         }
         Hashtable queryinfo = new Hashtable();
         try {
