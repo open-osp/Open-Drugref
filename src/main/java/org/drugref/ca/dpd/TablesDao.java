@@ -25,16 +25,20 @@ package org.drugref.ca.dpd;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 import org.drugref.plugin.*;
+import org.drugref.util.DrugrefProperties;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.MiscUtils;
 
@@ -728,6 +732,39 @@ public class TablesDao {
                 }
                 System.out.println("NUMBER OF DRUGS RETURNED: " + vec.size());
 
+                if("true".equals(DrugrefProperties.getInstance().getProperty("sort_down_mfg_tagged_generics", "false"))) {
+	                //sort the generics with no manufacturer code up
+	                Collections.sort(vec,new Comparator<Hashtable>() {
+	
+						public int compare(Hashtable o1, Hashtable o2) {
+							String name = (String)o1.get("name");
+							String name2 = (String)o2.get("name");
+							
+							//Pattern p = Pattern.compile();
+							String regex = "^(ACT|APO|Dom|PHL|PMS|Ratio|Riva|Teva|AVA|AURO|DOM|ECL|JAMP|MAR|PRO|RAN|RIVA|TEVA|DOM|RATIO|MINT|MAR|RHO|ACH|ZYM|CAL|GEN)\\-.*";
+							
+							if(!name.matches(regex) && !name2.matches(regex)) {
+								return name.compareTo(name2);
+							}
+							
+							if(name.matches(regex) && !name2.matches(regex)) {
+								return 1;
+							}
+							
+							if(name.matches(regex) && name2.matches(regex)) {
+								return name.compareTo(name2);
+							}
+							
+							if(!name.matches(regex) && name2.matches(regex)) {
+								return -1;
+							}
+							
+							//should never get to here
+							return 0;
+						}
+	                	
+	                });
+				}
             }catch(Exception e){
                 e.printStackTrace();
             }finally{
