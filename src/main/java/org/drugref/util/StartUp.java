@@ -33,8 +33,8 @@ package org.drugref.util;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-//import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
+import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**
  * This ContextListener is used to Initialize classes at startup - Initialize the DBConnection Pool.
@@ -67,7 +67,8 @@ public class StartUp implements ServletContextListener {
 		} catch (java.io.FileNotFoundException ex) {
 	        logger.error( "properties file not found at" + propertiesFilePath, ex);
 		}
-
+		
+		InteractionsCheckerFactory.start(); //Get the file loading
 		logger.info("LAST LINE IN contextInitialized");
 
 	}

@@ -54,5 +54,7 @@
 
 	<!-- Managed JPA Beans -->
     <context:component-scan base-package="org.drugref" />
+    
+    <bean  id="taskScheduler" class="org.springframework.scheduling.timer.TimerTaskExecutor" />
 
 </beans>

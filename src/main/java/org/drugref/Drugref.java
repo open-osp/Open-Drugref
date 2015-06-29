@@ -22,6 +22,8 @@
  * Ontario, Canada
  */
 package org.drugref;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -44,6 +46,9 @@ import org.drugref.util.SpringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.drugref.util.MiscUtils;
+import org.drugref.dinInteractionCheck.InteractionRecord;
+import org.drugref.dinInteractionCheck.InteractionsChecker;
+import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**
  *
@@ -338,6 +343,126 @@ public class Drugref {
         Vector result = queryDao.getTcATC(atc);
         return result;
     }
+    
+    
+    public Vector interaction_by_regional_identifier(Vector listOfDins, int minSignificates){
+
+    	InteractionsChecker interactionsChecker = InteractionsCheckerFactory.getInteractionChecker();
+    	Vector retVec = new Vector();
+    	logger.debug("Interaction checker active:"+interactionsChecker.interactionsCheckerActive());
+    	if(!interactionsChecker.interactionsCheckerActive()){
+    		logger.debug("returning error message");
+    		Vector v = new Vector();
+    		Hashtable returnHash = new Hashtable();
+    		returnHash.put("id","0");
+			returnHash.put("updated_at",new Date());
+			returnHash.put("name","Interactions Service Not Available");
+			StringBuilder sb = new StringBuilder();
+			
+			for(String s:interactionsChecker.getErrors()){
+				sb.append(s);
+			}
+			if(sb.length()==0){
+				returnHash.put("body", "Interaction Checker Not Available");
+			}else{
+				returnHash.put("body", sb.toString());
+			}
+			//returnHash.put("atc = drugATC;
+			returnHash.put("evidence"," ");
+			returnHash.put("reference", "");
+			returnHash.put("significance","3");//  //severity
+			returnHash.put("trusted",true);
+			returnHash.put("author","Medi-Span");
+			
+    			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr	
+    		v.add(returnHash);
+    		
+        	return v;
+
+    	}
+    	
+    	Date now = new Date();
+    	if(interactionsChecker.getExpiryDate().before(now)){
+    		int daysBetween =  (int) ((now.getTime() -interactionsChecker.getExpiryDate().getTime()) / (1000 * 60 * 60 * 24));
+    		logger.info(" how many days expired "+daysBetween);
+    		Hashtable returnHash = new Hashtable();
+    		returnHash.put("id","0");
+			returnHash.put("updated_at",now); //NEEDS TO Be replaced by date of the file
+			returnHash.put("name","Interactions Service Expired on");
+			returnHash.put("evidence"," ");
+			returnHash.put("reference", "");
+			returnHash.put("significance","3");//  //severity
+			returnHash.put("trusted",true);
+			returnHash.put("author","Medi-Span");
+			
+			
+    		if(daysBetween < 60){
+    			returnHash.put("body", "Interaction Checker has Expired a new version must be installed to continue use");
+    			retVec.add(returnHash);
+    		}else{
+    			returnHash.put("body", "Interaction Checker has Expired, a new version must be installed");
+    			Vector v = new Vector();
+    			v.add(returnHash);
+            	return v;
+    		}
+    		
+    	}
+    	
+    	List<InteractionRecord> interactionsFull = new ArrayList<InteractionRecord>();
+    	for (String din1 :(List<String>)listOfDins){
+    		
+    		for (String din2 :(List<String>)listOfDins){
+    			logger.debug("din "+din1+" din "+din2);
+    			List<InteractionRecord> interactions = interactionsChecker.check(din1, din2);
+    			if(interactions != null){
+    				logger.error("din "+din1+" din "+din2+" size "+interactions.size());
+    				interactionsFull.addAll(interactions);
+    			}
+    			
+    		}
+    	}
+    	for (String din1 :(List<String>)listOfDins){
+    		List<InteractionRecord> foodInteractions = interactionsChecker.checkForFoodAndEthanol(din1);
+    		
+    		logger.debug("food "+foodInteractions);
+    		if(foodInteractions != null){
+    			interactionsFull.addAll(foodInteractions);
+    		}
+    	}
+    	
+		logger.debug("interactionsFull "+interactionsFull.size());
+    	
+    	
+    	for (InteractionRecord i : interactionsFull){
+    		logger.debug("i record"+retVec.size());
+    		Hashtable returnHash = new Hashtable();
+    		returnHash.put("id",i.getIntid());
+			returnHash.put("updated_at",interactionsChecker.getPublishDate()); //NEEDS TO Be replaced by date of the file
+			returnHash.put("name",nullCheck(i.getWAR()));
+			String body = "<b>Effect:</b>"+i.getEFF()+"<br><b>Mechanism:</b> "+i.getMEC()+"<br><b>Management:</b> "+i.getMAN()+"<br><b>Discussion:</b>"+i.getDIS()+"<br><b>Reference:</b>"+i.getREF()+"<br><br>"+interactionsChecker.getCopyright()+"<br><b>Issue:</b>"+interactionsChecker.getIssue()+"<br><b>Disclaimer:</b>"+interactionsChecker.getDisclaimer();
+			returnHash.put("body", body);
+			//returnHash.put("atc = drugATC;
+			returnHash.put("evidence"," ");
+			returnHash.put("reference", "");
+			returnHash.put("significance",i.getSeverity());//  //severity
+			returnHash.put("trusted",true);
+			returnHash.put("author","Medi-Span");
+			
+			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr	
+			retVec.add(returnHash);
+    		logger.debug("ie record"+retVec.size());
+    	}
+    	logger.debug("v.size "+retVec.size());
+		return retVec;
+	}
+    
+    private String nullCheck(String s){
+    	if(s ==null){
+    		return "n/a";
+    	}
+    	return s;
+    }
+    
 
 
 }
