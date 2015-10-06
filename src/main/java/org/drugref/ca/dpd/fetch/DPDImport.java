@@ -394,23 +394,55 @@ public class DPDImport {
     private void createDrugRecords(File drugFile, EntityManager em)
             throws Exception {
         // Parse into Zip File
-        ZipFile drugZip = new ZipFile(drugFile);
+        ZipFile drugZip = null;
 
         // Enumerate entries contained within Zip
         try {
+        	drugZip = new ZipFile(drugFile);
             Enumeration<? extends ZipEntry> drugEntries = drugZip.entries();
             while (drugEntries.hasMoreElements()) {
                 // Get entry and stream
                 ZipEntry entry = drugEntries.nextElement();
-
-                // Parse the entry
-                if (!entry.isDirectory()) {
-                    InputStream is = drugZip.getInputStream(entry);
-                    RecordParser.getDPDObject(entry.getName(), is, em);
+               
+                //copy the zip to file, and then open it up as a ZipFile
+                File f = File.createTempFile(entry.getName(), "-item.zip");
+                FileOutputStream fos = null;
+                try {
+                	fos = new FileOutputStream(f);
+                	IOUtils.copy(drugZip.getInputStream(entry),fos);
+                } catch(IOException e) {
+                	System.err.println("Failed to write to file " + f);
+                	continue;
+                } finally {
+                	IOUtils.closeQuietly(fos);
                 }
+                
+                ZipFile entryZip = null;
+                
+                try {
+                	entryZip = new ZipFile(f);
+                
+	                Enumeration<? extends ZipEntry> entryZipEntries = entryZip.entries();
+	                while (entryZipEntries.hasMoreElements()) {
+	                	ZipEntry innerEntry = entryZipEntries.nextElement();
+	                	
+	                	// Parse the entry
+	                    if (!innerEntry.isDirectory()) {
+	                    	RecordParser.getDPDObject(innerEntry.getName(), entryZip.getInputStream(innerEntry), em);
+	                    }
+	                    
+	                }
+                } finally {
+                	if(entryZip != null) {
+                		entryZip.close();
+                	}
+                }
+                
             }
         } finally {
-            drugZip.close();
+        	if(drugZip != null) {
+        		drugZip.close();
+        	}
         }
 
         // Remove temporary file
