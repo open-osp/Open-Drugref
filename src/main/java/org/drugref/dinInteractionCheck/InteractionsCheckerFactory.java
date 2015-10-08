@@ -37,6 +37,7 @@ import org.drugref.util.DrugrefProperties;
 import org.drugref.util.MiscUtils;
 import org.drugref.util.SpringUtils;
 import org.springframework.scheduling.timer.TimerTaskExecutor;
+import org.springframework.util.StringUtils;
 
 public class InteractionsCheckerFactory {
 	
@@ -51,6 +52,9 @@ public class InteractionsCheckerFactory {
 	
 	
 	public static void start(){
+		if(StringUtils.isEmpty(licenceKey)) {
+			return;
+		}
 		if(taskScheduler == null){
 			taskScheduler = (TimerTaskExecutor) SpringUtils.getBean("taskScheduler");
 			scheduler(null);
