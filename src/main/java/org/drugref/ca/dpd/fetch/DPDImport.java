@@ -404,38 +404,52 @@ public class DPDImport {
                 // Get entry and stream
                 ZipEntry entry = drugEntries.nextElement();
                
-                //copy the zip to file, and then open it up as a ZipFile
-                File f = File.createTempFile(entry.getName(), "-item.zip");
-                FileOutputStream fos = null;
-                try {
-                	fos = new FileOutputStream(f);
-                	IOUtils.copy(drugZip.getInputStream(entry),fos);
-                } catch(IOException e) {
-                	System.err.println("Failed to write to file " + f);
-                	continue;
-                } finally {
-                	IOUtils.closeQuietly(fos);
-                }
-                
-                ZipFile entryZip = null;
-                
-                try {
-                	entryZip = new ZipFile(f);
-                
-	                Enumeration<? extends ZipEntry> entryZipEntries = entryZip.entries();
-	                while (entryZipEntries.hasMoreElements()) {
-	                	ZipEntry innerEntry = entryZipEntries.nextElement();
-	                	
-	                	// Parse the entry
-	                    if (!innerEntry.isDirectory()) {
-	                    	RecordParser.getDPDObject(innerEntry.getName(), entryZip.getInputStream(innerEntry), em);
-	                    }
-	                    
+                if(entry.getName().endsWith(".zip")) {
+	                //copy the zip to file, and then open it up as a ZipFile
+	                File f = File.createTempFile(entry.getName(), "-item.zip");
+	                FileOutputStream fos = null;
+	                try {
+	                	fos = new FileOutputStream(f);
+	                	IOUtils.copy(drugZip.getInputStream(entry),fos);
+	                } catch(IOException e) {
+	                	System.err.println("Failed to write to file " + f);
+	                	continue;
+	                } finally {
+	                	IOUtils.closeQuietly(fos);
 	                }
-                } finally {
-                	if(entryZip != null) {
-                		entryZip.close();
-                	}
+	                
+	                ZipFile entryZip = null;
+	                
+	                try {
+	                	entryZip = new ZipFile(f);
+	                
+		                Enumeration<? extends ZipEntry> entryZipEntries = entryZip.entries();
+		                while (entryZipEntries.hasMoreElements()) {
+		                	ZipEntry innerEntry = entryZipEntries.nextElement();
+		                	
+		                	// Parse the entry
+		                    if (!innerEntry.isDirectory()) {
+		                    	RecordParser.getDPDObject(innerEntry.getName(), entryZip.getInputStream(innerEntry), em);
+		                    }
+		                    
+		                }
+	                } finally {
+	                	if(entryZip != null) {
+	                		entryZip.close();
+	                	}
+	                }
+                } else {
+                	 if (!entry.isDirectory()) {
+                         InputStream is = null;
+                         try {
+	                         is = drugZip.getInputStream(entry);
+	                         RecordParser.getDPDObject(entry.getName(), is, em);
+                         }catch(Exception e) {
+                        	 MiscUtils.getLogger().error("Error",e);
+                         } finally {
+                        	 IOUtils.closeQuietly(is);
+                         }
+                     }
                 }
                 
             }
