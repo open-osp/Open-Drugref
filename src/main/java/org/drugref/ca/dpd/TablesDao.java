@@ -788,7 +788,7 @@ public class TablesDao {
 							String name2 = (String)o2.get("name");
 							
 							//Pattern p = Pattern.compile();
-							String regex = "^(ACT|APO|Dom|PHL|PMS|Ratio|Riva|Teva|AVA|AURO|DOM|ECL|JAMP|MAR|PRO|RAN|RIVA|TEVA|DOM|RATIO|MINT|MAR|RHO|ACH|ZYM|CAL|GEN)\\-.*";
+							String regex = "^(ACT|APO|Dom|PHL|PMS|Ratio|Riva|Teva|AVA|AURO|DOM|ECL|JAMP|MAR|PRO|RAN|RIVA|TEVA|DOM|RATIO|MINT|MAR|RHO|ACH|ZYM|CAL|GEN|ABBOTT|ACCEL|AG|ALTI|GD|CO|AG|BIO|BCI|MED)(\\-|\\s).*";
 							
 							if(!name.matches(regex) && !name2.matches(regex)) {
 								return name.compareTo(name2);
