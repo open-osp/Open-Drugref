@@ -440,6 +440,34 @@ public class TablesDao {
         return ret;
     }
 
+        public List<String> findLikeDins(String din){
+    	 EntityManager em = JpaUtils.createEntityManager();
+         //EntityTransaction tx = em.getTransaction();
+    	 List<String> dins  = new ArrayList<String>();
+         //tx.begin();
+         try {
+             String queryStr = " select cds from CdDrugProduct cds where cds.drugIdentificationNumber = (:din) ";
+             Query query = em.createQuery(queryStr);
+             query.setParameter("din", din);
+             List<CdDrugProduct> list = query.getResultList();
+             if (list.size() > 0) {
+                  String aiGroupNo = list.get(0).getAiGroupNo();
+                  String queryStr2 = " select cds from CdDrugProduct cds, CdDrugStatus cdStat where cds.aiGroupNo = (:aiGroupNo) and cds.drugCode = cdStat.drugCode and cdStat.currentStatusFlag = 'Y'";
+                  Query query2 = em.createQuery(queryStr2);
+                  query2.setParameter("aiGroupNo", aiGroupNo);
+                  List<CdDrugProduct> activeList = query2.getResultList();
+                  for(CdDrugProduct cdp: activeList){
+                	  dins.add(cdp.getDrugIdentificationNumber());
+                  }
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+         } finally {
+             JpaUtils.close(em);
+         }
+         return dins;
+    }
+    
     public List listDrugsbyAIGroup(String aiGroup) {
         EntityManager em = JpaUtils.createEntityManager();
         List<Object[]> results = null;

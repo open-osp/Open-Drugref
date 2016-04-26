@@ -39,12 +39,16 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.drugref.ca.dpd.TablesDao;
 import org.drugref.util.MiscUtils;
+import org.drugref.util.SpringUtils;
 
 
 public class InteractionsChecker {
 	
 	private static final Logger logger = MiscUtils.getLogger();
+	
+	TablesDao queryDao = (TablesDao) SpringUtils.getBean("tablesDao");
 	
 	
 	int count = 0;
@@ -94,14 +98,40 @@ public class InteractionsChecker {
 	
 	SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");	
 
+	//If din is not current need to find one that is current.
+	public String findClassByDinOrLikeDin(String din){
+		DinRecord dinRecord = dinmap.get(din);
+		if(dinRecord != null){
+			logger.debug(din+":din exact match  returning "+dinRecord.getKdc1());
+			return dinRecord.getKdc1();
+		}
+		logger.debug(din+":din exact match not found");
+		 System.out.println(queryDao);
+		 List<String> likeDins = queryDao.findLikeDins( din);
+		 if(likeDins != null){
+			 for(String likeDin:likeDins){
+				  dinRecord = dinmap.get(likeDin);
+				  if(dinRecord != null){
+					  logger.debug(din+":din like match found "+likeDin+  " returning "+dinRecord.getKdc1());
+						return dinRecord.getKdc1();
+				  }
+				  logger.debug(din+":tried din with no luck finding match "+likeDin);
+			 }
+		 }
+		 logger.debug(din+":not like match found");
+	   return null;	 
+	}
+	
 	public List<String> findClassByDin(String din){
 		try{
-			List<String> classes = drugFormulationMap.get(dinmap.get(din).getKdc1()).getClassList();
+			//List<String> classes = drugFormulationMap.get(dinmap.get(din).getKdc1()).getClassList();
+			String kdc1 = findClassByDinOrLikeDin(din);
+			List<String> classes = drugFormulationMap.get(kdc1).getClassList();
 			StringBuilder sb = new StringBuilder();
 			for(String s:classes){
 				sb.append(s+",");
 			}
-			logger.debug("Din "+din+" kdc1"+dinmap.get(din).getKdc1() +" classes "+sb.toString());
+			logger.debug("Din "+din+" kdc1 "+kdc1 +" classes "+sb.toString());
 			return classes;
 		}catch(Exception e){
 			logger.error("Din "+din+" not found",e);
@@ -130,33 +160,34 @@ public class InteractionsChecker {
 		List<String> classesForDrug = findClassByDin(din);
 		List<String> classesForFood = findClassByKDC(cFOOD);
 		List<String> classesForEthanol = findClassByKDC(cETHANOL);
-		for(String classOne:classesForDrug){
-			for(String classTwo: classesForFood){
-				InteractionRecord interaction = interactionMap.get(classOne.substring(0, 5)+":"+classTwo.substring(0, 5));
-				logger.debug("FOOD1 "+classOne.substring(0, 5)+":"+classTwo.substring(0, 5)+" -- "+interaction);
-				if(interaction != null){
-					interactions.add(interaction);
+		if(classesForDrug != null){
+			for(String classOne:classesForDrug){
+				for(String classTwo: classesForFood){
+					InteractionRecord interaction = interactionMap.get(classOne.substring(0, 5)+":"+classTwo.substring(0, 5));
+					logger.debug("FOOD1 "+classOne.substring(0, 5)+":"+classTwo.substring(0, 5)+" -- "+interaction);
+					if(interaction != null){
+						interactions.add(interaction);
+					}
+					interaction = interactionMap.get(classTwo.substring(0, 5)+":"+classOne.substring(0, 5));
+					logger.debug("FOOD2 "+classTwo.substring(0, 5)+":"+classOne.substring(0, 5)+" -- "+interaction);
+					if(interaction != null){
+						interactions.add(interaction);
+					}
 				}
-				interaction = interactionMap.get(classTwo.substring(0, 5)+":"+classOne.substring(0, 5));
-				logger.debug("FOOD2 "+classTwo.substring(0, 5)+":"+classOne.substring(0, 5)+" -- "+interaction);
-				if(interaction != null){
-					interactions.add(interaction);
-				}
-			}
-			for(String classTwo: classesForEthanol){
-				InteractionRecord interaction = interactionMap.get(classOne.substring(0, 5)+":"+classTwo.substring(0, 5));
-				logger.debug("FOOD1 "+classOne.substring(0, 5)+":"+classTwo.substring(0, 5)+" -- "+interaction);
-				if(interaction != null){
-					interactions.add(interaction);
-				}
-				interaction = interactionMap.get(classTwo.substring(0, 5)+":"+classOne.substring(0, 5));
-				logger.debug("FOOD2 "+classTwo.substring(0, 5)+":"+classOne.substring(0, 5)+" -- "+interaction);
-				if(interaction != null){
-					interactions.add(interaction);
+				for(String classTwo: classesForEthanol){
+					InteractionRecord interaction = interactionMap.get(classOne.substring(0, 5)+":"+classTwo.substring(0, 5));
+					logger.debug("FOOD1 "+classOne.substring(0, 5)+":"+classTwo.substring(0, 5)+" -- "+interaction);
+					if(interaction != null){
+						interactions.add(interaction);
+					}
+					interaction = interactionMap.get(classTwo.substring(0, 5)+":"+classOne.substring(0, 5));
+					logger.debug("FOOD2 "+classTwo.substring(0, 5)+":"+classOne.substring(0, 5)+" -- "+interaction);
+					if(interaction != null){
+						interactions.add(interaction);
+					}
 				}
 			}
 		}
-		
 		return interactions;
 	}
 	
