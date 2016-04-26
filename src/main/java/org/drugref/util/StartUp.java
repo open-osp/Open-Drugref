@@ -68,6 +68,7 @@ public class StartUp implements ServletContextListener {
 	        logger.error( "properties file not found at" + propertiesFilePath, ex);
 		}
 		
+		logger.info("About to start Interactions checker with key"+drugRefProperties.getProperty("licence_key"));
 		InteractionsCheckerFactory.start(); //Get the file loading
 		logger.info("LAST LINE IN contextInitialized");
 
