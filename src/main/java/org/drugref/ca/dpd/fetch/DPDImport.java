@@ -184,6 +184,8 @@ public class DPDImport {
        arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
        arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
 
+       arrList.add("CREATE INDEX idx_cd_inactive_products_idNumber on cd_inactive_products (drug_identification_number);");
+       arrList.add("CREATE INDEX idx_cd_drug_product_aiGroupNo on cd_drug_product (ai_group_no);"); 
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
@@ -204,6 +206,104 @@ public class DPDImport {
             arrList.add("create index  cd_drug_search_name_idx on cd_drug_search(name(70));");
        return arrList;
 
+    }
+
+    public List addTALLman() {
+        List<String> arrList = new ArrayList();
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'AFATINIB' , 'AFAtinib') WHERE `name` LIKE '%AFATINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'AXITINIB' , 'aXitinib') WHERE `name` LIKE '%AXITINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'AMLODIPINE' , 'amLODIPine') WHERE `name` LIKE '%AMLODIPINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'AZACITIDINE' , 'azaCITIDine') WHERE `name` LIKE '%AZACITIDINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'AZATHIOPRINE' , 'azaTHIOprine') WHERE `name` LIKE '%AZATHIOPRINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'CARBOPLATIN' , 'CARBOplatin') WHERE `name` LIKE '%CARBOPLATIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'CISPLATIN' , 'CISplatin') WHERE `name` LIKE '%CISPLATIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'CYCLOSERINE' , 'cycloSERINE') WHERE `name` LIKE '%CYCLOSERINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'CYCLOSPORINE' , 'cycloSPORINE') WHERE `name` LIKE '%CYCLOSPORINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DABRAFENIB' , 'daBRAFenib') WHERE `name` LIKE '%DABRAFENIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DASATINIB' , 'daSATinib') WHERE `name` LIKE '%DASATINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DACTINOMYCIN' , 'DACTINomycin') WHERE `name` LIKE '%DACTINOMYCIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DAUNORUBICIN' , 'DAUNOrubicin') WHERE `name` LIKE '%DAUNORUBICIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DOXORUBICIN' , 'DOXOrubicin') WHERE `name` LIKE '%DOXORUBICIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DEXMEDETOMIDINE' , 'dexmedeTOMidine') WHERE `name` LIKE '%DEXMEDETOMIDINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DILTIAZEM' , 'dilTIAZem') WHERE `name` LIKE '%DILTIAZEM%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DIMENHYDRINATE' , 'dimenhyDRINATE') WHERE `name` LIKE '%DIMENHYDRINATE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DIPHENHYDRAMINE' , 'diphenhydrAMINE') WHERE `name` LIKE '%DIPHENHYDRAMINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DOBUTAMINE' , 'DOBUTamine') WHERE `name` LIKE '%DOBUTAMINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DOPAMINE' , 'DOPamine') WHERE `name` LIKE '%DOPAMINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DOCETAXEL' , 'DOCEtaxel') WHERE `name` LIKE '%DOCETAXEL%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'PACLITAXEL' , 'PACLitaxel') WHERE `name` LIKE '%PACLITAXEL%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'DOXORUBICIN' , 'DOXOrubicin') WHERE `name` LIKE '%DOXORUBICIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'IDARUBICIN' , 'IDArubicin') WHERE `name` LIKE '%IDARUBICIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'EPHEDRINE' , 'ePHEDrine') WHERE `name` LIKE '%EPHEDRINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'ERIBULIN' , 'eriBULin') WHERE `name` LIKE '%ERIBULIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'SUFENTANIL' , 'SUFentanil') WHERE `name` LIKE '%SUFENTANIL%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'HYDROMORPHONE' , 'HYDROmorphone') WHERE `name` LIKE '%HYDROMORPHONE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'HYDROXYUREA' , 'hydroxyUREA') WHERE `name` LIKE '%HYDROXYUREA%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'IBRUTINIB' , 'iBRUtinib') WHERE `name` LIKE '%IBRUTINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'IMATINIB' , 'iMAtinib') WHERE `name` LIKE '%IMATINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'INFLIXIMAB' , 'inFLIXimab') WHERE `name` LIKE '%INFLIXIMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'RITUXIMAB' , 'riTUXimab') WHERE `name` LIKE '%RITUXIMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'LAMIVUDINE' , 'lamiVUDine') WHERE `name` LIKE '%LAMIVUDINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'LAMOTRIGINE' , 'lamoTRIgine') WHERE `name` LIKE '%LAMOTRIGINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'MITOXANTRONE' , 'mitoXANTRONE') WHERE `name` LIKE '%MITOXANTRONE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'NILOTINIBB' , 'niLOtinib') WHERE `name` LIKE '%NILOTINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'NILUTAMIDE' , 'niLUTAmide') WHERE `name` LIKE '%NILUTAMIDE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'OBINUTUZUMAB' , 'oBINutuzumab') WHERE `name` LIKE '%OBINUTUZUMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'OFATUMUMAB' , 'oFAtumumab') WHERE `name` LIKE '%OFATUMUMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'PANITUMUMAB' , 'PANitumumab') WHERE `name` LIKE '%PANITUMUMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'PERTUZUMAB' , 'PERTuzumab') WHERE `name` LIKE '%PERTUZUMAB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'QUINIDINE' , 'quiNIDine') WHERE `name` LIKE '%QUINIDINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'QUININE' , 'quiNINE') WHERE `name` LIKE '%QUININE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'SAXAGLIPTIN' , 'sAXagliptin') WHERE `name` LIKE '%SAXAGLIPTIN%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'SORAFENIB' , 'SORAfenib') WHERE `name` LIKE '%SORAFENIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'SUNITINIB' , 'SUNItinib') WHERE `name` LIKE '%SUNITINIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'VANDETANIB' , 'vanDETanib') WHERE `name` LIKE '%VANDETANIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'VEMURAFENIB' , 'vemURAFenib') WHERE `name` LIKE '%VEMURAFENIB%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'VINBLASTINE' , 'vinBLAStine') WHERE `name` LIKE '%VINBLASTINE%' ;");
+        arrList.add("UPDATE `cd_drug_search` SET `name` = REPLACE(`name`, 'VINCRISTINE' , 'vinCRIStine') WHERE `name` LIKE '%VINCRISTINE%' ;");
+        return arrList;
+    }
+
+    public List cleanDecimals() { 
+	//normalise drug dosing per IPAL 
+        List<String> arrList = new ArrayList();
+        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, ' .' , ' 0.') WHERE `name` LIKE '% .%';");
+        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, '.0 ' , ' ') WHERE `name` LIKE '%.0 %';");
+        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, '.0MG' , 'MG') WHERE `name` LIKE '%.0MG%';");
+        return arrList;
+    }
+
+
+    public void setISMPmeds() {
+    	// apply ISMP Canada medication safety rules to search medications
+        EntityManager entityManager = JpaUtils.createEntityManager();
+        try {
+            EntityTransaction tx = entityManager.getTransaction();
+ 
+            try{
+                tx.begin();
+            }
+            catch(org.apache.openjpa.persistence.InvalidStateException ise){
+                ise.printStackTrace();
+            }
+            catch(java.lang.IllegalStateException ee){
+                ee.printStackTrace();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+
+            insertLines(entityManager, addTALLman());//rename search drug to use Canadian TALLman list
+            insertLines(entityManager, cleanDecimals());//normalise drug dosing
+
+            tx.commit();
+ 
+        } finally {
+
+            JpaUtils.close(entityManager);
+
+        }
+        return;
     }
 
     public List dropSearchTables() {
@@ -536,8 +636,7 @@ public class DPDImport {
             tx.begin();
             insertLines(entityManager, addIndexToSearchTable());
             tx.commit();
-
-
+  
         } finally {
 
             JpaUtils.close(entityManager);

@@ -30,6 +30,7 @@ public class RxUpdateDBWorker extends Thread{
             long timeGenericImport=0L;
             timeGenericImport=newGenericImport.run();//in miliseconds
             timeGenericImport=(timeGenericImport/1000)/60;
+            dpdImport.setISMPmeds();
             HistoryUtil h=new HistoryUtil();
             h.addUpdateHistory();
             HashMap hm=dpdImport.numberTableRows();
