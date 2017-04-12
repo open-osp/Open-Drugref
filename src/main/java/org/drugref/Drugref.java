@@ -396,10 +396,10 @@ public class Drugref {
 			returnHash.put("author","Medi-Span");
 			
 			
-    		if(daysBetween < 60){
+    		if(daysBetween > 50 && daysBetween < 60){
     			returnHash.put("body", "Interaction Checker has Expired a new version must be installed to continue use");
     			retVec.add(returnHash);
-    		}else{
+    		}else if(daysBetween > 60){
     			returnHash.put("body", "Interaction Checker has Expired, a new version must be installed");
     			Vector v = new Vector();
     			v.add(returnHash);
