@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -100,9 +101,20 @@ public class RecordParser {
         System.out.println(str);
     }
 
+    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+    
     public static Object getDPDObject(String type, InputStream is, EntityManager em) throws Exception {
         p("TYPE",type);
-        InputStreamReader isr = new InputStreamReader(is, "ISO-8859-1");
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         Reader in = new BufferedReader(isr);
         CSVParser csv = new CSVParser(is);
         String[] items = null;
@@ -118,6 +130,11 @@ public class RecordParser {
 
             while ((items = csv.getLine()) != null) {
                 //System.out.println(looksLike(items));
+            	items[0] = items[0].replaceAll("\\p{C}", "");     
+            	if(items[0].startsWith("\"")) {
+            		items[0] = items[0].replaceAll("\"", "");
+            	}
+            	
                 CdVeterinarySpecies vet = new CdVeterinarySpecies();
 
                 vet.setDrugCode(new Integer(items[0]));
@@ -148,7 +165,11 @@ public class RecordParser {
             CSVParser csv2 = new CSVParser(ins);
             int count=0;
             while ((items = csv2.getLine()) != null) {
-                //System.out.println("reading comps,line number="+count);
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
+            	
+            	//System.out.println("reading comps,line number="+count);
                 //System.out.println(looksLike(items));
                 CdCompanies vet = new CdCompanies();
                 /*
@@ -223,6 +244,9 @@ public class RecordParser {
               //  if (str2.startsWith("LAIT SOLAIRE PROTECTION M")) {
                     //p("#################################### insert before", str2);
               //  }
+                if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 prod.setDrugCode(new Integer(items[0]));
                 prod.setProductCategorization(items[1]);
                 prod.setClass1(items[2]);
@@ -255,8 +279,10 @@ public class RecordParser {
             PHARMACEUTICAL_FORM                            VARCHAR2(40)
              */
             while ((items = csv.getLine()) != null) {
-                //   System.out.println(looksLike(items));
-                CdForm vet = new CdForm();
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
+            	CdForm vet = new CdForm();
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setPharmCdFormCode(new Integer((items[1])));
                 vet.setPharmaceuticalCdForm(items[2]);
@@ -298,6 +324,9 @@ public class RecordParser {
 
             while ((items = csv2.getLine()) != null) {
 
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 //        System.out.println(looksLike(items));
                 CdActiveIngredients vet = new CdActiveIngredients();
                 vet.setDrugCode(new Integer(items[0]));
@@ -326,6 +355,9 @@ public class RecordParser {
             PRODUCT_INFORMATION                              VARCHAR2(80)
              */
             while ((items = csv.getLine()) != null) {
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 //    System.out.println(looksLike(items));
                 CdPackaging vet = new CdPackaging();
                 vet.setDrugCode(new Integer(items[0]));
@@ -345,6 +377,9 @@ public class RecordParser {
              */
             while ((items = csv.getLine()) != null) {
                 //      System.out.println(looksLike(items));
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 CdPharmaceuticalStd vet = new CdPharmaceuticalStd();
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setPharmaceuticalStd(items[1]);
@@ -359,6 +394,9 @@ public class RecordParser {
             ROUTE_OF_ADMINISTRATION                          VARCHAR2(40)
              */
             while ((items = csv.getLine()) != null) {
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 //System.out.println(looksLike(items));
                 CdRoute vet = new CdRoute();
                 vet.setDrugCode(new Integer(items[0]));
@@ -375,6 +413,9 @@ public class RecordParser {
             SCHEDULE                                         VARCHAR2(40)
              */
             while ((items = csv.getLine()) != null) {
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 //   System.out.println(looksLike(items));
                 CdSchedule vet = new CdSchedule();
                 vet.setDrugCode(new Integer(items[0]));
@@ -392,6 +433,9 @@ public class RecordParser {
 
              */
             while ((items = csv.getLine()) != null) {
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 //    System.out.println(looksLike(items));
                 CdDrugStatus vet = new CdDrugStatus();
                 vet.setDrugCode(new Integer(items[0]));
@@ -413,6 +457,9 @@ public class RecordParser {
             //0.64437-- 1.C03EA01-- 2.HYDROCHLOROTHIAZIDE AND POTASSIUM-SPARING AGENTS-- 3.24:08.24.16-- 4.POTASSIUM-SPARING DIURETICS-- 420909056/1068302336 :56619472
             while ((items = csv.getLine()) != null) {
                 //    System.out.println(looksLike(items));
+            	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+            		items[0] = items[0].substring(1).replaceAll("\"", "");
+            	}
                 CdTherapeuticClass vet = new CdTherapeuticClass();
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setTcAtcNumber(items[1]);
@@ -428,6 +475,9 @@ public class RecordParser {
             
              while ((items = csv.getLine()) != null) {
                 //    System.out.println(looksLike(items));
+            	 if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+             		items[0] = items[0].substring(1).replaceAll("\"", "");
+             	}
                 CdInactiveProducts vet = new CdInactiveProducts();
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setDrugIdentificationNumber(items[1]);
@@ -440,6 +490,9 @@ public class RecordParser {
 
         }else if("interactions-holbrook.txt".equals(type)){
            while ((items = csv.getLine()) != null) {
+        	   if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
+           		items[0] = items[0].substring(1).replaceAll("\"", "");
+           	}
                 Interactions inter = new Interactions();
                 inter.setId(Integer.parseInt(items[0]));
                 inter.setAffectingatc(items[1]);
