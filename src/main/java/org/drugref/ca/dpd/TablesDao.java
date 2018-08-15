@@ -1434,6 +1434,7 @@ public class TablesDao {
         Vector vec = new Vector();
         Hashtable ha = new Hashtable();
         Vector warning = new Vector();
+        Vector missing = new Vector();
 
         if (atcCode.matches("") || atcCode.matches("null")) {
             ha.put("warnings", results);
@@ -1545,12 +1546,19 @@ public class TablesDao {
                     List<Integer> r2Integer=new ArrayList();
                     for(String ss:r2)
                         r2Integer.add(Integer.parseInt(ss));
-                    q1.setParameter("atcCode", atcCode);
-                    q1.setParameter("aDesc", aDesc);
-                    q1.setParameter("cdsDrugCodeInteger", r2Integer);
-                    List<String> r1=q1.getResultList();
-                    if(r1.size()>0)
-                        results.add(aId);
+                    
+                    if(r2Integer.isEmpty()) {
+                    	missing.add(aId);
+                    } else {
+	                    q1.setParameter("atcCode", atcCode);
+	                    q1.setParameter("aDesc", aDesc);
+	                    q1.setParameter("cdsDrugCodeInteger", r2Integer);
+	                    
+	                    logger.info("atcCode="+atcCode + ",aDesc=" + aDesc + ",cdsDrugCodeInteger=" + r2Integer);
+	                    List<String> r1=q1.getResultList();
+	                    if(r1.size()>0)
+	                        results.add(aId);
+                    }
 
                 } else {
                     logger.debug("No Match YET desc " + aDesc + " type " + aType + " atccode " + atcCode);
@@ -1564,6 +1572,7 @@ public class TablesDao {
         }
 
         ha.put("warnings", results);
+        ha.put("missing", missing);
         vec.add(ha);
         // logger.debug("print out return values: ");
         // Vector retlist=(Vector)((Hashtable)vec.get(0)).get("warnings");
