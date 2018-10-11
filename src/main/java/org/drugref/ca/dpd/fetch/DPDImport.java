@@ -57,17 +57,17 @@ public class DPDImport {
     private static Logger logger = MiscUtils.getLogger();
 
     public File getZipStream() throws Exception {
-        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles.zip";
+        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/Allfiles.zip";
         return getZipStream(sUrl);
     }
 
     public File getInactiveZipStream() throws Exception {
-            String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/allfiles_ia.zip";
+            String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/Allfiles_ia-Oct10.zip";
                     return getZipStream(sUrl);
     }
 
     public File getInactiveTableZipStream() throws Exception {
-        String sUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/inactive.zip";
+        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/inactive.zip";
         return getZipStream(sUrl);
     }
 
@@ -184,7 +184,7 @@ public class DPDImport {
        arrList.add("create index  cd_therapeutic_class_drug_code_idx on     cd_therapeutic_class(drug_code);");
        arrList.add("create index  cd_veterinary_species_drug_code_idx on     cd_veterinary_species(drug_code);");
 
-       arrList.add("CREATE INDEX idx_cd_inactive_products_idNumber on cd_inactive_products (drug_identification_number);");
+       arrList.add("CREATE INDEX idx_cd_inactive_products_idNumber on cd_inactive_products (drug_identification_number(8));");
        arrList.add("CREATE INDEX idx_cd_drug_product_aiGroupNo on cd_drug_product (ai_group_no);"); 
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
