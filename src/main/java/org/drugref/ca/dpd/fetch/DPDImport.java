@@ -57,7 +57,7 @@ public class DPDImport {
     private static Logger logger = MiscUtils.getLogger();
 
     public File getZipStream() throws Exception {
-        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/Allfiles.zip";
+        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/allfiles.zip";
         return getZipStream(sUrl);
     }
 
