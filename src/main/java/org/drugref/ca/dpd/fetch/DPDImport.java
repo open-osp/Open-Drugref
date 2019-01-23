@@ -266,9 +266,9 @@ public class DPDImport {
     public List cleanDecimals() { 
 	//normalise drug dosing per IPAL 
         List<String> arrList = new ArrayList();
-        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, ' .' , ' 0.') WHERE `name` LIKE '% .%';");
-        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, '.0 ' , ' ') WHERE `name` LIKE '%.0 %';");
-        arrList.add("UPDATE drugref.cd_drug_search SET `name` = REPLACE(`name`, '.0MG' , 'MG') WHERE `name` LIKE '%.0MG%';");
+        arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, ' .' , ' 0.') WHERE `name` LIKE '% .%';");
+        arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0 ' , ' ') WHERE `name` LIKE '%.0 %';");
+        arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0MG' , 'MG') WHERE `name` LIKE '%.0MG%';");
         return arrList;
     }
 
