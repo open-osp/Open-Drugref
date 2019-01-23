@@ -171,8 +171,6 @@ public class DPDImport {
     public List addIndexToTables() {
         List<String> arrList = new ArrayList();
 
-        //?arrList.add("create index cd_drug_product_drug_code_idx on cd_drug_product(drug_code);");
-
         arrList.add("create index  cd_active_ingredients_drug_code_idx on   cd_active_ingredients(drug_code);");
        arrList.add("create index  cd_drug_status_drug_code_idx on   cd_drug_status(drug_code);");
        arrList.add("create index  cd_form_drug_code_idx on    cd_form(drug_code);");
@@ -189,7 +187,8 @@ public class DPDImport {
 
         arrList.add("create index cd_company_drug_code_idx on cd_companies(drug_code);");
         arrList.add("create index cd_drug_code_idx on cd_drug_product(drug_code);");
-        arrList.add("update cd_drug_product set company_code=(select company_code from cd_companies where cd_companies.drug_code =  cd_drug_product.drug_code);");
+        arrList.add("update cd_drug_product join cd_companies using (drug_code) set cd_drug_product.company_code = cd_companies.company_code");
+
         return arrList;
     }
 
