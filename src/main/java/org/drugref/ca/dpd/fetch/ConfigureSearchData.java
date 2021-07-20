@@ -30,9 +30,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
-import org.apache.openjpa.persistence.OpenJPAPersistence;
-import org.apache.openjpa.persistence.OpenJPAQuery;
-import org.apache.openjpa.persistence.jdbc.JDBCFetchPlan;
 import org.drugref.ca.dpd.CdActiveIngredients;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugSearch;
@@ -137,9 +134,6 @@ public class ConfigureSearchData {
         tx.begin();
         System.out.println("Importing Brand Names");
         Query queryDrugProduct = em.createQuery("SELECT cdp from CdDrugProduct cdp");
-        OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-        JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-        fetch.setFetchBatchSize(20);
 
         List<CdDrugProduct> productList = queryDrugProduct.getResultList();
        
@@ -167,9 +161,6 @@ public class ConfigureSearchData {
         //Query queryDrugProduct = em.createNativeQuery("SELECT distinct cdp.tc_Atc, cdp.tc_Atc_Number from Cd_Therapeutic_Class cdp");
 
         Query queryDrugProduct = em.createQuery("SELECT distinct cdp.tcAtc, cdp.tcAtcNumber from CdTherapeuticClass cdp");
-        OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-        JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-        fetch.setFetchBatchSize(20);
 
         List<Object[]> productList = queryDrugProduct.getResultList();
 
@@ -199,9 +190,6 @@ public class ConfigureSearchData {
         //Query queryDrugProduct = em.createNativeQuery("SELECT distinct cdp.tc_Atc, cdp.tc_Atc_Number from Cd_Therapeutic_Class cdp");
 
         Query queryDrugProduct = em.createQuery("SELECT distinct cdp.tcAhfs, cdp.tcAhfsNumber from CdTherapeuticClass cdp");
-        OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-        JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-        fetch.setFetchBatchSize(20);
 
         List<Object[]> productList = queryDrugProduct.getResultList();
 
@@ -230,17 +218,13 @@ public class ConfigureSearchData {
             tx.begin();
             //System.out.println("Import Generics");
             Query queryDrugProduct = em.createQuery("SELECT cdp.drugCode from CdDrugProduct cdp");
-            OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-            JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-            fetch.setFetchBatchSize(20);
 
-            List<Integer> productList = queryDrugProduct.getResultList();
+            List<Integer> productList = queryDrugProduct.getResultList();          
 
             //System.out.println("Have got all the products in memory");
-
+            Query ingredientQuery = em.createQuery("select cai.ingredient from CdActiveIngredients cai where cai.drugCode =(:drugCode)");
+            int county = 0;
             for (Integer drug:productList){
-
-                Query ingredientQuery = em.createQuery("select cai.ingredient from CdActiveIngredients cai where cai.drugCode =(:drugCode)");
 
                 ingredientQuery.setParameter("drugCode", drug);
                 List<String> ingredients = ingredientQuery.getResultList();
@@ -330,9 +314,6 @@ public class ConfigureSearchData {
             //System.out.println("Import Ingredients");
 
             Query queryDrugProduct = em.createQuery("SELECT distinct cai.ingredient, cai.activeIngredientCode from CdActiveIngredients cai");
-            OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-            JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-            fetch.setFetchBatchSize(20);
 
             List<Object[]> productList = queryDrugProduct.getResultList();
 
@@ -374,9 +355,6 @@ public class ConfigureSearchData {
             //System.out.println("Clean Up Search Names");
 
             Query queryDrugProduct = em.createQuery("select cds.name ,count(cds.name)  from CdDrugSearch cds where cds.category = 13 group by cds.name ");
-            OpenJPAQuery kq = OpenJPAPersistence.cast(queryDrugProduct);
-            JDBCFetchPlan fetch = (JDBCFetchPlan) kq.getFetchPlan();
-            fetch.setFetchBatchSize(20);
 
             List<Object[]> productList = queryDrugProduct.getResultList();
 

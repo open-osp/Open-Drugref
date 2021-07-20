@@ -114,7 +114,7 @@ public class DPDImport {
         boolean bool = false;
         Connection con = null;
         DrugrefProperties dp=DrugrefProperties.getInstance();
-        String dbURL = dp.getDbUrl();
+        String dbURL = dp.getDbUrl()+"?serverTimezone=UTC";
         String dbUser = dp.getDbUser();
         String dbPassword = dp.getDbPassword();
 

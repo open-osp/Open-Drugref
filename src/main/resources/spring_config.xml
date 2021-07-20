@@ -16,7 +16,7 @@
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${db_driver}" />
         <!--property name="url" value="${db_url}" /-->
-        <property name="url" value="${db_url}" />
+        <property name="url" value="${db_url}?serverTimezone=UTC" />
         <property name="defaultAutoCommit" value="false" />
 
         <property name="username" value="${db_user}" />
