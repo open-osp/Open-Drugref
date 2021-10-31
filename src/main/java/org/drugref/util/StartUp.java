@@ -69,8 +69,8 @@ public class StartUp implements ServletContextListener {
             try {
             	propertiesFilePath = "../../" + filePath  + contextPath + ".properties";
             	drugRefProperties.loader(propertiesFilePath);
-            } catch (java.io.FileNotFoundException ex) {
-                logger.error( "properties file not found at" + propertiesFilePath, ex);
+            } catch (java.io.FileNotFoundException exc) {
+                logger.error( "properties file not found at" + propertiesFilePath, exc);
 			}            
 		}
 		
