@@ -88,7 +88,7 @@ public class RecordParser {
     }
 
     static public Date getDate(String s) throws Exception {
-        DateFormat formatter = new SimpleDateFormat("dd-MMM-yy");
+        DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
         Date date = (Date) formatter.parse(s);
         return date;
     }
