@@ -32,7 +32,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigInteger;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -88,7 +88,7 @@ public class RecordParser {
     }
 
     static public Date getDate(String s) throws Exception {
-        DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+        DateFormat formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
         Date date = (Date) formatter.parse(s);
         return date;
     }
