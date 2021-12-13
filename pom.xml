@@ -80,6 +80,11 @@
 			<version>2.15.0</version>
             <scope>compile</scope>
         </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.32</version>
+		</dependency>
 <!--spring-core, spring-context, spring-orm and spring-tx -->
         <dependency>
             <groupId>org.springframework</groupId>
