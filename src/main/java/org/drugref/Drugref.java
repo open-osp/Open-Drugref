@@ -44,7 +44,7 @@ import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
 import org.drugref.util.SpringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.util.MiscUtils;
 import org.drugref.dinInteractionCheck.InteractionRecord;
 import org.drugref.dinInteractionCheck.InteractionsChecker;
@@ -180,7 +180,7 @@ public class Drugref {
          */
         public Vector get_drug_2(String pkey,boolean html){
                 logger.debug("IN get_drug_2 "+pkey);
-                Hashtable returnHash = new Hashtable();
+                Hashtable<String, Object> returnHash = new Hashtable<>();
                 Integer id = Integer.parseInt(pkey);
                 
                 CdDrugSearch cds = queryDao.getSearchedDrug(id);
@@ -385,7 +385,7 @@ public class Drugref {
     	if(interactionsChecker.getExpiryDate().before(now)){
     		int daysBetween =  (int) ((now.getTime() -interactionsChecker.getExpiryDate().getTime()) / (1000 * 60 * 60 * 24));
     		logger.info(" how many days expired "+daysBetween);
-    		Hashtable returnHash = new Hashtable();
+    		Hashtable<String, Object> returnHash = new Hashtable<>();
     		returnHash.put("id","0");
 			returnHash.put("updated_at",now); //NEEDS TO Be replaced by date of the file
 			returnHash.put("name","Interactions Service Expired on");
@@ -435,7 +435,7 @@ public class Drugref {
     	
     	for (InteractionRecord i : interactionsFull){
     		logger.debug("i record"+retVec.size());
-    		Hashtable returnHash = new Hashtable();
+    		Hashtable<String, Object> returnHash = new Hashtable<>();
     		returnHash.put("id",i.getIntid());
 			returnHash.put("updated_at",interactionsChecker.getPublishDate()); //NEEDS TO Be replaced by date of the file
 			returnHash.put("name",nullCheck(i.getWAR()));

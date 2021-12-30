@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.ca.dpd.TablesDao;
 import org.drugref.util.MiscUtils;
 import org.drugref.util.SpringUtils;

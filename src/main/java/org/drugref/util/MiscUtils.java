@@ -18,11 +18,14 @@
  */
 package org.drugref.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Logger;
+
 
 /**
  *
@@ -54,7 +57,7 @@ public class MiscUtils {
     public static Logger getLogger(){
     		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
     		String caller = ste[2].getClassName();
-    		return(Logger.getLogger(caller));
+    		return LogManager.getLogger(caller);
     }
 
     public static boolean isStringToInteger(String s){

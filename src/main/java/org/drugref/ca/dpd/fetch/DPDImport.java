@@ -40,7 +40,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.ca.dpd.CdActiveIngredients;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugSearch;

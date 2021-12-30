@@ -33,7 +33,7 @@ package org.drugref.util;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**

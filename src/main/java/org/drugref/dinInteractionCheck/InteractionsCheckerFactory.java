@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.util.DrugrefProperties;
 import org.drugref.util.MiscUtils;
 import org.drugref.util.SpringUtils;

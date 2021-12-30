@@ -40,8 +40,7 @@
 		</property>
 		<property name="jpaProperties">
 			<props>
-				<prop key="openjpa.Log">log4j</prop>
-                                <prop key="openjpa.Compatibility">QuotedNumbersInQueries=true</prop>
+                <prop key="openjpa.Compatibility">QuotedNumbersInQueries=true</prop>
 			</props>
 		</property>
 	</bean>

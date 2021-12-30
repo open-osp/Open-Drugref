@@ -20,7 +20,7 @@ package org.drugref.dinInteractionCheck;
  * Hamilton
  * Ontario, Canada   
  */
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.drugref.util.MiscUtils;
 
 public class LineCursor {
