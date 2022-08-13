@@ -464,8 +464,7 @@ public class RecordParser {
                 vet.setDrugCode(new Integer(items[0]));
                 vet.setTcAtcNumber(items[1]);
                 vet.setTcAtc(items[2]);
-                vet.setTcAhfsNumber(items[3]);
-                vet.setTcAhfs(items[4]);
+                vet.setTcAtcf(items[3]);
                 em.persist(vet);
                 //em.flush();
                 //em.clear();

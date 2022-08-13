@@ -40,19 +40,18 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "cd_therapeutic_class", catalog = "drugref2")
-@NamedQueries({@NamedQuery(name = "CdTherapeuticClass.findAll", query = "SELECT c FROM CdTherapeuticClass c"), @NamedQuery(name = "CdTherapeuticClass.findByDrugCode", query = "SELECT c FROM CdTherapeuticClass c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtcNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtcNumber = :tcAtcNumber"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtc", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtc = :tcAtc"), @NamedQuery(name = "CdTherapeuticClass.findByTcAhfsNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAhfsNumber = :tcAhfsNumber"), @NamedQuery(name = "CdTherapeuticClass.findByTcAhfs", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAhfs = :tcAhfs"), @NamedQuery(name = "CdTherapeuticClass.findById", query = "SELECT c FROM CdTherapeuticClass c WHERE c.id = :id")})
+@NamedQueries({@NamedQuery(name = "CdTherapeuticClass.findAll", query = "SELECT c FROM CdTherapeuticClass c"), @NamedQuery(name = "CdTherapeuticClass.findByDrugCode", query = "SELECT c FROM CdTherapeuticClass c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtcNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtcNumber = :tcAtcNumber"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtc", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtc = :tcAtc"), @NamedQuery(name = "CdTherapeuticClass.findByTcAhfsNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtcf = :tcAtcf"), @NamedQuery(name = "CdTherapeuticClass.findById", query = "SELECT c FROM CdTherapeuticClass c WHERE c.id = :id")})
 public class CdTherapeuticClass implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Column(name = "drug_code")
+    @Column(name = "drug_code", length = 8)
     private Integer drugCode;
     @Column(name = "tc_atc_number", length = 8)
     private String tcAtcNumber;
     @Column(name = "tc_atc", length = 120)
     private String tcAtc;
-    @Column(name = "tc_ahfs_number", length = 20)
-    private String tcAhfsNumber;
-    @Column(name = "tc_ahfs", length = 80)
-    private String tcAhfs;
+    @Column(name = "tc_atc_f", length = 240)
+    private String tcAtcf;
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
@@ -88,20 +87,12 @@ public class CdTherapeuticClass implements Serializable {
         this.tcAtc = tcAtc;
     }
 
-    public String getTcAhfsNumber() {
-        return tcAhfsNumber;
+    public String getTcAtcf() {
+        return tcAtcf;
     }
 
-    public void setTcAhfsNumber(String tcAhfsNumber) {
-        this.tcAhfsNumber = tcAhfsNumber;
-    }
-
-    public String getTcAhfs() {
-        return tcAhfs;
-    }
-
-    public void setTcAhfs(String tcAhfs) {
-        this.tcAhfs = tcAhfs;
+    public void setTcAtcf(String tcAtcf) {
+        this.tcAtcf = tcAtcf;
     }
 
     public Integer getId() {
