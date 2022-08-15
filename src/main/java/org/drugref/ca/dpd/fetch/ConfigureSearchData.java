@@ -104,13 +104,14 @@ public class ConfigureSearchData {
         long afterATC=System.currentTimeMillis();
         System.out.println("============time import ATC="+(afterATC-afterBN));
         ////Import AFHC Names
-        importAllAHFSCodeName(em);
-        long afterAHFS=System.currentTimeMillis();
-        System.out.println("============time import AHFS="+(afterAHFS-afterATC));
+        // Deprecated July 1st, 2022
+//        importAllAHFSCodeName(em);
+//        long afterAHFS=System.currentTimeMillis();
+//        System.out.println("============time import AHFS="+(afterAHFS-afterATC));
         ////Import Generic Data
         importGenerics(em);
         long afterGenerics=System.currentTimeMillis();
-        System.out.println("============time import Generics="+(afterGenerics-afterAHFS));
+        System.out.println("============time import Generics="+(afterGenerics-afterBN));
         ////Import Ingredients
         importAllIngredients(em);
         long afterIngredients=System.currentTimeMillis();
@@ -182,8 +183,13 @@ public class ConfigureSearchData {
         System.out.println("DONE Import ATC Code Name");
         tx.commit();
        }
-      
-       public void importAllAHFSCodeName(EntityManager em){
+
+    /**
+     * @Deprecated
+     * The DPD eleminated the AHFS code and description as of
+     * July 1st, 2022
+     */
+    public void importAllAHFSCodeName(EntityManager em){
            EntityTransaction tx = em.getTransaction();
         tx.begin();
         System.out.println("Import AHFS Code Name");
