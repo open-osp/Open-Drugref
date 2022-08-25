@@ -39,10 +39,10 @@ import org.drugref.util.MiscUtils;
  */
 public class DrugrefService extends HttpServlet {
 
-    public static XmlRpcServer xmlrpc = new XmlRpcServer();
+    public static XmlRpcServer xmlrpc;
     private static Logger logger = MiscUtils.getLogger();
     
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
         logger.debug("HERE-INIT");
         xmlrpc = new XmlRpcServer();
         xmlrpc.addHandler("$default", new Drugref());
@@ -56,14 +56,15 @@ public class DrugrefService extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         logger.debug("HERE-POST");
         byte[] result = xmlrpc.execute(request.getInputStream(), null, null);
         response.setContentType("text/xml");
         response.setContentLength(result.length);
-        OutputStream output = response.getOutputStream();
-        output.write(result);
-        output.flush();
+        try(OutputStream output = response.getOutputStream()) {
+            output.write(result);
+            output.flush();
+        }
     }
 
 

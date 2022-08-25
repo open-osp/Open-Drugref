@@ -18,7 +18,7 @@ package org.drugref.dinInteractionCheck;
  * Department of Family Medicine
  * McMaster University
  * Hamilton
- * Ontario, Canada   
+ * Ontario, Canada
  */
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,39 +30,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.drugref.util.DrugrefProperties;
 import org.drugref.util.MiscUtils;
 import org.drugref.util.SpringUtils;
-import org.springframework.scheduling.timer.TimerTaskExecutor;
+//import org.springframework.scheduling.timer.TimerTaskExecutor;
 import org.springframework.util.StringUtils;
 
 public class InteractionsCheckerFactory {
-	
+
 	private static final Logger logger = MiscUtils.getLogger();
-	private static InteractionsChecker interactionsChecker = new InteractionsChecker();  
-	
+	private static InteractionsChecker interactionsChecker = new InteractionsChecker();
+
 	static String baseUrl = DrugrefProperties.getInstance().getProperty("interaction_base_url");
 	static String licenceKey=  DrugrefProperties.getInstance().getProperty("licence_key");
-	
-	//private final ScheduledExecutorService scheduler =  Executors.newScheduledThreadPool(1);
-	private static TimerTaskExecutor taskScheduler = null;
-	
-	
+
+	private static ScheduledExecutorService scheduler =  Executors.newScheduledThreadPool(1);
+
+
 	public static void start(){
 		if(StringUtils.isEmpty(licenceKey)) {
 			return;
 		}
-		if(taskScheduler == null){
-			taskScheduler = (TimerTaskExecutor) SpringUtils.getBean("taskScheduler");
-			scheduler(null);
-		}
 	}
-	
-	private static void scheduler(String stat){
+
+	private static long scheduler(String stat){
 		logger.debug("stat="+stat);
+		long delay = 0;
 		if(stat == null){
 			callLoadIn();
 		}else if("NEW_VERSION_AVAILABLE".equals(stat)){
@@ -70,39 +67,38 @@ public class InteractionsCheckerFactory {
 		}else if(stat.startsWith("ERROR")){
 			interactionsChecker.getErrors().add("<br>"+stat);
 		}else{
-			int delay = Integer.parseInt(stat);
-			taskScheduler.setDelay(delay);
+			delay = Integer.parseInt(stat);
 			checkStatus();
 		}
+		return delay;
 	}
-	
+
 	static int numCount = 0;
 	private static int getNum(){
 		numCount++;
-		return numCount; 
+		return numCount;
 	}
-	
+
 	private static void callLoadIn(){
 		try{
-			taskScheduler.execute(new Runnable(){
+			scheduler.schedule(new Runnable(){
 				int counta = getNum();
 				public void run() {
-					
+
 					logger.info("running"+counta);
 					load();
-					scheduler(DrugrefProperties.getInstance().getProperty("scheduled_timer")); //five minutes = 300000
 				}
-			});
+			},scheduler(DrugrefProperties.getInstance().getProperty("scheduled_timer")), TimeUnit.MILLISECONDS);
 			}catch(Exception e){
 				logger.error("Error Running callLoadIn",e);
 			}
 
 	}
-	
+
 	private static void checkStatus(){
-		
+
 		try{
-			taskScheduler.execute(new Runnable(){
+			scheduler.execute(new Runnable(){
 				int counta = getNum();
 
 				public void run() {
@@ -116,31 +112,31 @@ public class InteractionsCheckerFactory {
 						logger.error("Error loading stream ",e);
 						//interacerrors.add("<br>ERROR: Could not process Interactions file. "+e.getMessage());
 					}
-					
-					
+
+
 					scheduler(retval);
 				}
-				
+
 			});
 			}catch(Exception e){
 				logger.error("uh oh",e);
 			}
-		
+
 	}
-	
-	
+
+
 	public static boolean load(){
-		InteractionsChecker ichecker = null; 
+		InteractionsChecker ichecker = null;
 		List<String>  errors = new ArrayList<String>();
 		boolean retval = false;
 		logger.info("Going to download file");
 		try{
 			URL webStream = new URL(baseUrl+"/file?currentVersion=0&licenceKey="+URLEncoder.encode(licenceKey, "utf-8"));
 			ichecker = InteractionsChecker.getInteractionsChecker(webStream);
-		
+
 			URL webStream2 = new URL(baseUrl+"/audit?audit="+URLEncoder.encode(ichecker.getAudit(),"utf-8")+"&licenceKey="+URLEncoder.encode(licenceKey, "utf-8"));
 			logger.info("audit response:"+ readStream(webStream2));
-			
+
 			URL webStream3 = new URL(baseUrl+"/disclaimer?licenceKey="+URLEncoder.encode(licenceKey, "utf-8"));
 			ichecker.setDisclaimer(readStream(webStream3));
 			retval = true;
@@ -155,15 +151,15 @@ public class InteractionsCheckerFactory {
 		if(ichecker != null && ichecker.getNumberOfInteractions() > 0 ){
 			interactionsChecker = ichecker;
 		}
-		
+
 		return retval;
 	}
-	
+
 	public static String readStream(URL  url){
 		StringBuilder sb = new StringBuilder();
 		BufferedReader bufferedReader  = null;
 		InputStreamReader inputStreamReader = null;
-		InputStream inputStream = null;		
+		InputStream inputStream = null;
 		try {
 			inputStream = url.openStream();
 			inputStreamReader = new InputStreamReader(inputStream);
@@ -184,8 +180,8 @@ public class InteractionsCheckerFactory {
 		}
 		return sb.toString();
 	}
-	
-	
+
+
 	public static InteractionsChecker getInteractionChecker(){
 			if(interactionsChecker == null){
 				logger.info("having to load interaction checker");
@@ -193,6 +189,6 @@ public class InteractionsCheckerFactory {
 			}
 			return interactionsChecker;
 	}
-	
-		
+
+
 }

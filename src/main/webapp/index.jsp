@@ -1,5 +1,5 @@
 <%@page contentType="text/html" pageEncoding="MacRoman"%>
-<%@page import="java.io.BufferedReader,java.io.FileReader,java.io.IOException,java.lang.Object,java.util.Hashtable,java.util.Vector,org.apache.xmlrpc.XmlRpcClientLite,org.apache.xmlrpc.XmlRpcException" %>
+<%@page import="java.lang.Object,java.util.Hashtable,java.util.Vector,org.apache.xmlrpc.XmlRpcClientLite,org.apache.xmlrpc.XmlRpcException" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <%String str = request.getParameter("searchVal");
