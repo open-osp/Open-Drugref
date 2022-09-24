@@ -276,6 +276,12 @@ public class DPDImport {
         return arrList;
     }
 
+    public List addCategories() { 
+	//group ATC's into broad catagories for allergy checking 
+        List<String> arrList = new ArrayList();
+        arrList.add("UPDATE cd_therapeutic_class INNER JOIN utility ON utility.tc_atc_number = cd_therapeutic_class.tc_atc_number SET cd_therapeutic_class.tc_ahfs_number = utility.tc_ahfs_number, cd_therapeutic_class.tc_ahfs = utility.tc_ahfs;");
+        return arrList;
+    }
 
     public void setISMPmeds() {
     	// apply ISMP Canada medication safety rules to search medications
@@ -298,7 +304,8 @@ public class DPDImport {
 
             insertLines(entityManager, addTALLman());//rename search drug to use Canadian TALLman list
             insertLines(entityManager, cleanDecimals());//normalise drug dosing
-
+            insertLines(entityManager, addCategories());//add broad categories
+            
             tx.commit();
  
         } finally {
