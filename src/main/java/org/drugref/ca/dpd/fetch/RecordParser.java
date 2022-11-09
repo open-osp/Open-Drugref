@@ -90,7 +90,7 @@ public class RecordParser {
     static public Date getDate(String s) throws Exception {
     // drug.txt "10000","","Veterinary","00813761","LINCOMIX","","N","69580","1","03-DEC-2018","0105826008","Vétérinaire","",""
     // dd-MMM-yy format will correctly handle both 03-DEC-2018 and 03-DEC-18
-        DateFormat formatter = new SimpleDateFormat("dd-MMM-yyy");
+        DateFormat formatter = new SimpleDateFormat("dd-MMM-yy");
         Date date = (Date) formatter.parse(s);
         return date;
     }
