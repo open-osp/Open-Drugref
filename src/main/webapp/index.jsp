@@ -22,8 +22,6 @@ if (str == null) str = "";
 <%
 if (request.getParameter("searchVal") != null){
 
-
-
 Vector params = new Vector();
 params.addElement(request.getParameter("searchVal"));
 Object obj = callWebserviceLite("list_search_element3",params);
@@ -44,111 +42,119 @@ Vector vec = (Vector) obj;
 
 
 
-<tr><th colspan="3" align="left">NEW GEN</th></tr>
+<tr><th colspan="3" align="left">RESULTS</th></tr>
 <% for (Object Hash: vec){
 Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("18")) continue;
 %>
 <tr>
 <td><%=h.get("category")%></td>
 <td><%=h.get("id")%></td>
 <td><%=h.get("name")%></td>
 </tr>
-<%}%>
-<tr><th colspan="3" align="left">NEW GEN COMP</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("19")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
 
 
-<tr><th colspan="3" align="left">ATC</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("8")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
+<%
+        params = new Vector();
+        params.addElement(h.get("id"));
+        params.addElement(false);
+        obj = callWebserviceLite("get_drug_2", params);
+
+        System.out.println("obj "+obj.toString());
+}%>
+
+<%--<tr><th colspan="3" align="left">NEW GEN COMP</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("19")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
+
+
+<%--<tr><th colspan="3" align="left">ATC</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("8")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
 
 
 
 
 
-<tr><th colspan="3" align="left">AHFS</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("10")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
-<tr><th colspan="3" align="left">GEN ORIG</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("12")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
-<tr><th colspan="3" align="left">GEN COMP ORIG</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("11")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
-<tr><th colspan="3" align="left">INGREDIENT</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("14")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
+<%--<tr><th colspan="3" align="left">AHFS</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("10")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
+<%--<tr><th colspan="3" align="left">GEN ORIG</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("12")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
+<%--<tr><th colspan="3" align="left">GEN COMP ORIG</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("11")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
+<%--<tr><th colspan="3" align="left">INGREDIENT</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("14")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
 
 
-<tr><th colspan="3" align="left">BRAND</th></tr>
-<% for (Object Hash: vec){
-Hashtable h = (Hashtable) Hash;
-String cat = ""+h.get("category");
-if(!cat.equals("13")) continue;
-%>
-<tr>
-<td><%=h.get("category")%></td>
-<td><%=h.get("id")%></td>
-<td><%=h.get("name")%></td>
-</tr>
-<%}%>
+<%--<tr><th colspan="3" align="left">BRAND</th></tr>--%>
+<%--<% for (Object Hash: vec){--%>
+<%--Hashtable h = (Hashtable) Hash;--%>
+<%--//String cat = ""+h.get("category");--%>
+<%--if(!cat.equals("13")) continue;--%>
+<%--%>--%>
+<%--<tr>--%>
+<%--<td><%=h.get("category")%></td>--%>
+<%--<td><%=h.get("id")%></td>--%>
+<%--<td><%=h.get("name")%></td>--%>
+<%--</tr>--%>
+<%--<%}%>--%>
 
 
 
@@ -224,7 +230,7 @@ int somethingElse = 0;
 
 for(Object obj:vec){
 Hashtable h = (Hashtable) obj;
-String num = ""+ h.get("category");
+String num = "0";
 if (num.equals("")){
 num = "0";
 }
