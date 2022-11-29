@@ -34,7 +34,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.logging.log4j.Logger;
-import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
+//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**
  * This ContextListener is used to Initialize classes at startup - Initialize the DBConnection Pool.
@@ -75,7 +75,7 @@ public class StartUp implements ServletContextListener {
 		}
 		
 		logger.info("About to start Interactions checker with key"+drugRefProperties.getProperty("licence_key"));
-		InteractionsCheckerFactory.start(); //Get the file loading
+//		InteractionsCheckerFactory.start(); //Get the file loading
 		logger.info("LAST LINE IN contextInitialized");
 
 	}
