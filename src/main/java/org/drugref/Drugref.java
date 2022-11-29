@@ -27,19 +27,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import org.drugref.ca.dpd.CdTherapeuticClass;
+import org.drugref.ca.dpd.*;
 
 import java.util.List;
-
-import org.drugref.ca.dpd.TablesDao;
 
 import java.util.Vector;
 
 import javax.persistence.Query;
 import javax.persistence.EntityManager;
 
-import org.drugref.ca.dpd.CdDrugSearch;
-import org.drugref.ca.dpd.History;
+import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
 import org.drugref.util.SpringUtils;
@@ -48,7 +45,7 @@ import org.apache.logging.log4j.Logger;
 import org.drugref.util.MiscUtils;
 import org.drugref.dinInteractionCheck.InteractionRecord;
 import org.drugref.dinInteractionCheck.InteractionsChecker;
-import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
+//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**
  *
@@ -57,11 +54,17 @@ import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 public class Drugref {
 	
-        TablesDao queryDao = (TablesDao) SpringUtils.getBean("tablesDao");
-        public static HashMap<String,Object> DB_INFO=new HashMap<String,Object>();       
+        protected TablesDao queryDao;
+        public static HashMap<String,Object> DB_INFO=new HashMap<>();
         public static Boolean UPDATE_DB=false;        
         private static Logger logger = MiscUtils.getLogger();
-        
+
+        public Drugref(Class<?> daoClazz) {
+            String beanName = daoClazz.getSimpleName();
+            beanName = beanName.substring(0, 1).toLowerCase() + beanName.substring(1);
+            queryDao = (TablesDao) SpringUtils.getBean(beanName);
+        }
+
         /**
          * Dennis Warren Colcamex Resources
          * @param DIN
@@ -192,7 +195,7 @@ public class Drugref {
                     returnHash.put("cat",cds.getCategory());
                     logger.debug("drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
 
-                    if (cds.getCategory() == 13){
+                    if (cds.getCategory() == Category.BRAND.getOrdinal()){
                        return queryDao.getDrug(pkey, true);
                     }else if (cds.getCategory() == 18 || cds.getCategory() == 19){
                        int pl = cds.getDrugCode().indexOf("+");
@@ -207,8 +210,7 @@ public class Drugref {
 
 
         public Vector list_search_element_route(String str, String route) {
-                Vector vec=queryDao.listSearchElementRoute(str,route);
-                return vec;
+                return queryDao.listSearchElementRoute(str,route);
         }
 
         public Vector list_brands_from_element(String drugID) {
@@ -358,7 +360,7 @@ public class Drugref {
 			returnHash.put("updated_at",new Date());
 			returnHash.put("name","Interactions Service Not Available");
 			StringBuilder sb = new StringBuilder();
-			
+
 			for(String s:interactionsChecker.getErrors()){
 				sb.append(s);
 			}
@@ -373,14 +375,14 @@ public class Drugref {
 			returnHash.put("significance","3");//  //severity
 			returnHash.put("trusted",true);
 			returnHash.put("author","Medi-Span");
-			
-    			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr	
+
+    			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr
     		v.add(returnHash);
-    		
+
         	return v;
 
     	}
-    	
+
     	Date now = new Date();
     	if(interactionsChecker.getExpiryDate().before(now)){
     		int daysBetween =  (int) ((now.getTime() -interactionsChecker.getExpiryDate().getTime()) / (1000 * 60 * 60 * 24));
@@ -394,8 +396,8 @@ public class Drugref {
 			returnHash.put("significance","3");//  //severity
 			returnHash.put("trusted",true);
 			returnHash.put("author","Medi-Span");
-			
-			
+
+
     		if(daysBetween > 50 && daysBetween < 60){
     			returnHash.put("body", "Interaction Checker has Expired a new version must be installed to continue use");
     			retVec.add(returnHash);
@@ -405,12 +407,12 @@ public class Drugref {
     			v.add(returnHash);
             	return v;
     		}
-    		
+
     	}
-    	
+
     	List<InteractionRecord> interactionsFull = new ArrayList<InteractionRecord>();
     	for (String din1 :(List<String>)listOfDins){
-    		
+
     		for (String din2 :(List<String>)listOfDins){
     			logger.debug("din "+din1+" din "+din2);
     			List<InteractionRecord> interactions = interactionsChecker.check(din1, din2);
@@ -418,21 +420,21 @@ public class Drugref {
     				logger.error("din "+din1+" din "+din2+" size "+interactions.size());
     				interactionsFull.addAll(interactions);
     			}
-    			
+
     		}
     	}
     	for (String din1 :(List<String>)listOfDins){
     		List<InteractionRecord> foodInteractions = interactionsChecker.checkForFoodAndEthanol(din1);
-    		
+
     		logger.debug("food "+foodInteractions);
     		if(foodInteractions != null){
     			interactionsFull.addAll(foodInteractions);
     		}
     	}
-    	
+
 		logger.debug("interactionsFull "+interactionsFull.size());
-    	
-    	
+
+
     	for (InteractionRecord i : interactionsFull){
     		logger.debug("i record"+retVec.size());
     		Hashtable<String, Object> returnHash = new Hashtable<>();
@@ -447,8 +449,8 @@ public class Drugref {
 			returnHash.put("significance",i.getSeverity());//  //severity
 			returnHash.put("trusted",true);
 			returnHash.put("author","Medi-Span");
-			
-			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr	
+
+			//Other keys not set: comments, type, createdAt, updatedAt, createdBy, updatedBy, interactStr
 			retVec.add(returnHash);
     		logger.debug("ie record"+retVec.size());
     	}

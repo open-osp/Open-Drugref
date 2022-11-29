@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcServer;
+import org.drugref.ca.dpd.DrugrefDao;
+import org.drugref.ca.dpd.VigilanceDao;
 import org.drugref.util.MiscUtils;
 /**
  *
@@ -45,7 +47,12 @@ public class DrugrefService extends HttpServlet {
     public void init(ServletConfig config) {
         logger.debug("HERE-INIT");
         xmlrpc = new XmlRpcServer();
-        xmlrpc.addHandler("$default", new Drugref());
+        boolean vigilance = true;
+        if(vigilance) {
+            xmlrpc.addHandler("$default", new Drugref(VigilanceDao.class));
+        } else {
+            xmlrpc.addHandler("$default", new Drugref(DrugrefDao.class));
+        }
     }
     /** 
      * Handles the HTTP <code>POST</code> method.

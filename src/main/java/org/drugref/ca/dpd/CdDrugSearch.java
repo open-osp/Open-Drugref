@@ -44,7 +44,7 @@ import javax.persistence.Table;
 public class CdDrugSearch implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+//    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "drug_code")
     private String drugCode;
@@ -54,10 +54,6 @@ public class CdDrugSearch implements Serializable {
     private String name;
 
     public CdDrugSearch() {
-    }
-
-    public CdDrugSearch(Integer id) {
-        this.id = id;
     }
 
     public Integer getId() {
