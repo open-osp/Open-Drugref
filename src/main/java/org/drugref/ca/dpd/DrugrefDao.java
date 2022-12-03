@@ -1,6 +1,7 @@
 package org.drugref.ca.dpd;
 
 import org.apache.logging.log4j.Logger;
+import org.drugref.ca.TablesDao;
 import org.drugref.plugin.DrugrefPlugin;
 import org.drugref.plugin.Holbrook;
 import org.drugref.util.DrugrefProperties;

@@ -43,7 +43,7 @@ import javax.persistence.TemporalType;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_drug_product", catalog = "drugref2")
+@Table(name = "cd_drug_product")
 @NamedQueries({@NamedQuery(name = "CdDrugProduct.findAll", query = "SELECT c FROM CdDrugProduct c"), 
 	@NamedQuery(name = "CdDrugProduct.findByDrugCode", query = "SELECT c FROM CdDrugProduct c WHERE c.drugCode = :drugCode"), 
 	@NamedQuery(name = "CdDrugProduct.findByProductCategorization", query = "SELECT c FROM CdDrugProduct c WHERE c.productCategorization = :productCategorization"), 

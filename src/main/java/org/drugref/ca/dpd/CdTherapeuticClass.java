@@ -39,7 +39,7 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_therapeutic_class", catalog = "drugref2")
+@Table(name = "cd_therapeutic_class")
 @NamedQueries({@NamedQuery(name = "CdTherapeuticClass.findAll", query = "SELECT c FROM CdTherapeuticClass c"), @NamedQuery(name = "CdTherapeuticClass.findByDrugCode", query = "SELECT c FROM CdTherapeuticClass c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtcNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtcNumber = :tcAtcNumber"), @NamedQuery(name = "CdTherapeuticClass.findByTcAtc", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtc = :tcAtc"), @NamedQuery(name = "CdTherapeuticClass.findByTcAhfsNumber", query = "SELECT c FROM CdTherapeuticClass c WHERE c.tcAtcf = :tcAtcf"), @NamedQuery(name = "CdTherapeuticClass.findById", query = "SELECT c FROM CdTherapeuticClass c WHERE c.id = :id")})
 public class CdTherapeuticClass implements Serializable {
     private static final long serialVersionUID = 1L;

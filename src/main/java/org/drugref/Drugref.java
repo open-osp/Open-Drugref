@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import org.drugref.ca.dpd.*;
+import org.drugref.ca.TablesDao;
 
 import java.util.List;
 
@@ -36,6 +36,10 @@ import java.util.Vector;
 import javax.persistence.Query;
 import javax.persistence.EntityManager;
 
+import org.drugref.ca.dpd.CdDrugSearch;
+import org.drugref.ca.dpd.CdTherapeuticClass;
+import org.drugref.ca.dpd.History;
+//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
@@ -45,7 +49,6 @@ import org.apache.logging.log4j.Logger;
 import org.drugref.util.MiscUtils;
 import org.drugref.dinInteractionCheck.InteractionRecord;
 import org.drugref.dinInteractionCheck.InteractionsChecker;
-//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 
 /**
  *

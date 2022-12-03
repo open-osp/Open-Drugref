@@ -23,7 +23,7 @@ import javax.persistence.TemporalType;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_inactive_products", catalog = "drugref2")
+@Table(name = "cd_inactive_products")
 @NamedQueries({@NamedQuery(name = "CdInactiveProducts.findAll", query = "SELECT c FROM CdInactiveProducts c"), @NamedQuery(name = "CdInactiveProducts.findByDrugCode", query = "SELECT c FROM CdInactiveProducts c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdInactiveProducts.findByDrugIdentificationNumber", query = "SELECT c FROM CdInactiveProducts c WHERE c.drugIdentificationNumber = :drugIdentificationNumber"), @NamedQuery(name = "CdInactiveProducts.findByBrandName", query = "SELECT c FROM CdInactiveProducts c WHERE c.brandName = :brandName"), @NamedQuery(name = "CdInactiveProducts.findByHistoryDate", query = "SELECT c FROM CdInactiveProducts c WHERE c.historyDate = :historyDate"), @NamedQuery(name = "CdInactiveProducts.findById", query = "SELECT c FROM CdInactiveProducts c WHERE c.id = :id")})
 public class CdInactiveProducts implements Serializable {
     private static final long serialVersionUID = 1L;

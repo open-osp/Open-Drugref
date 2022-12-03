@@ -28,9 +28,7 @@ import java.util.*;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.CdTherapeuticClass;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public interface TablesDao {
 
       String identify();

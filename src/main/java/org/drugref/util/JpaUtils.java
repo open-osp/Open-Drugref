@@ -45,10 +45,10 @@ public class JpaUtils {
 
     public static EntityManager createEntityManager() {
      //   System.out.println("in createEntityManager()");
-        if (entityManagerFactory==null)
+        if (entityManagerFactory==null) {
             System.out.println("entityManagerFactory is null");
-
-        return (entityManagerFactory.createEntityManager());
+        }
+        return entityManagerFactory.createEntityManager();
     }
 
    

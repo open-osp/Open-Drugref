@@ -41,7 +41,7 @@ import javax.persistence.TemporalType;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_drug_status", catalog = "drugref2")
+@Table(name = "cd_drug_status")
 @NamedQueries({@NamedQuery(name = "CdDrugStatus.findAll", query = "SELECT c FROM CdDrugStatus c"), @NamedQuery(name = "CdDrugStatus.findByDrugCode", query = "SELECT c FROM CdDrugStatus c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdDrugStatus.findByCurrentStatusFlag", query = "SELECT c FROM CdDrugStatus c WHERE c.currentStatusFlag = :currentStatusFlag"), @NamedQuery(name = "CdDrugStatus.findByStatus", query = "SELECT c FROM CdDrugStatus c WHERE c.status = :status"), @NamedQuery(name = "CdDrugStatus.findByHistoryDate", query = "SELECT c FROM CdDrugStatus c WHERE c.historyDate = :historyDate"), @NamedQuery(name = "CdDrugStatus.findById", query = "SELECT c FROM CdDrugStatus c WHERE c.id = :id")})
 public class CdDrugStatus implements Serializable {
     private static final long serialVersionUID = 1L;

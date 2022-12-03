@@ -40,7 +40,7 @@ import javax.persistence.Table;
  * @author jackson
  */
 @Entity
-@Table(name = "cd_form", catalog = "drugref2")
+@Table(name = "cd_form")
 @NamedQueries({@NamedQuery(name = "CdForm.findAll", query = "SELECT c FROM CdForm c"), @NamedQuery(name = "CdForm.findByDrugCode", query = "SELECT c FROM CdForm c WHERE c.drugCode = :drugCode"), @NamedQuery(name = "CdForm.findByPharmCdFormCode", query = "SELECT c FROM CdForm c WHERE c.pharmCdFormCode = :pharmCdFormCode"), @NamedQuery(name = "CdForm.findByPharmaceuticalCdForm", query = "SELECT c FROM CdForm c WHERE c.pharmaceuticalCdForm = :pharmaceuticalCdForm"), @NamedQuery(name = "CdForm.findById", query = "SELECT c FROM CdForm c WHERE c.id = :id")})
 public class CdForm implements Serializable {
     private static final long serialVersionUID = 1L;

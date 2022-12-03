@@ -26,11 +26,8 @@ package org.drugref.util;
  * @author jackson
  */
 
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  * This class holds utilities used to work with spring.
@@ -58,21 +55,21 @@ public class SpringUtils
 	/**
 	 * The following is example code on how to use programmatic spring transactions.
 	 */
-	@Deprecated
-	public static void exampleProgrammaticTransaction()
-	{
-		JpaTransactionManager txManager=(JpaTransactionManager)SpringUtils.getBean("txManager");
-		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-		try
-		{
-			// some database work like the following
-			// emailBroadcastDao.findWaitingToSendAndLock();
-
-			txManager.commit(status);
-		}
-		finally
-		{
-		    if (!status.isCompleted()) txManager.rollback(status);
-		}
-	}
+//	@Deprecated
+//	public static void exampleProgrammaticTransaction()
+//	{
+//		JpaTransactionManager txManager=(JpaTransactionManager)SpringUtils.getBean("txManager");
+//		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+//		try
+//		{
+//			// some database work like the following
+//			// emailBroadcastDao.findWaitingToSendAndLock();
+//
+//			txManager.commit(status);
+//		}
+//		finally
+//		{
+//		    if (!status.isCompleted()) txManager.rollback(status);
+//		}
+//	}
 }

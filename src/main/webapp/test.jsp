@@ -17,10 +17,10 @@
         <%
         Vector paramsListDrugs = new Vector();
         Hashtable haListDrugs=new Hashtable();
-        paramsListDrugs.addElement("coumarin");
+        paramsListDrugs.addElement("ESIDRIX");
         System.out.println("params "+paramsListDrugs);
-        Object vecListDrugs = (Object) callWebserviceLite("list_search_element",paramsListDrugs);
-        System.out.println("vec "+vecListDrugs);
+        Object vecListDrugs = callWebserviceLite("list_search_element3",paramsListDrugs);
+        System.out.println("vec "+vecListDrugs.toString());
         out.write("list_search_element result: " + vecListDrugs + "\n");
 
      /*   Vector paramsGetDrug = new Vector();
@@ -206,7 +206,7 @@ private Object callWebserviceLite(String procedureName,Vector params) throws Exc
              System.out.println("in callWebserviceLite");
             // System.out.println("server_url :"+server_url);
            // XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/DrugrefService");
-             XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/drugref2/DrugrefService");
+             XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8080/drugref2/DrugrefService");
             // XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:4082/drugref2/DrugrefService");
             System.out.println("procedureName="+procedureName);
             //XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:4080/drugref2/DrugrefService");
@@ -226,12 +226,10 @@ private Object callWebserviceLite(String procedureName,Vector params) throws Exc
                 System.out.println("main's e: ");
                 e.printStackTrace();
             }*/
-            object = (Object) server.execute(procedureName, params);
+            object = server.execute(procedureName, params);
             System.out.println("Object in callWebserviceLite:       "+object);
          }catch (Exception exception) {
-            System.out.println(exception.getClass().getName()+ "message in exception: "+exception.getMessage());
-            exception.getStackTrace();
-            exception.printStackTrace();
+             exception.printStackTrace();
              /*
                 System.err.println("JavaClient: XML-RPC Fault #" +
                                    Integer.toString(exception.code) + ": " +

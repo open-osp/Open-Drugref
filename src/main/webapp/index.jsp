@@ -271,21 +271,15 @@ try{
 XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8080/drugref2/DrugrefService");
 //XmlRpcClientLite server = new XmlRpcClientLite("http://localhost:8084/drugref2/DrugrefService");
 object = server.execute(procedureName, params);
-}catch (XmlRpcException exception) {
+}catch (Exception exception) {
 
-System.err.println("JavaClient: XML-RPC Fault #" +
-Integer.toString(exception.code) + ": " +
+System.err.println("JavaClient: XML-RPC Fault #" + ": " +
 exception.toString());
 exception.printStackTrace();
 
-throw new Exception("JavaClient: XML-RPC Fault #" +
-Integer.toString(exception.code) + ": " +
+throw new Exception("JavaClient: XML-RPC Fault #" + ": " +
 exception.toString());
 
-} catch (Exception exception) {
-System.err.println("JavaClient: " + exception.toString());
-exception.printStackTrace();
-throw new Exception("JavaClient: " + exception.toString());
 }
 return object;
 }
