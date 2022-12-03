@@ -1,6 +1,10 @@
-package org.drugref.ca.dpd;
+package org.drugref.ca.vigilance;
 
 import org.drugref.Category;
+import org.drugref.ca.dpd.CdDrugProduct;
+import org.drugref.ca.dpd.CdDrugSearch;
+import org.drugref.ca.dpd.CdTherapeuticClass;
+import org.drugref.ca.TablesDao;
 import org.drugref.util.JpaUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;

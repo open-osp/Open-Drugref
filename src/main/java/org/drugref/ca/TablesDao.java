@@ -21,9 +21,13 @@
  * Hamilton
  * Ontario, Canada
  */
-package org.drugref.ca.dpd;
+package org.drugref.ca;
 
 import java.util.*;
+
+import org.drugref.ca.dpd.CdDrugProduct;
+import org.drugref.ca.dpd.CdDrugSearch;
+import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.springframework.stereotype.Repository;
 
 @Repository

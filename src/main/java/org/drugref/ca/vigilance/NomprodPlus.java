@@ -1,4 +1,4 @@
-package org.drugref.ca.dpd;
+package org.drugref.ca.vigilance;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;

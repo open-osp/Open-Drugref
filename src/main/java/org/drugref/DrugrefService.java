@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcServer;
 import org.drugref.ca.dpd.DrugrefDao;
-import org.drugref.ca.dpd.VigilanceDao;
+import org.drugref.ca.vigilance.VigilanceDao;
 import org.drugref.util.MiscUtils;
 /**
  *
