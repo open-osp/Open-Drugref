@@ -297,7 +297,7 @@ public class VigilanceDao implements TablesDao {
         String sql = "SELECT vig_fgenPlus.genericName" + language + " AS `name`, " +
                 "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
                 "IFNULL(ATCcode, '') AS `atc`, " +
-                "vig_fgenPlus.TMcodesOfCCDD AS `regional_identifier`, " +
+                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `regional_identifier`, " +
                 "CONCAT(vig_nomprodPlus.productName" + language + ", ' ', IFNULL( vig_nomprodPlus.strength" + language + ", ''), ' ', IFNULL( vig_nomprodPlus.form" + language + ", '')) AS `productName`, " +
                 "vig_nomprodPlus.form" + language + " AS `drugForm`, " +
                 "vig_fgenPlus.genericName" + language + " AS `components`, " +
@@ -305,7 +305,7 @@ public class VigilanceDao implements TablesDao {
                 "IFNULL(vig_generxPlus.ceRxRouteCode, '') AS `drugRoute`, " +
                 "IFNULL(vig_generxPlus.strength" + language + ", '') AS `strength`, " +
                 "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
-                "vig_generxPlus.uuid AS `vigId`, " +
+                "IFNULL(vig_generxPlus.uuid,'') AS `genrxId`, " +
                 "vig_fgenPlus.GENcode  AS `genericId`, " +
                 "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`, " +
                 "vig_nomprodPlus.productId AS productID " +
@@ -348,7 +348,7 @@ public class VigilanceDao implements TablesDao {
         EntityManager em = JpaUtils.createEntityManager();
         String sql = "SELECT IFNULL(vig_generxPlus.usualName" + language + ", vig_generxPlus.genericName" + language + ") AS `product`, " +
                 "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
-                "vig_fgenPlus.TMcodesOfCCDD AS `regional_identifier`, " +
+                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `regional_identifier`, " +
                 "vig_fgenPlus.ATCcode AS `atc`, " +
                 "CONCAT(vig_generxPlus.genericName" + language + ", ' ', IFNULL( vig_generxPlus.strength" + language + ", '')) AS `name`, " +
                 "vig_fgenPlus.genericName" + language + " AS `components`, " +
@@ -357,7 +357,7 @@ public class VigilanceDao implements TablesDao {
                 "vig_generxPlus.ceRxRouteCode AS `drugRoute`, " +
                 "vig_generxPlus.strength" + language + " AS `strength`, " +
                 "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
-                "vig_generxPlus.uuid AS `vigId`, " +
+                "IFNULL(vig_generxPlus.uuid,'') AS `genrxId`, " +
                 "vig_fgenPlus.GENcode  AS `genericId`, " +
                 "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`" +
                 "FROM vig_generxPlus " +
