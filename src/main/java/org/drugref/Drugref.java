@@ -38,6 +38,7 @@ import javax.persistence.EntityManager;
 
 import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.CdTherapeuticClass;
+import org.drugref.ca.dpd.DrugrefDao;
 import org.drugref.ca.dpd.History;
 //import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
@@ -187,24 +188,27 @@ public class Drugref {
         public Vector get_drug_2(String pkey,boolean html){
                 logger.debug("IN get_drug_2 "+pkey);
                 Hashtable<String, Object> returnHash = new Hashtable<>();
-                Integer id = Integer.parseInt(pkey);
-                
-                CdDrugSearch cds = queryDao.getSearchedDrug(id);
-                
+                CdDrugSearch cds;
+                if(queryDao instanceof DrugrefDao) {
+                    Integer id = Integer.parseInt(pkey);
+                    cds = queryDao.getSearchedDrug(id);
+                }else{
+                    cds = queryDao.getSearchedDrug(pkey);
+                }
                 if (cds != null){
-                    cds.getDrugCode();
-                    cds.getCategory();
                     returnHash.put("drugCode",cds.getDrugCode());
                     returnHash.put("cat",cds.getCategory());
                     logger.debug("drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
 
                     if (cds.getCategory() == Category.BRAND.getOrdinal()){
                        return queryDao.getDrug(pkey, true);
-                    }else if (cds.getCategory() == 18 || cds.getCategory() == 19){
+                    }else if (queryDao instanceof DrugrefDao && (cds.getCategory() == Category.AI_GENERIC.getOrdinal() || cds.getCategory() == Category.AI_COMPOSITE_GENERIC.getOrdinal())){
                        int pl = cds.getDrugCode().indexOf("+");
                        String aiCode = cds.getDrugCode().substring(0, pl);
                        String formCode = cds.getDrugCode().substring(pl+1);
                        return queryDao.getMadeGenericExample(aiCode,formCode,false);
+                    } else if (cds.getCategory() == Category.AI_GENERIC.getOrdinal()) {
+                        return queryDao.getMadeGenericExample(cds.getUuid(), cds.getDrugCode(),false);
                     }
                 }
                 return null;

@@ -69,6 +69,7 @@ public interface TablesDao {
      
       CdDrugSearch getSearchedDrug(int id);
 
+      CdDrugSearch getSearchedDrug(String id);
      
       List<CdDrugSearch> getListAICodes(List<String> listOfDrugCodes);
 

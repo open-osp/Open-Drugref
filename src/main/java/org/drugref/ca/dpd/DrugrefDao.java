@@ -344,6 +344,10 @@ public class DrugrefDao implements TablesDao {
         return null;
     }
 
+    public CdDrugSearch getSearchedDrug(String id) {
+        return null;
+    }
+
     public CdDrugSearch getSearchedDrug(int id) {
         EntityManager em = JpaUtils.createEntityManager();
         //EntityTransaction tx = em.getTransaction();
@@ -1852,6 +1856,7 @@ public class DrugrefDao implements TablesDao {
             ha2.put("components", component);
             ha2.put("drugForm", drugForm);
             ha2.put("drugRoute", drugRoute);
+            ha2.put("drugId", origId);
 
             returnRows.addElement(ha2);
         } catch (Exception e) {

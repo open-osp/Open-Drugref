@@ -11,9 +11,7 @@ import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 @Repository
 public class VigilanceDao implements TablesDao {
@@ -78,26 +76,51 @@ public class VigilanceDao implements TablesDao {
         return null;
     }
 
+    /*
+     * alternate is French which was not considered as a choice during initial development
+     * Future development should consider the system language French or English
+     */
+    private static String language = "English";
+
     /**
-     * Fetches a single search result based on the unique identifier of a drug.
+     * Fetches a single search result from the
+     * generic or brand tables based on the unique identifier of a drug.
+     * Searches are isolated to the generxPlus (generic) or nomprodPlus (Brand)
+     * tables.
      */
     @Override
-    public CdDrugSearch getSearchedDrug(int id) {
+    public CdDrugSearch getSearchedDrug(String id) {
         EntityManager em = JpaUtils.createEntityManager();
-        String sql = "SELECT NomprodPlus.productID AS id, NomprodPlus.GENcode AS drugCode, CAST(?1 AS NCHAR) AS category, " +
-                "NomprodPlus.ProductNameEnglish AS name " +
-                "FROM NomprodPlus " +
-                "WHERE NomprodPlus.productID = ?2";
+        String sql = "SELECT productID AS `id`, " +
+                "GENcode AS `drugCode`, " +
+                "CAST(?2 AS NCHAR) AS `category`, " +
+                "ProductName" + language + " AS `name` " +
+                "FROM vig_nomprodPlus " +
+                "WHERE productID = ?1" +
+                " UNION " +
+                "SELECT uuid AS `id`, " +
+                "GENcode AS `drugCode`, " +
+                "CAST(?3 AS NCHAR) AS `category`, " +
+                "genericName" + language + " AS `name` " +
+                "FROM vig_generxPlus " +
+                "WHERE uuid = ?1";
         Query query = em.createNativeQuery(sql, Hashtable.class);
-        query.setParameter(2, id);
-        query.setParameter(1, Category.BRAND.getOrdinal());
+        query.setParameter(1, id);
+        query.setParameter(2, Category.BRAND.getOrdinal());
+        query.setParameter(3, Category.AI_GENERIC.getOrdinal());
         Hashtable<String, Object> singleResult = (Hashtable) query.getSingleResult();
         CdDrugSearch cdDrugSearch = new CdDrugSearch();
-        cdDrugSearch.setId((Integer) singleResult.get("id"));
-        cdDrugSearch.setDrugCode((String) singleResult.get("drugCode"));
-        cdDrugSearch.setCategory(Integer.parseInt((String) singleResult.get("category")));
-        cdDrugSearch.setName((String) singleResult.get("name"));
+        if(singleResult != null) {
+            cdDrugSearch.setUuid((String) singleResult.get("id"));
+            cdDrugSearch.setDrugCode((String) singleResult.get("drugCode"));
+            cdDrugSearch.setCategory(Integer.parseInt((String) singleResult.get("category")));
+            cdDrugSearch.setName((String) singleResult.get("name"));
+        }
         return cdDrugSearch;
+    }
+
+    public CdDrugSearch getSearchedDrug(int id) {
+        return null;
     }
 
     @Override
@@ -138,24 +161,62 @@ public class VigilanceDao implements TablesDao {
     public Vector listSearchElement4(String keyword, boolean rightOnly){
         EntityManager em = JpaUtils.createEntityManager();
         Assert.notNull(keyword, "Search value cannot be null.");
-        String searchstring = keyword.trim();
-                //.replaceAll("\\p{Punct}", "");
-        // searchstring += "*";
-        String sql = "SELECT NomprodPlus.productID AS id, CAST(?2 AS NCHAR) AS category," +
-                "NomprodPlus.GENcode AS drugCode, NomprodPlus.productNameEnglish AS name " +
-                "FROM NomprodPlus WHERE MATCH(nomprodPlus.productNameEnglish) AGAINST (?1 IN BOOLEAN MODE)" +
-                " UNION " +
-                "SELECT FgenPlus.uniqueIdentifier AS id, CAST(?3 AS NCHAR) AS category," +
-                "FgenPlus.GENcode AS drugCode, FgenPlus.genericNameEnglish AS name " +
-                "FROM FgenPlus WHERE MATCH(FgenPlus.genericNameEnglish, fgenPlus.genericSimpleNameEnglish) AGAINST (?1 IN BOOLEAN MODE)" +
-                "LIMIT 50";
-        // score > 2
-        // boolean mode + - * ""
-        Query query = em.createNativeQuery(sql, Hashtable.class);
-        query.setParameter(1, searchstring);
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT productID AS id, CAST(?2 AS NCHAR) AS `category`,");
+        sql.append("GENcode AS `drugCode`,");
+        sql.append("CONCAT(");
+            sql.append("productNameCapitalized").append(language);
+            sql.append(", ").append("' ', ");
+            sql.append("IFNULL(");
+                sql.append("strength").append(language);
+            sql.append(",'')");
+            sql.append(", ").append("' ', ");
+            sql.append("IFNULL(");
+                sql.append("form").append(language);
+            sql.append(",'')");
+        sql.append(") AS `name` ");
+        sql.append("FROM vig_nomprodPlus ");
+        sql.append("WHERE MATCH(");
+            sql.append("productName").append(language).append(", ");
+            sql.append("strength").append(language).append(", ");
+            sql.append("form").append(language);
+        sql.append(") ");
+        sql.append("AGAINST (?1 IN BOOLEAN MODE)");
+
+        sql.append(" UNION ");
+
+        sql.append("SELECT uuid AS `id`, ");
+        sql.append("CAST(?3 AS NCHAR) AS `category`,");
+        sql.append("GENcode AS `drugCode`,");
+        sql.append("CONCAT(");
+            sql.append("genericName").append(language);
+            sql.append(", ").append("' ', ");
+            sql.append("IFNULL(");
+                sql.append("strength").append(language);
+            sql.append(",'')");
+            sql.append(", ").append("' ', ");
+            sql.append("IFNULL(");
+                sql.append("form").append(language);
+            sql.append(",'')");
+        sql.append(") AS `name` ");
+        sql.append("FROM vig_generxPlus ");
+        sql.append("WHERE MATCH(");
+        sql.append("lowercaseGenericName").append(language).append(", ");
+        sql.append("strength").append(language).append(", ");
+        sql.append("form").append(language);
+        sql.append(") ");
+        sql.append("AGAINST (?1 IN BOOLEAN MODE) ");
+
+        sql.append("LIMIT 50");
+
+        Query query = em.createNativeQuery(sql.toString(), Hashtable.class);
+        String parameters = parseParameters(keyword);
+        query.setParameter(1, parameters);
         query.setParameter(2, Category.BRAND.getOrdinal());
         query.setParameter(3, Category.AI_GENERIC.getOrdinal());
-        Vector<Hashtable<String, Object>> resultList = new Vector<>(query.getResultList());
+        List results = query.getResultList();
+        Vector<Hashtable<String, Object>> resultList = new Vector<Hashtable<String,Object>>(results);
         JpaUtils.close(em);
         return resultList;
     }
@@ -216,41 +277,109 @@ public class VigilanceDao implements TablesDao {
     }
 
     @Override
-    public Vector getMadeGenericExample(String groupno, String formCode, boolean html) {
-        return null;
+    public Vector getMadeGenericExample(String uuid, String gencode, boolean html) {
+        return getDrugByDrugCode(uuid, gencode, html);
     }
 
 
     /**
-     * Fetches a drug from the FgenPlus (Generics) table based on Category 18
+     * Fetch brandname drugs by productId in NomprodPlus
+     * Return product and all generic information for specific
+     * drug signature.
+     *
+     * @param pKey
+     * @param html
+     * @return
      */
     @Override
     public Vector getDrug(String pKey, boolean html) {
         EntityManager em = JpaUtils.createEntityManager();
-        String sql = "SELECT FgenPlus.genericNameEnglish AS name, " +
-                "FgenPlus.ATCcode AS atc, " +
-                "NomprodPlus.productID AS regional_identifier, " +
-                "NomprodPlus.productNameEnglish AS product, " +
-                "NomprodPlus.formEnglish AS drugForm, " +
-                "FgenPlus.genericSimpleNameEnglish AS components " +
-                "FROM NomprodPlus " +
-                "INNER JOIN FgenPlus " +
-                "ON (FgenPlus.GENcode = NomprodPlus.GENcode) " +
-                "WHERE NomprodPlus.productID = ?1";
+        String sql = "SELECT vig_fgenPlus.genericName" + language + " AS `name`, " +
+                "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
+                "IFNULL(ATCcode, '') AS `atc`, " +
+                "vig_fgenPlus.TMcodesOfCCDD AS `regional_identifier`, " +
+                "CONCAT(vig_nomprodPlus.productName" + language + ", ' ', IFNULL( vig_nomprodPlus.strength" + language + ", ''), ' ', IFNULL( vig_nomprodPlus.form" + language + ", '')) AS `productName`, " +
+                "vig_nomprodPlus.form" + language + " AS `drugForm`, " +
+                "vig_fgenPlus.genericName" + language + " AS `components`, " +
+                "vig_fgenPlus.GENcodeDetail AS `componentsGenCode`, " +
+                "IFNULL(vig_generxPlus.ceRxRouteCode, '') AS `drugRoute`, " +
+                "IFNULL(vig_generxPlus.strength" + language + ", '') AS `strength`, " +
+                "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
+                "vig_generxPlus.uuid AS `vigId`, " +
+                "vig_fgenPlus.GENcode  AS `genericId`, " +
+                "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`, " +
+                "vig_nomprodPlus.productId AS productID " +
+                "FROM vig_nomprodPlus " +
+                "JOIN vig_fgenPlus " +
+                "ON (vig_nomprodPlus.GENcode = vig_fgenPlus.GENcode) " +
+                "LEFT JOIN vig_generxPlus " +
+                "ON (vig_generxPlus.uuid = CONCAT(vig_fgenPlus.GENcode, '##', IFNULL(vig_nomprodPlus.strength" + language + ",''),'##', IFNULL(vig_nomprodPlus.form" + language + ",''))) " +
+                "WHERE productID = ?1";
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, pKey);
-        Vector returnRows = new Vector();
-        Vector components = new Vector();
-        Hashtable result = (Hashtable) query.getSingleResult();
-        components.addElement(result.get("components"));
-        result.put("components", components);
+        Vector<Object> returnRows = new Vector<>();
+        Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());
+        parseComponents(result);
+
+        /*
+         * For whatever reason, the OSCAR interface needs the route info formatted this way.
+         */
+        String drugroute = (String) result.get("drugRoute");
+        Vector routeVector = new Vector();
+        routeVector.addElement(drugroute);
+        result.put("drugRoute", routeVector);
+
         returnRows.addElement(result);
         return returnRows;
     }
 
+    /**
+     * Fetch generic drugs from generxPlus by UUID.
+     *
+     * UUID: [Generic Code]##[Strength signature]##[Form]
+     *
+     * @param uuid
+     * @param gencode
+     * @param html
+     * @return
+     */
     @Override
-    public Vector getDrugByDrugCode(String pKey, String formCode, boolean html) {
-        return null;
+    public Vector getDrugByDrugCode(String uuid, String gencode, boolean html) {
+        EntityManager em = JpaUtils.createEntityManager();
+        String sql = "SELECT IFNULL(vig_generxPlus.usualName" + language + ", vig_generxPlus.genericName" + language + ") AS `product`, " +
+                "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
+                "vig_fgenPlus.TMcodesOfCCDD AS `regional_identifier`, " +
+                "vig_fgenPlus.ATCcode AS `atc`, " +
+                "CONCAT(vig_generxPlus.genericName" + language + ", ' ', IFNULL( vig_generxPlus.strength" + language + ", '')) AS `name`, " +
+                "vig_fgenPlus.genericName" + language + " AS `components`, " +
+                "vig_fgenPlus.GENcodeDetail AS `componentsGenCode`, " +
+                "vig_generxPlus.lowercaseForm" + language + " AS `drugForm`, " +
+                "vig_generxPlus.ceRxRouteCode AS `drugRoute`, " +
+                "vig_generxPlus.strength" + language + " AS `strength`, " +
+                "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
+                "vig_generxPlus.uuid AS `vigId`, " +
+                "vig_fgenPlus.GENcode  AS `genericId`, " +
+                "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`" +
+                "FROM vig_generxPlus " +
+                "JOIN vig_fgenPlus " +
+                "ON (vig_generxPlus.GENcode = vig_fgenPlus.GENcode) " +
+                "WHERE vig_generxPlus.uuid = ?1";
+        Query query = em.createNativeQuery(sql, Hashtable.class);
+        query.setParameter(1, uuid);
+        Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());
+        parseComponents(result);
+
+        /*
+         * For whatever reason, the OSCAR interface needs the route info formatted this way.
+         */
+        String drugroute = (String) result.get("drugRoute");
+        Vector<Object> routeVector = new Vector<>();
+        routeVector.addElement(drugroute);
+        result.put("drugRoute", routeVector);
+
+        Vector<Object> returnRows = new Vector<>();
+        returnRows.addElement(result);
+        return returnRows;
     }
 
     @Override
@@ -261,5 +390,72 @@ public class VigilanceDao implements TablesDao {
     @Override
     public Vector getTcATC(String atc) {
         return null;
+    }
+
+    private Hashtable parseComponents(Hashtable result) {
+        Vector<Object> components = new Vector<>();
+        String[] names = ((String) result.get("components")).split("\\+");
+        String[] codes = ((String) result.get("componentsGenCode")).split("\\+");
+        String[] strengths = ((String) result.get("strength")).split("\\+");
+        String resultCode = (String) result.get("regional_identifier");
+        String unit = (String) result.get("unit");
+        if(unit == null) {
+            unit = "";
+        }
+        String genericName = (String) result.get("genericName");
+
+        for(int i = 0; i < names.length; i++) {
+            Hashtable component = new Hashtable();
+            component.put("name", names[i].trim());
+            String code = codes[i].trim();
+            if(code.equalsIgnoreCase(genericName)) {
+                component.put("code", resultCode);
+            } else {
+                component.put("code", codes[i].trim());
+            }
+            component.put("strength", strengths[i].trim());
+            component.put("unit", unit);
+            components.addElement(component);
+        }
+
+        result.put("components", components);
+        return result;
+    }
+
+    /**
+     * Searches in the Vigilance database are formed with 3 parameters separated with a comma:
+     * [product/generic name], [strength], [form]
+     * ie
+     * tylenol, 500, tablet
+     */
+    private String parseParameters(String keyword) {
+        StringTokenizer stringTokenizer = new StringTokenizer(keyword, ",", false);
+        StringBuilder parameterBuilder = new StringBuilder();
+        if(stringTokenizer.countTokens() > 0) {
+            // keyword strength and form
+            while (stringTokenizer.hasMoreTokens()) {
+                addOperators(stringTokenizer.nextToken().trim().toLowerCase(), parameterBuilder);
+            }
+        } else {
+            addOperators(keyword.trim().toLowerCase(), parameterBuilder);
+        }
+        return parameterBuilder.toString().trim();
+    }
+
+    private void addOperators(String parameter, StringBuilder builder) {
+        if(!parameter.startsWith("+")&&!parameter.startsWith("-")) {
+            builder.append("+");
+        }
+        if(!parameter.endsWith("*")) {
+            if(parameter.endsWith("\"")) {
+                builder.append(parameter);
+            } else {
+                builder.append(parameter);
+                builder.append("*");
+            }
+        } else {
+            builder.append(parameter);
+        }
+        builder.append(" ");
     }
 }

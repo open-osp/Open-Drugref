@@ -25,14 +25,7 @@
 package org.drugref.ca.dpd;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  *
@@ -46,6 +39,10 @@ public class CdDrugSearch implements Serializable {
     @Id
 //    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
+
+    @Transient
+    private String uuid;
+
     @Column(name = "drug_code")
     private String drugCode;
     @Column(name = "category")
@@ -54,6 +51,14 @@ public class CdDrugSearch implements Serializable {
     private String name;
 
     public CdDrugSearch() {
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Integer getId() {

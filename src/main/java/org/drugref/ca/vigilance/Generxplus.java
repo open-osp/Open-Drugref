@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 
 @Entity
-@Table(name = "vig_generxplus")
+@Table(name = "vig_generxPlus")
 public class Generxplus implements Serializable {
 
     private static final long serialVersionUID = 1L;
