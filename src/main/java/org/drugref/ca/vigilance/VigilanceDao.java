@@ -120,7 +120,7 @@ public class VigilanceDao implements TablesDao {
     }
 
     public CdDrugSearch getSearchedDrug(int id) {
-        return null;
+        return getSearchedDrug(id+"");
     }
 
     @Override
@@ -413,7 +413,16 @@ public class VigilanceDao implements TablesDao {
             } else {
                 component.put("code", codes[i].trim());
             }
-            component.put("strength", strengths[i].trim());
+
+            // the strength is likely empty if the array length is
+            // not the same as the component array length
+            if(strengths.length == names.length) {
+                String strength = strengths[i];
+                component.put("strength", strength.replaceAll(unit, "").trim());
+            } else {
+                component.put("strength", "");
+            }
+
             component.put("unit", unit);
             components.addElement(component);
         }
