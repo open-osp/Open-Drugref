@@ -52,10 +52,13 @@ import org.drugref.util.MiscUtils;
  *
  * @author jaygallagher
  */
+
+ 
 public class DPDImport {
 
+
     private static Logger logger = MiscUtils.getLogger();
-    String dpd_url = DrugrefProperties.getInstance().getProperty("DPD_BASE_URL") ? DrugrefProperties.getInstance().getProperty("DPD_BASE_URL") : "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database";
+    String dpd_url = DrugrefProperties.getInstance().getProperty("DPD_BASE_URL", "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database");
     public File getZipStream() throws Exception {
         String sUrl = dpd_url + "/allfiles.zip";
         return getZipStream(sUrl);
