@@ -55,19 +55,19 @@ import org.drugref.util.MiscUtils;
 public class DPDImport {
 
     private static Logger logger = MiscUtils.getLogger();
-
+    String dpd_url = DrugrefProperties.getInstance().getProperty("DPD_BASE_URL") ? DrugrefProperties.getInstance().getProperty("DPD_BASE_URL") : "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database";
     public File getZipStream() throws Exception {
-        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/allfiles.zip";
+        String sUrl = dpd_url + "/allfiles.zip";
         return getZipStream(sUrl);
     }
 
     public File getInactiveZipStream() throws Exception {
-            String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/Allfiles_ia-Oct10.zip";
+            String sUrl = dpd_url + "/Allfiles_ia.zip";
                     return getZipStream(sUrl);
     }
 
     public File getInactiveTableZipStream() throws Exception {
-        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/inactive.zip";
+        String sUrl = dpd_url + "/inactive.zip";
         return getZipStream(sUrl);
     }
 
