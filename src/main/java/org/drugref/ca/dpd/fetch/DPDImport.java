@@ -65,7 +65,8 @@ public class DPDImport {
     }
 
     public File getInactiveZipStream() throws Exception {
-            String sUrl = dpd_url + "/Allfiles_ia.zip";
+            String sUrl = dpd_url + "/Allfiles_ia-Oct10.zip";
+            // WARNING Allfiles_ia-Oct10.zip is data from 2018, code should be updated to handle new format in Allfiles_ia.zip
                     return getZipStream(sUrl);
     }
 
@@ -273,6 +274,7 @@ public class DPDImport {
         List<String> arrList = new ArrayList();
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, ' .' , ' 0.') WHERE `name` LIKE '% .%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0 ' , ' ') WHERE `name` LIKE '%.0 %';");
+        arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.00 ' , ' ') WHERE `name` LIKE '%.0 %';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0MG' , 'MG') WHERE `name` LIKE '%.0MG%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, 'µG' , 'MCG') WHERE `name` LIKE '%µG%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0MCG' , 'MCG') WHERE `name` LIKE '%.0MCG%';");
