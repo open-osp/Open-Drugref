@@ -40,7 +40,6 @@ import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.drugref.ca.dpd.DrugrefDao;
 import org.drugref.ca.dpd.History;
-//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;

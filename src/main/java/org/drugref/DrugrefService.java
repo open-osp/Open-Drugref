@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcServer;
 import org.drugref.ca.dpd.DrugrefDao;
 import org.drugref.ca.vigilance.VigilanceDao;
+import org.drugref.util.DrugrefProperties;
 import org.drugref.util.MiscUtils;
 /**
  *
@@ -45,15 +46,18 @@ public class DrugrefService extends HttpServlet {
     private static Logger logger = MiscUtils.getLogger();
     
     public void init(ServletConfig config) {
-        logger.debug("HERE-INIT");
+        DrugrefProperties.DATA_BASE dataBase = DrugrefProperties.getInstance().getDatbase();
         xmlrpc = new XmlRpcServer();
-        boolean vigilance = true;
-        if(vigilance) {
-            xmlrpc.addHandler("$default", new Drugref(VigilanceDao.class));
-        } else {
-            xmlrpc.addHandler("$default", new Drugref(DrugrefDao.class));
+        switch(dataBase) {
+            case cdpd: xmlrpc.addHandler("$default", new Drugref(DrugrefDao.class));
+                        logger.info("Using database integration: CPDP");
+            break;
+            case vigilance: xmlrpc.addHandler("$default", new Drugref(VigilanceDao.class));
+                        logger.info("Using database integration: Vigilance");
+            break;
         }
     }
+
     /** 
      * Handles the HTTP <code>POST</code> method.
      * @param request servlet request
@@ -74,24 +78,19 @@ public class DrugrefService extends HttpServlet {
         }
     }
 
-
-
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-    logger.debug("HERE-GET");
-    processRequest(request, response);
+        // no get here
     }
-     */
+
 }
 
    

@@ -9,7 +9,13 @@
         <Logger name="org.apache.log4j.xml" level="error">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Root level="error">
+        <Logger name="openjpa.jdbc.SQL" level="TRACE" >
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="openjpa.Runtime" level="TRACE" >
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Root level="TRACE">
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>

@@ -11,10 +11,11 @@ import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.io.Serializable;
 import java.util.*;
 
 @Repository
-public class VigilanceDao implements TablesDao {
+public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public String identify() {
@@ -158,7 +159,62 @@ public class VigilanceDao implements TablesDao {
      * will not work if the Full Text indexes are not created in the MySQL database.
      */
     @Override
-    public Vector listSearchElement4(String keyword, boolean rightOnly){
+    public Vector listSearchElement4(String keyword, boolean ingredientOnly){
+        if(ingredientOnly) {
+            return listSearchIngredient(keyword);
+        } else {
+            return listSearchAll(keyword);
+        }
+    }
+
+    /**
+     * All search results are returned as a list of drug ingredients.
+     * Example: searching for a brand name will return only the ingredients
+     * for the brand name.
+     * @return
+     */
+    private Vector listSearchIngredient(String keyword) {
+
+        EntityManager em = JpaUtils.createEntityManager();
+        Assert.notNull(keyword, "Search value cannot be null.");
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append("uuid AS `id`,");
+        sql.append("CAST(?2 AS NCHAR) AS category,");
+        sql.append("GENcode AS `drugCode`,CONCAT(genericNameEnglish, ' ', IFNULL(strengthEnglish,''), ' ', IFNULL(formEnglish,'')) AS `name`,");
+        sql.append("genericNameEnglish,");
+        sql.append("strengthEnglish ");
+        sql.append("FROM vig_generxPlus ");
+        sql.append("WHERE GENcode IN (");
+        sql.append("SELECT GENcode ");
+        sql.append("FROM (");
+        sql.append("SELECT GENcode ");
+        sql.append("FROM vig_nomprodPlus ");
+        sql.append("WHERE MATCH(productNameEnglish, strengthEnglish, formEnglish) against (?1 IN BOOLEAN MODE)");
+        sql.append(" UNION ");
+        sql.append("SELECT GENcode ");
+        sql.append("FROM vig_generxPlus ");
+        sql.append("WHERE MATCH(lowercaseGenericNameEnglish, strengthEnglish, formEnglish) AGAINST (?1 IN BOOLEAN MODE)");
+        sql.append(") gencodes ");
+        sql.append("GROUP BY gencodes.GENcode having count(gencodes.GENcode) > -1 ");
+        sql.append(") ORDER BY genericNameEnglish, strengthEnglish;");
+
+        Query query = em.createNativeQuery(sql.toString(), Hashtable.class);
+        String parameters = parseParameters(keyword);
+        query.setParameter(1, parameters);
+        query.setParameter(2, Category.AI_GENERIC.getOrdinal());
+        List results = query.getResultList();
+        Vector<Hashtable<String, Object>> resultList = new Vector<Hashtable<String,Object>>(results);
+        JpaUtils.close(em);
+        return resultList;
+    }
+
+    /**
+     * Any search will return all results brand, ingredient, generic, etc...
+     * @return
+     */
+    private Vector listSearchAll(String keyword) {
         EntityManager em = JpaUtils.createEntityManager();
         Assert.notNull(keyword, "Search value cannot be null.");
 
@@ -166,21 +222,21 @@ public class VigilanceDao implements TablesDao {
         sql.append("SELECT productID AS id, CAST(?2 AS NCHAR) AS `category`,");
         sql.append("GENcode AS `drugCode`,");
         sql.append("CONCAT(");
-            sql.append("productNameCapitalized").append(language);
-            sql.append(", ").append("' ', ");
-            sql.append("IFNULL(");
-                sql.append("strength").append(language);
-            sql.append(",'')");
-            sql.append(", ").append("' ', ");
-            sql.append("IFNULL(");
-                sql.append("form").append(language);
-            sql.append(",'')");
+        sql.append("productNameCapitalized").append(language);
+        sql.append(", ").append("' ', ");
+        sql.append("IFNULL(");
+        sql.append("strength").append(language);
+        sql.append(",'')");
+        sql.append(", ").append("' ', ");
+        sql.append("IFNULL(");
+        sql.append("form").append(language);
+        sql.append(",'')");
         sql.append(") AS `name` ");
         sql.append("FROM vig_nomprodPlus ");
         sql.append("WHERE MATCH(");
-            sql.append("productName").append(language).append(", ");
-            sql.append("strength").append(language).append(", ");
-            sql.append("form").append(language);
+        sql.append("productName").append(language).append(", ");
+        sql.append("strength").append(language).append(", ");
+        sql.append("form").append(language);
         sql.append(") ");
         sql.append("AGAINST (?1 IN BOOLEAN MODE)");
 
@@ -190,15 +246,15 @@ public class VigilanceDao implements TablesDao {
         sql.append("CAST(?3 AS NCHAR) AS `category`,");
         sql.append("GENcode AS `drugCode`,");
         sql.append("CONCAT(");
-            sql.append("genericName").append(language);
-            sql.append(", ").append("' ', ");
-            sql.append("IFNULL(");
-                sql.append("strength").append(language);
-            sql.append(",'')");
-            sql.append(", ").append("' ', ");
-            sql.append("IFNULL(");
-                sql.append("form").append(language);
-            sql.append(",'')");
+        sql.append("genericName").append(language);
+        sql.append(", ").append("' ', ");
+        sql.append("IFNULL(");
+        sql.append("strength").append(language);
+        sql.append(",'')");
+        sql.append(", ").append("' ', ");
+        sql.append("IFNULL(");
+        sql.append("form").append(language);
+        sql.append(",'')");
         sql.append(") AS `name` ");
         sql.append("FROM vig_generxPlus ");
         sql.append("WHERE MATCH(");

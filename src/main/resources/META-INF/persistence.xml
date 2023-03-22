@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd" version="1.0">
 
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL" >
-            <!--properties-->
-                 <!--property name="openjpa.jdbc.DBDictionary" value="postgres(StoreCharsAsNumbers=false)"/-->
-                 <!--/properties-->
-        </persistence-unit>
+        <properties>
+            <property name="openjpa.Log" value="DefaultLevel=TRACE"/>
+        </properties>
+    </persistence-unit>
 
 </persistence>

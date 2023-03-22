@@ -27,14 +27,11 @@
  */
 package org.drugref.util;
 
-//import java.io.File;
-//import java.io.InputStream;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.logging.log4j.Logger;
-//import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
+
 
 /**
  * This ContextListener is used to Initialize classes at startup - Initialize the DBConnection Pool.
@@ -61,20 +58,9 @@ public class StartUp implements ServletContextListener {
 		logger.info( "Looking for properties file at: " + propertiesFilePath );
 
 		DrugrefProperties drugRefProperties = DrugrefProperties.getInstance(propertiesFilePath);
-                
-		try {
-			drugRefProperties.loader(propertiesFilePath);
-		} catch (java.io.FileNotFoundException ex) {
-	        logger.error( "properties file not found at" + propertiesFilePath, ex);
-            try {
-            	propertiesFilePath = "../../" + filePath  + contextPath + ".properties";
-            	drugRefProperties.loader(propertiesFilePath);
-            } catch (java.io.FileNotFoundException exc) {
-                logger.error( "properties file not found at" + propertiesFilePath, exc);
-			}            
-		}
-		
-		logger.info("About to start Interactions checker with key"+drugRefProperties.getProperty("licence_key"));
+
+		logger.info("Initializing database: " + drugRefProperties.get("database.integration"));
+		logger.info("Starting interactions checker with key"+drugRefProperties.getProperty("licence_key"));
 //		InteractionsCheckerFactory.start(); //Get the file loading
 		logger.info("LAST LINE IN contextInitialized");
 

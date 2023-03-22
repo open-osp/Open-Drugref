@@ -190,8 +190,8 @@
             <artifactId>openjpa-maven-plugin</artifactId>
             <version>${openjpa.version}</version>
             <configuration>
-                <includes>**/org/drugref/ca/dpd/*.class</includes>
-                <excludes>**/org/durgref/ca/dpd/TablesDao.class</excludes>
+                <includes>**/org/drugref/ca/**/*.class</includes>
+                <excludes>**/org/durgref/ca/dpd/**/*.class</excludes>
                 <addDefaultConstructor>true</addDefaultConstructor>
                 <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
             </configuration>
@@ -204,13 +204,6 @@
                     </goals>
                 </execution>
             </executions>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.openjpa</groupId>
-                    <artifactId>openjpa</artifactId>
-                    <version>${openjpa.version}</version>
-                </dependency>
-            </dependencies>
         </plugin>
 
         </plugins>

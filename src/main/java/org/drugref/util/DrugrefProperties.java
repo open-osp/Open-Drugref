@@ -25,10 +25,7 @@
 
 package org.drugref.util;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -38,120 +35,98 @@ import org.apache.logging.log4j.Logger;
  *
  * @author jackson
  */
-public class DrugrefProperties extends Properties{
+public class DrugrefProperties extends Properties implements Serializable {
     private static Logger logger = MiscUtils.getLogger();
     private static final long serialVersionUID = -5965807410049845132L;
 	private static final String DEFAULT_PROPERTIES = "/drugref.properties";
     private static DrugrefProperties drugrefProperties = new DrugrefProperties();
     private static boolean loaded = false;
-    static{
-            logger.debug("static initializer of drugrefproperties");
-            readFromFile(DEFAULT_PROPERTIES,drugrefProperties);
-    }
-    
+
+	/*
+	 * What database integration is being used.
+	 * cdpd: Canadian Drug Product Database
+	 * vigilance: Vigilance Sante https://www.vigilance.ca/home
+	 */
+	public enum DATA_BASE {cdpd, vigilance}
 
     private DrugrefProperties() {
 		logger.debug("DRUGREF PROPS CONSTRUCTOR");
 	}
 
     public static DrugrefProperties getInstance() {
-    	return getInstance(DEFAULT_PROPERTIES);
+	    return drugrefProperties;
     }
     	/**
 	 * @return DrugrefProperties the instance of DrugrefProperties
 	 */
 	public static DrugrefProperties getInstance(String url) {
-            Enumeration em=drugrefProperties.propertyNames();
-            while(em.hasMoreElements()){
-                String ss=(String)em.nextElement();
-//                logger.debug("property="+ss);
-//                logger.debug("value="+drugrefProperties.getProperty(ss));
-
-        }
-
+		readFromFile(url, drugrefProperties);
 		return drugrefProperties;
 	}
-	
-	
-	
-    private static void readFromFile(String url, Properties p) {
-    	
-		InputStream is = null;
-	
-		try {
-			is = DrugrefProperties.class.getResourceAsStream(url);
-			if (is == null) {
-				is = new FileInputStream(url);
+
+    private static void readFromFile(String url, Properties properties) {
+
+		/*
+		 * load local resource settings.
+		 */
+		try (InputStream is = DrugrefProperties.class.getResourceAsStream(DEFAULT_PROPERTIES)) {
+			if(is != null) {
+				properties.load(is);
+			} else {
+				// this should be unlikely.
+				logger.error("Default properties file not found at:  " + DEFAULT_PROPERTIES);
 			}
-			p.load(is);
-			
 		} catch (FileNotFoundException e1) {
-			logger.error("file not found at:  " + url, e1);
+			logger.error("Default properties file not found at: " + DEFAULT_PROPERTIES, e1);
 		} catch (IOException e1) {
-			logger.error("IO while retrieving: " + url, e1);
-		} finally {
-			try {
-				if(is != null) {
-					is.close();
-				}
-			} catch (IOException e) {
-				logger.error("IO Error: ", e);
-			}
+			logger.error("IO while retrieving default properties: " + DEFAULT_PROPERTIES, e1);
 		}
+
+		/*
+		 * load override settings
+		 */
+	    try(InputStream inputStream = new FileInputStream(url)) {
+			if(inputStream != null) {
+				properties.load(inputStream);
+			}
+		} catch (FileNotFoundException e) {
+		    logger.error("Override properties not found at:  " + url + " Override properties may not be set.", e);
+	    } catch (IOException e) {
+		    logger.error("IO while retrieving override properties file: " + url + " Override properties may not be set.", e);
+	    }
 
 	}
 
-	public void loader(InputStream propertyStream) {
-		if (!loaded) {
-			try {
-				load(propertyStream);
-				propertyStream.close();
-				loaded = true;
-			} catch (IOException ex) {
-				logger.error("IO Error: " + ex.getMessage());
-			}
-		}
+    public String getDbUrl(){
+        return getProperty("db_url");
+    }
+    public String getDbUser(){
+        return getProperty("db_user");
+    }
+    public String getDbPassword(){
+        return getProperty("db_password");
+    }
+
+    public String getAllDrugClasses(){
+        return getProperty("all_drug_classes");
+    }
+
+    public boolean isMysql(){
+        if(getDbUrl().contains("mysql"))
+            return true;
+        else
+            return false;
+    }
+    public boolean isPostgres(){
+        if(getDbUrl().contains("postgresql"))
+            return true;
+        else
+            return false;
+    }
+
+	public DATA_BASE getDatbase(){
+		return DATA_BASE.valueOf(getProperty("database.integration"));
 	}
-
-	public void loader(String propFileName) throws java.io.FileNotFoundException {
-		if (!loaded) {
-			FileInputStream fis2 = new FileInputStream(propFileName);
-			try {
-				load(fis2);
-				fis2.close();
-				loaded = true;
-			} catch (IOException ex) {
-				logger.error("IO Error: " + ex.getMessage());
-			}
-		}
-	}
-
-        public String getDbUrl(){
-            return getProperty("db_url");
-        }
-        public String getDbUser(){
-            return getProperty("db_user");
-        }
-        public String getDbPassword(){
-            return getProperty("db_password");
-        }
-
-        public String getAllDrugClasses(){
-            return getProperty("all_drug_classes");
-        }
-
-        public boolean isMysql(){
-            if(getDbUrl().contains("mysql"))
-                return true;
-            else
-                return false;
-        }
-        public boolean isPostgres(){
-            if(getDbUrl().contains("postgresql"))
-                return true;
-            else
-                return false;
-        }
 
 }
 
