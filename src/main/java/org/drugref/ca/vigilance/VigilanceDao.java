@@ -329,6 +329,13 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public Vector getAllergyWarnings(String atcCode, Vector allergies) {
+        for(Object allergyMap : allergies) {
+            Map allergy = new Hashtable<>((Hashtable) allergyMap);
+            String type = (String) allergy.get("type");
+            String description = (String) allergy.get("description");
+            String id = (String) allergy.get("id");
+
+        }
         return null;
     }
 

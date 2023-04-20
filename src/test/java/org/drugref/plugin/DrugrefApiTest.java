@@ -144,7 +144,7 @@ public class DrugrefApiTest extends TestCase {
     /**
      * Test of getVersion method, of class DrugrefApi.
      */
-    public void atestGetVersion() {
+    public void testGetVersion() {
         System.out.println("getVersion");
         DrugrefApi instance = new DrugrefApi();
         String expResult = "";
@@ -157,7 +157,7 @@ public class DrugrefApiTest extends TestCase {
     /**
      * Test of listCapabilities method, of class DrugrefApi.
      */
-    public void atestListCapabilities() {
+    public void testListCapabilities() {
         System.out.println("listCapabilities");
         DrugrefApi instance = new DrugrefApi();
         Hashtable expResult = null;
@@ -165,6 +165,22 @@ public class DrugrefApiTest extends TestCase {
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
+    }
+
+    public void testGetAllergies() {
+        System.out.println("testGetAllergies");
+
+        String drugAtc = "N02BE01";
+
+//        Object allergies = new Object();
+        Vector key=new Vector();
+        key.addElement("N02BE01");
+        key.addElement("N05BA01");
+        key.addElement("N05BA12");
+
+        Drugref drugref = new Drugref(VigilanceDao.class);
+        drugref.get_allergy_warnings(drugAtc, key);
+
     }
 
 }
