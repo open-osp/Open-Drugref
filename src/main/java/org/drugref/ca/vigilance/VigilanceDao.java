@@ -1,5 +1,6 @@
 package org.drugref.ca.vigilance;
 
+import org.apache.openjpa.persistence.QueryImpl;
 import org.drugref.Category;
 import org.drugref.ca.dpd.CdDrugProduct;
 import org.drugref.ca.dpd.CdDrugSearch;
@@ -19,62 +20,62 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public String identify() {
-        return null;
+        return "";
     }
 
     @Override
     public String version() {
-        return null;
+        return "";
     }
 
     @Override
     public Vector list_available_services() {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Hashtable list_capabilities() {
-        return null;
+        return new Hashtable();
     }
 
     @Override
     public Object fetch(String attribute, Vector key, Vector services, boolean feelingLucky) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Integer getDrugIdFromDIN(String DIN) {
-        return null;
+        return 0;
     }
 
     @Override
     public String getDINFromDrugId(Integer drugId) {
-        return null;
+        return "";
     }
 
     @Override
     public Integer getDrugpKeyFromDIN(String DIN) {
-        return null;
+        return 0;
     }
 
     @Override
     public Integer getDrugpKeyFromDrugId(Integer drugId) {
-        return null;
+        return 0;
     }
 
     @Override
     public List<Integer> getInactiveDrugs() {
-        return null;
+        return new Vector();
     }
 
     @Override
     public CdDrugProduct getDrugProduct(String drugcode) {
-        return null;
+        return new CdDrugProduct();
     }
 
     @Override
     public CdTherapeuticClass getATCCodes(String drugcode) {
-        return null;
+        return new CdTherapeuticClass();
     }
 
     /*
@@ -126,22 +127,22 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public List<CdDrugSearch> getListAICodes(List<String> listOfDrugCodes) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public List<String> findLikeDins(String din) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public List listDrugsbyAIGroup(String aiGroup) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public List<CdDrugSearch> listDrugsbyAIGroup2(String aiGroup) {
-        return null;
+        return new Vector();
     }
 
     @Override
@@ -151,7 +152,7 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public String getFirstDinInAIGroup(String aiGroupNo) {
-        return null;
+        return "";
     }
 
     /**
@@ -289,54 +290,72 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public Vector listSearchElementRoute(String str, String route) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector listBrandsFromElement(String drugID) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat, boolean wildcardLeft, boolean wildcardRight) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector getGenericName(String drugID) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector getInactiveDate(String pKey) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector getForm(String pKey) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector listDrugClass(Vector Dclass) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector getAllergyWarnings(String atcCode, Vector allergies) {
+        EntityManager em = JpaUtils.createEntityManager();
+        String sql = "SELECT genericSimpleNameEnglish as `genericSimpleNameEnglish` FROM vig_fgenPlus WHERE ATCcode LIKE ?1";
+        Query query = em.createNativeQuery(sql, Hashtable.class);
+        query.setParameter(1, atcCode);
+        List<Hashtable> drugList =  query.getResultList();
+
+        Vector results = new Vector();
+        Vector vec = new Vector();
+        Hashtable ha = new Hashtable();
+        Vector missing = new Vector();
+
         for(Object allergyMap : allergies) {
             Map allergy = new Hashtable<>((Hashtable) allergyMap);
-            String type = (String) allergy.get("type");
+//            String type = (String) allergy.get("type");
             String description = (String) allergy.get("description");
             String id = (String) allergy.get("id");
 
+            if(description.equalsIgnoreCase((String) drugList.get(0).get("genericSimpleNameEnglish"))) {
+                results.add(id);
+            }
         }
-        return null;
+
+        ha.put("warnings", results);
+        ha.put("missing", missing);
+        vec.add(ha);
+        return vec;
     }
 
     @Override
@@ -360,7 +379,7 @@ public class VigilanceDao implements TablesDao, Serializable {
         String sql = "SELECT vig_fgenPlus.genericName" + language + " AS `name`, " +
                 "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
                 "IFNULL(ATCcode, '') AS `atc`, " +
-                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `regional_identifier`, " +
+                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `tmCodesOfCCDD`, " +
                 "CONCAT(vig_nomprodPlus.productName" + language + ", ' ', IFNULL( vig_nomprodPlus.strength" + language + ", ''), ' ', IFNULL( vig_nomprodPlus.form" + language + ", '')) AS `productName`, " +
                 "vig_nomprodPlus.form" + language + " AS `drugForm`, " +
                 "vig_fgenPlus.genericName" + language + " AS `components`, " +
@@ -368,9 +387,9 @@ public class VigilanceDao implements TablesDao, Serializable {
                 "IFNULL(vig_generxPlus.ceRxRouteCode, '') AS `drugRoute`, " +
                 "IFNULL(vig_generxPlus.strength" + language + ", '') AS `strength`, " +
                 "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
-                "IFNULL(vig_generxPlus.uuid,'') AS `genrxId`, " +
-                "vig_fgenPlus.GENcode  AS `genericId`, " +
-                "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`, " +
+                "IFNULL(vig_generxPlus.uuid,'') AS `regional_identifier`, " +
+                "vig_fgenPlus.GENcode  AS `gcnCode`, " +
+                "IFNULL(vig_fgenPlus.uniqueIdentifier,'') AS `genericPlusUniqueId`, " +
                 "vig_nomprodPlus.productId AS productID " +
                 "FROM vig_nomprodPlus " +
                 "JOIN vig_fgenPlus " +
@@ -411,7 +430,7 @@ public class VigilanceDao implements TablesDao, Serializable {
         EntityManager em = JpaUtils.createEntityManager();
         String sql = "SELECT IFNULL(vig_generxPlus.usualName" + language + ", vig_generxPlus.genericName" + language + ") AS `product`, " +
                 "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
-                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `regional_identifier`, " +
+                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `tmCodesOfCCDD`, " +
                 "vig_fgenPlus.ATCcode AS `atc`, " +
                 "CONCAT(vig_generxPlus.genericName" + language + ", ' ', IFNULL( vig_generxPlus.strength" + language + ", '')) AS `name`, " +
                 "vig_fgenPlus.genericName" + language + " AS `components`, " +
@@ -420,13 +439,13 @@ public class VigilanceDao implements TablesDao, Serializable {
                 "vig_generxPlus.ceRxRouteCode AS `drugRoute`, " +
                 "vig_generxPlus.strength" + language + " AS `strength`, " +
                 "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
-                "IFNULL(vig_generxPlus.uuid,'') AS `genrxId`, " +
-                "vig_fgenPlus.GENcode  AS `genericId`, " +
-                "vig_fgenPlus.uniqueIdentifier AS `genericUniqueId`" +
+                "IFNULL(vig_generxPlus.uuid,'') AS `regional_identifier`, " +
+                "vig_fgenPlus.GENcode  AS `gcnCode`, " +
+                "IFNULL(vig_fgenPlus.uniqueIdentifier,'') AS `genericPlusUniqueId`" +
                 "FROM vig_generxPlus " +
                 "JOIN vig_fgenPlus " +
                 "ON (vig_generxPlus.GENcode = vig_fgenPlus.GENcode) " +
-                "WHERE vig_generxPlus.uuid = ?1";
+                "WHERE vig_generxPlus.uuid LIKE ?1";
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, uuid);
         Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());
@@ -447,15 +466,15 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public Vector getAllergyClasses(Vector allergies) {
-        return null;
+        return new Vector();
     }
 
     @Override
     public Vector getTcATC(String atc) {
-        return null;
+        return new Vector();
     }
 
-    private Hashtable parseComponents(Hashtable result) {
+    private void parseComponents(Hashtable result) {
         Vector<Object> components = new Vector<>();
         String[] names = ((String) result.get("components")).split("\\+");
         String[] codes = ((String) result.get("componentsGenCode")).split("\\+");
@@ -491,7 +510,7 @@ public class VigilanceDao implements TablesDao, Serializable {
         }
 
         result.put("components", components);
-        return result;
+        // return result;
     }
 
     /**
