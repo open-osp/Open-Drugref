@@ -300,12 +300,13 @@ public class VigilanceDao implements TablesDao, Serializable {
 
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat) {
-        return new Vector();
+
+        return listSearchAll(str);
     }
 
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat, boolean wildcardLeft, boolean wildcardRight) {
-        return new Vector();
+        return listSearchAll(str);
     }
 
     @Override
