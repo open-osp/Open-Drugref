@@ -95,7 +95,7 @@ public class DrugrefApiTest extends TestCase {
     public void testGetGenericDrug() {
         System.out.println("GET");
         Drugref drugref = new Drugref(VigilanceDao.class);
-        Vector out = drugref.get_drug_2("28160409##20MG/5ML##ORAL LIQUID", Boolean.FALSE);
+        Vector out = drugref.get_drug_2("20374", Boolean.FALSE);
         System.out.println(out);
     }
 

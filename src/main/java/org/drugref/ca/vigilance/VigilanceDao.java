@@ -105,11 +105,20 @@ public class VigilanceDao implements TablesDao, Serializable {
                 "CAST(?3 AS NCHAR) AS `category`, " +
                 "genericName" + language + " AS `name` " +
                 "FROM vig_generxPlus " +
-                "WHERE uuid = ?1";
+                "WHERE uuid = ?1" +
+                " UNION " +
+                "SELECT uniqueIdentifier AS `id`, " +
+                "GENcode AS `drugCode`, " +
+                "CAST(?4 AS NCHAR) AS `category`, " +
+                "genericName" + language + " AS `name` " +
+                "FROM vig_fgenPlus " +
+                "WHERE uniqueIdentifier = ?1";
+
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, id);
         query.setParameter(2, Category.BRAND.getOrdinal());
         query.setParameter(3, Category.AI_GENERIC.getOrdinal());
+        query.setParameter(4, Category.GENERIC.getOrdinal());
         Hashtable<String, Object> singleResult = (Hashtable) query.getSingleResult();
         CdDrugSearch cdDrugSearch = new CdDrugSearch();
         if(singleResult != null) {
@@ -265,8 +274,6 @@ public class VigilanceDao implements TablesDao, Serializable {
         sql.append(") ");
         sql.append("AGAINST (?1 IN BOOLEAN MODE) ");
 
-        sql.append("LIMIT 50");
-
         Query query = em.createNativeQuery(sql.toString(), Hashtable.class);
         String parameters = parseParameters(keyword);
         query.setParameter(1, parameters);
@@ -298,15 +305,72 @@ public class VigilanceDao implements TablesDao, Serializable {
         return new Vector();
     }
 
+    /**
+     * Method used for searching drug database for drugs that are identified as
+     * allergens.
+     * @param str
+     * @param cat
+     * @return Vector selection of drug names; generic and brand
+     */
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat) {
 
-        return listSearchAll(str);
+        EntityManager em = JpaUtils.createEntityManager();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append("vig_nomprodPlus.productNameCapitalized").append(language).append(" AS 'name',");
+        sql.append("vig_nomprodPlus.productID AS 'id',");
+        sql.append("CAST(?2 AS NCHAR) AS 'category',");
+        sql.append("vig_nomprodPlus.GENcode AS 'drugCode',");
+        sql.append("IFNULL(vig_nomprodPlus.ATC,'') as ATC, ");
+        sql.append("IFNULL(pharmacological.genericName").append(language).append(",'') AS 'pharmacological', ");
+        sql.append("IFNULL(chemical.genericName").append(language).append(",'') AS 'chemical', ");
+        sql.append("IFNULL(substance.genericName").append(language).append(",'') AS 'substance' ");
+        sql.append("FROM vig_nomprodPlus ");
+        sql.append("LEFT JOIN vig_fgenPlus pharmacological ");
+        sql.append("ON (pharmacological.ATCcode = SUBSTRING(vig_nomprodPlus.ATC,1,3)) ");
+        sql.append("LEFT JOIN vig_fgenPlus chemical ");
+        sql.append("ON (chemical.ATCcode = SUBSTRING(vig_nomprodPlus.ATC,1,4)) ");
+        sql.append("LEFT JOIN vig_fgenPlus substance ");
+        sql.append("ON (substance.ATCcode = SUBSTRING(vig_nomprodPlus.ATC,1,5) OR substance.ATCcode = vig_nomprodPlus.ATC) ");
+        sql.append("WHERE MATCH(productName").append(language).append(") AGAINST (?1 IN BOOLEAN MODE) ");
+        sql.append("GROUP BY vig_nomprodPlus.GENcode HAVING COUNT(vig_nomprodPlus.GENcode) > -1 ");
+
+        sql.append("UNION ALL ");
+
+        sql.append("SELECT ");
+        sql.append("vig_fgenPlus.genericName").append(language).append(" AS 'name',");
+        sql.append("vig_fgenPlus.uniqueIdentifier AS `id`,");
+        sql.append("CAST(?3 AS NCHAR) AS `category`,");
+        sql.append("vig_fgenPlus.GENcode AS `drugCode`,");
+        sql.append("IFNULL(vig_fgenPlus.ATCcode,'') AS ATC, ");
+        sql.append("IFNULL(pharmacological.genericName").append(language).append(",'') AS 'pharmacological', ");
+        sql.append("IFNULL(chemical.genericName").append(language).append(",'') AS 'chemical', ");
+        sql.append("IFNULL(substance.genericName").append(language).append(",'') AS 'substance' ");
+        sql.append("FROM vig_fgenPlus ");
+        sql.append("LEFT JOIN vig_fgenPlus pharmacological ");
+        sql.append("ON (pharmacological.ATCcode = SUBSTRING(vig_fgenPlus.ATCcode,1,3)) ");
+        sql.append("LEFT JOIN vig_fgenPlus chemical ");
+        sql.append("ON (chemical.ATCcode = SUBSTRING(vig_fgenPlus.ATCcode,1,4)) ");
+        sql.append("LEFT JOIN vig_fgenPlus substance ");
+        sql.append("ON (substance.ATCcode = SUBSTRING(vig_fgenPlus.ATCcode,1,5) OR substance.ATCcode = vig_fgenPlus.ATCcode) ");
+        sql.append("WHERE MATCH(vig_fgenPlus.genericName").append(language).append(") AGAINST (?1 IN BOOLEAN MODE) ");
+        sql.append("GROUP BY vig_fgenPlus.GENcode HAVING COUNT(vig_fgenPlus.GENcode) > -1");
+
+        Query query = em.createNativeQuery(sql.toString(), Hashtable.class);
+        String parameters = parseParameters(str);
+        query.setParameter(1, parameters);
+        query.setParameter(2, Category.BRAND.getOrdinal());
+        query.setParameter(3, Category.GENERIC.getOrdinal());
+        List results = query.getResultList();
+        Vector<Hashtable<String, Object>> resultList = new Vector<Hashtable<String,Object>>(results);
+        JpaUtils.close(em);
+        return resultList;
     }
 
     @Override
     public Vector listSearchElementSelectCategories(String str, Vector cat, boolean wildcardLeft, boolean wildcardRight) {
-        return listSearchAll(str);
+        return listSearchElementSelectCategories(str, cat);
     }
 
     @Override
@@ -430,23 +494,43 @@ public class VigilanceDao implements TablesDao, Serializable {
     public Vector getDrugByDrugCode(String uuid, String gencode, boolean html) {
         EntityManager em = JpaUtils.createEntityManager();
         String sql = "SELECT IFNULL(vig_generxPlus.usualName" + language + ", vig_generxPlus.genericName" + language + ") AS `product`, " +
-                "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
+                "IFNULL(vig_fgenPlus.genericName" + language + ",'') AS `genericName`, " +
                 "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `tmCodesOfCCDD`, " +
-                "vig_fgenPlus.ATCcode AS `atc`, " +
+                "IFNULL(vig_fgenPlus.ATCcode,'') AS `atc`, " +
                 "CONCAT(vig_generxPlus.genericName" + language + ", ' ', IFNULL( vig_generxPlus.strength" + language + ", '')) AS `name`, " +
-                "vig_fgenPlus.genericName" + language + " AS `components`, " +
-                "vig_fgenPlus.GENcodeDetail AS `componentsGenCode`, " +
+                "IFNULL(vig_fgenPlus.genericName" + language + ",'') AS `components`, " +
+                "IFNULL(vig_fgenPlus.GENcodeDetail,'') AS `componentsGenCode`, " +
                 "vig_generxPlus.lowercaseForm" + language + " AS `drugForm`, " +
                 "vig_generxPlus.ceRxRouteCode AS `drugRoute`, " +
                 "vig_generxPlus.strength" + language + " AS `strength`, " +
                 "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
                 "IFNULL(vig_generxPlus.uuid,'') AS `regional_identifier`, " +
-                "vig_fgenPlus.GENcode  AS `gcnCode`, " +
+                "IFNULL(vig_fgenPlus.GENcode,'')  AS `gcnCode`, " +
                 "IFNULL(vig_fgenPlus.uniqueIdentifier,'') AS `genericPlusUniqueId`" +
                 "FROM vig_generxPlus " +
-                "JOIN vig_fgenPlus " +
+                "LEFT JOIN vig_fgenPlus " +
                 "ON (vig_generxPlus.GENcode = vig_fgenPlus.GENcode) " +
-                "WHERE vig_generxPlus.uuid LIKE ?1";
+                "WHERE vig_generxPlus.uuid LIKE ?1 " +
+                " UNION " +
+                "SELECT COALESCE(vig_generxPlus.usualName" + language + ", vig_generxPlus.genericName" + language + ", '') AS `product`, " +
+                "vig_fgenPlus.genericName" + language + " AS `genericName`, " +
+                "IFNULL(vig_fgenPlus.TMcodesOfCCDD, '') AS `tmCodesOfCCDD`, " +
+                "vig_fgenPlus.ATCcode AS `atc`, " +
+                "CONCAT(IFNULL(vig_generxPlus.genericName" + language + ", vig_fgenPlus.genericName" + language + "), ' ', IFNULL( vig_generxPlus.strength" + language + ", '')) AS `name`, " +
+                "vig_fgenPlus.genericName" + language + " AS `components`, " +
+                "vig_fgenPlus.GENcodeDetail AS `componentsGenCode`, " +
+                "IFNULL(vig_generxPlus.lowercaseForm" + language + ",'') AS `drugForm`, " +
+                "IFNULL(vig_generxPlus.ceRxRouteCode,'') AS `drugRoute`, " +
+                "IFNULL(vig_generxPlus.strength" + language + ",'') AS `strength`, " +
+                "IFNULL(vig_generxPlus.doseUnits, '') AS `unit`, " +
+                "IFNULL(vig_generxPlus.uuid, vig_fgenPlus.uniqueIdentifier) AS `regional_identifier`, " +
+                "vig_fgenPlus.GENcode  AS `gcnCode`, " +
+                "IFNULL(vig_fgenPlus.uniqueIdentifier,'') AS `genericPlusUniqueId`" +
+                "FROM vig_fgenPlus " +
+                "LEFT JOIN vig_generxPlus " +
+                "ON (vig_generxPlus.GENcode = vig_fgenPlus.GENcode) " +
+                "WHERE vig_fgenPlus.uniqueIdentifier = ?1 ";
+
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, uuid);
         Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());

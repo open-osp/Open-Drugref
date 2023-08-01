@@ -197,16 +197,16 @@ public class Drugref {
                 if (cds != null){
                     returnHash.put("drugCode",cds.getDrugCode());
                     returnHash.put("cat",cds.getCategory());
-                    logger.debug("drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
+                    logger.debug("unniqueid " + cds.getUuid() + " drugCode "+cds.getDrugCode()+ " category "+cds.getCategory());
 
                     if (cds.getCategory() == Category.BRAND.getOrdinal()){
                        return queryDao.getDrug(pkey, true);
-                    }else if (queryDao instanceof DrugrefDao && (cds.getCategory() == Category.AI_GENERIC.getOrdinal() || cds.getCategory() == Category.AI_COMPOSITE_GENERIC.getOrdinal())){
+                    }else if (queryDao instanceof DrugrefDao && (cds.getCategory() == Category.AI_GENERIC.getOrdinal() || cds.getCategory() == Category.AI_COMPOSITE_GENERIC.getOrdinal() )){
                        int pl = cds.getDrugCode().indexOf("+");
                        String aiCode = cds.getDrugCode().substring(0, pl);
                        String formCode = cds.getDrugCode().substring(pl+1);
                        return queryDao.getMadeGenericExample(aiCode,formCode,false);
-                    } else if (cds.getCategory() == Category.AI_GENERIC.getOrdinal()) {
+                    } else if (cds.getCategory() == Category.AI_GENERIC.getOrdinal() || cds.getCategory() == Category.GENERIC.getOrdinal()) {
                         return queryDao.getMadeGenericExample(cds.getUuid(), cds.getDrugCode(),false);
                     }
                 }
@@ -232,12 +232,28 @@ public class Drugref {
 
         public Vector list_search_element_select_categories(String str, Vector cat) {
                 Vector vec=queryDao.listSearchElementSelectCategories(str,cat);
+				if(vec == null) {
+					vec = new Vector();
+					Hashtable ha = new Hashtable();
+					ha.put("id", "0");
+					ha.put("category", "");
+					ha.put("name", "None found");
+					vec.addElement(ha);
+				}
                 return vec;
         }
         
         public Vector list_search_element_select_categories_right(String str, Vector cat) {
             Vector vec=queryDao.listSearchElementSelectCategories(str,cat,false,true);
-            return vec;
+	        if(vec == null) {
+		        vec = new Vector();
+		        Hashtable ha = new Hashtable();
+		        ha.put("id", "0");
+		        ha.put("category", "");
+		        ha.put("name", "None found");
+		        vec.addElement(ha);
+	        }
+	        return vec;
         }
 
         public Vector get_inactive_date(String str ){
@@ -281,9 +297,8 @@ public class Drugref {
      }
      
      public Vector get_drug(String pKey, boolean html) {
-                Vector vec=queryDao.getDrug(pKey,html);
-                return vec;
-        }
+		     return queryDao.getDrug(pKey,html);
+	}
 
      public Object fetch(String attribute, Vector key) {
         Vector services = new Vector();
