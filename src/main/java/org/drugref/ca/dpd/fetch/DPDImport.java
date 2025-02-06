@@ -52,22 +52,26 @@ import org.drugref.util.MiscUtils;
  *
  * @author jaygallagher
  */
+
+ 
 public class DPDImport {
 
-    private static Logger logger = MiscUtils.getLogger();
 
+    private static Logger logger = MiscUtils.getLogger();
+    String dpd_url = DrugrefProperties.getInstance().getProperty("DPD_BASE_URL", "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database");
     public File getZipStream() throws Exception {
-        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/allfiles.zip";
+        String sUrl = dpd_url + "/allfiles.zip";
         return getZipStream(sUrl);
     }
 
     public File getInactiveZipStream() throws Exception {
-            String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/Allfiles_ia-Oct10.zip";
+            String sUrl = dpd_url + "/Allfiles_ia-Oct10.zip";
+            // WARNING Allfiles_ia-Oct10.zip is data from 2018, code should be updated to handle new format in Allfiles_ia.zip
                     return getZipStream(sUrl);
     }
 
     public File getInactiveTableZipStream() throws Exception {
-        String sUrl = "https://www.canada.ca/content/dam/hc-sc/documents/services/drug-product-database/inactive.zip";
+        String sUrl = dpd_url + "/inactive.zip";
         return getZipStream(sUrl);
     }
 
@@ -155,11 +159,13 @@ public class DPDImport {
         arrList.add("CREATE TABLE  cd_pharmaceutical_std  (id serial  PRIMARY KEY,   drug_code   int default NULL,   pharmaceutical_std  varchar(40) default NULL);");
         arrList.add("CREATE TABLE  cd_route  (id serial  PRIMARY KEY,   drug_code   int default NULL,   route_of_administration_code   int default NULL,   route_of_administration  varchar(40) default NULL);");
         arrList.add("CREATE TABLE  cd_schedule  (id serial  PRIMARY KEY,   drug_code   int default NULL,   schedule  varchar(40) default NULL);");
-        arrList.add("CREATE TABLE  cd_therapeutic_class  (id serial  PRIMARY KEY,   drug_code   int default NULL,   tc_atc_number  varchar(8) default NULL,   tc_atc  varchar(120) default NULL,   tc_atc_f  varchar(240) default NULL);");
+        arrList.add("CREATE TABLE  cd_therapeutic_class  (id serial  PRIMARY KEY,   drug_code   int default NULL,   tc_atc_number  varchar(8) default NULL,   tc_atc  varchar(120) default NULL,   tc_ahfs_number  varchar(20) default NULL,   tc_ahfs  varchar(80) default NULL,	tc_atc_f  varchar(240) default NULL);");
         arrList.add("CREATE TABLE  cd_veterinary_species  (id serial  PRIMARY KEY,   drug_code   int default NULL,   vet_species  varchar(80) default NULL,   vet_sub_species  varchar(80) default NULL);");
-
-        arrList.add("CREATE TABLE  interactions  (id serial PRIMARY KEY, affectingatc varchar(7), affectedatc varchar(7) default NULL, effect char(1) default NULL, significance char(1) default NULL, evidence char(1) default NULL, comment text default NULL, affectingdrug text default NULL, affecteddrug text default NULL, CONSTRAINT UNQ_ATC_EFFECT UNIQUE (affectingatc, affectedatc, effect));");
-
+      
+        arrList.add("CREATE TABLE  interactions  (id serial PRIMARY KEY, affectingatc varchar(8), affectedatc varchar(8) default NULL, effect char(1) default NULL, significance char(1) default NULL, evidence char(1) default NULL, comment text default NULL, affectingdrug text default NULL, affecteddrug text default NULL, CONSTRAINT UNQ_ATC_EFFECT UNIQUE (affectingatc, affectedatc, effect));");
+        if (!isTablePresent("utility")) {
+            arrList.add("CREATE TABLE `utility` (`id` serial PRIMARY KEY, `drug_identification_number` varchar(8) DEFAULT NULL, `brand_name` varchar(200) DEFAULT NULL, `descriptor` varchar(150) DEFAULT NULL,  `tc_atc_number` varchar(8) DEFAULT NULL,  `tc_atc` varchar(120) DEFAULT NULL,  `tc_ahfs_number` varchar(20) DEFAULT NULL,  `tc_ahfs` varchar(80) DEFAULT NULL);");
+        }
         return arrList;
     }
     private List getHistoryTable(){
@@ -268,12 +274,19 @@ public class DPDImport {
         List<String> arrList = new ArrayList();
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, ' .' , ' 0.') WHERE `name` LIKE '% .%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0 ' , ' ') WHERE `name` LIKE '%.0 %';");
+        arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.00 ' , ' ') WHERE `name` LIKE '%.0 %';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0MG' , 'MG') WHERE `name` LIKE '%.0MG%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, 'µG' , 'MCG') WHERE `name` LIKE '%µG%';");
         arrList.add("UPDATE cd_drug_search SET `name` = REPLACE(`name`, '.0MCG' , 'MCG') WHERE `name` LIKE '%.0MCG%';");
         return arrList;
     }
 
+    public List addCategories() { 
+	//group ATC's into broad catagories for allergy checking 
+        List<String> arrList = new ArrayList();
+        arrList.add("UPDATE cd_therapeutic_class INNER JOIN utility ON utility.tc_atc_number = cd_therapeutic_class.tc_atc_number SET cd_therapeutic_class.tc_ahfs_number = utility.tc_ahfs_number, cd_therapeutic_class.tc_ahfs = utility.tc_ahfs;");
+        return arrList;
+    }
 
     public void setISMPmeds() {
     	// apply ISMP Canada medication safety rules to search medications
@@ -296,7 +309,8 @@ public class DPDImport {
 
             insertLines(entityManager, addTALLman());//rename search drug to use Canadian TALLman list
             insertLines(entityManager, cleanDecimals());//normalise drug dosing
-
+            insertLines(entityManager, addCategories());//add broad categories
+            
             tx.commit();
  
         } finally {

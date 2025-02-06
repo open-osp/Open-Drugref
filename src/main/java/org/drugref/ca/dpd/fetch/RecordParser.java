@@ -88,6 +88,8 @@ public class RecordParser {
     }
 
     static public Date getDate(String s) throws Exception {
+    // drug.txt "10000","","Veterinary","00813761","LINCOMIX","","N","69580","1","03-DEC-2018","0105826008","Vétérinaire","",""
+    // dd-MMM-yy format will correctly handle both 03-DEC-2018 and 03-DEC-18
         DateFormat formatter = new SimpleDateFormat("dd-MMM-yy");
         Date date = (Date) formatter.parse(s);
         return date;
@@ -447,14 +449,13 @@ public class RecordParser {
                 //em.clear();
             }
         } else if ("ther.txt".equals(type) || "ther_ia.txt".equals(type)) {
-            /*
-            DRUG_CODE                              NOT NULL  NUMBER(8)
-            TC_ATC_NUMBER                                    VARCHAR2(8)
-            TC_ATC                                           VARCHAR2(120)
-            TC_AHFS_NUMBER                                   VARCHAR2(20)
-            TC_AHFS                                          VARCHAR2(80)
+            /* as of July 2022
+            DRUG_CODE 	NOT NULL 	NUMBER(8)
+            TC_ATC_NUMBER 	NULLABLE 	VARCHAR2(8)
+            TC_ATC 	NULLABLE 	VARCHAR2(120)
+            TC_ATC_F 	NULLABLE 	VARCHAR2(240)           
              */
-            //0.64437-- 1.C03EA01-- 2.HYDROCHLOROTHIAZIDE AND POTASSIUM-SPARING AGENTS-- 3.24:08.24.16-- 4.POTASSIUM-SPARING DIURETICS-- 420909056/1068302336 :56619472
+             //"778","C03AA03","HYDROCHLOROTHIAZIDE",""
             while ((items = csv.getLine()) != null) {
                 //    System.out.println(looksLike(items));
             	if("EFBBBF".equals(bytesToHex(items[0].substring(0, 1).getBytes()))) {
