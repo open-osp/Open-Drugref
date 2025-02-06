@@ -18,6 +18,12 @@ import java.util.*;
 @Repository
 public class VigilanceDao implements TablesDao, Serializable {
 
+    /*
+     * alternate is French which was not considered as a choice during initial development
+     * Future development should consider the system language French or English
+     */
+    private static String language = "English";
+
     @Override
     public String identify() {
         return "";
@@ -78,11 +84,54 @@ public class VigilanceDao implements TablesDao, Serializable {
         return new CdTherapeuticClass();
     }
 
-    /*
-     * alternate is French which was not considered as a choice during initial development
-     * Future development should consider the system language French or English
+    /**
+     * Get all possible ATC codes for given drug name search
+     * @param drugname
+     * @return
      */
-    private static String language = "English";
+    private Set<String> searchATCCodesByDrugname(String drugname) {
+        Vector searchResults = this.listSearchAll(drugname);
+        Set<String> allergyATCList = new HashSet<>();
+        Set<String> genericCodeList = new HashSet<>();
+
+        // collect a set of generic codes from the results
+        for(Object resultMap : searchResults) {
+            Map result = new Hashtable<>((Hashtable) resultMap);
+            genericCodeList.add((String) result.get("drugCode"));
+        }
+
+        // collect a set of ATC codes from the generic codes
+        for(String genericCode : genericCodeList) {
+            String atcCode = getATCCode(genericCode);
+            if(atcCode != null){
+                allergyATCList.add(atcCode);
+            }
+        }
+
+        return allergyATCList;
+    }
+
+    /**
+     *
+     * @param genericCode Drug genericcode
+     * @return Single ATC for given generic code
+     */
+    private String getATCCode(String genericCode) {
+        EntityManager em = JpaUtils.createEntityManager();
+        String sql = "SELECT DISTINCT list.ATC FROM (" +
+                "SELECT ATC AS `ATC` " +
+                "FROM vig_nomprodPlus " +
+                "WHERE GENcode = ?1" +
+                " UNION " +
+                "SELECT ATCcode AS `ATC` " +
+                "FROM vig_fgenPlus " +
+                "WHERE GENcode = ?1" +
+                ") list";
+
+        Query query = em.createNativeQuery(sql);
+        query.setParameter(1, genericCode);
+        return (String) query.getSingleResult();
+    }
 
     /**
      * Fetches a single search result from the
@@ -393,34 +442,78 @@ public class VigilanceDao implements TablesDao, Serializable {
         return new Vector();
     }
 
+    /**
+     * Compare a list of patient allergies against the ATC code of the drug
+     * being prescribed and return a list of potential allergies against the drug.
+     * Identifiers from old datasets cannot be depended on. If the drug allergy is missing
+     * the ATC an ATC will be derived from the description of the drug.  Accuracy is not 100%.
+     *
+     * @param prescribedATCCode ATC code of drug currently being prescribed
+     * @param allergies list of patient allergies
+     * @return list of potential drug allergies
+     */
     @Override
-    public Vector getAllergyWarnings(String atcCode, Vector allergies) {
-        EntityManager em = JpaUtils.createEntityManager();
-        String sql = "SELECT genericSimpleNameEnglish as `genericSimpleNameEnglish` FROM vig_fgenPlus WHERE ATCcode LIKE ?1";
-        Query query = em.createNativeQuery(sql, Hashtable.class);
-        query.setParameter(1, atcCode);
-        List<Hashtable> drugList =  query.getResultList();
+    public Vector getAllergyWarnings(String prescribedATCCode, Vector allergies) {
 
-        Vector results = new Vector();
-        Vector vec = new Vector();
-        Hashtable ha = new Hashtable();
+        Hashtable hashtable = new Hashtable();
+        Vector warning = new Vector();
         Vector missing = new Vector();
 
         for(Object allergyMap : allergies) {
-            Map allergy = new Hashtable<>((Hashtable) allergyMap);
-//            String type = (String) allergy.get("type");
-            String description = (String) allergy.get("description");
-            String id = (String) allergy.get("id");
 
-            if(description.equalsIgnoreCase((String) drugList.get(0).get("genericSimpleNameEnglish"))) {
-                results.add(id);
+            Map allergy = new Hashtable<>((Hashtable) allergyMap);
+            ArrayList<String> allergyATCList = new ArrayList<>();
+            String allergyATC = (String) allergy.get("ATC");
+
+            if( allergyATC == null || allergyATC.isEmpty() ) {
+                // get ATC by drug description
+                String allergyDescription = (String) allergy.get("description");
+                if(allergyDescription != null) {
+                    allergyATCList.addAll(searchATCCodesByDrugname(allergyDescription));
+                }
+            } else {
+                allergyATCList.add(allergyATC.trim());
+            }
+
+            prescribedATCCode = prescribedATCCode.trim();
+
+            for(String allergyATCvalue : allergyATCList) {
+
+//                String category = "";
+                String substance = "empty";
+                String ingredient = "empty";
+
+                allergyATCvalue = allergyATCvalue.trim();
+
+//                if(allergyATCvalue.length() > 2) {
+//                    category = allergyATCvalue.substring(0, 3);
+//                }
+
+                if(allergyATCvalue.length() > 3) {
+                    substance = allergyATCvalue.substring(0, 4);
+                }
+
+                if(allergyATCvalue.length() > 4) {
+                    ingredient = allergyATCvalue.substring(0, 5);
+                }
+
+                if(
+                        prescribedATCCode.equals(allergyATCvalue)
+//                        || prescribedATCCode.startsWith(category)
+                        || prescribedATCCode.startsWith(ingredient)
+                        || prescribedATCCode.startsWith(substance)
+                 ) {
+                    warning.add(allergy.get("id"));
+                }
             }
         }
 
-        ha.put("warnings", results);
-        ha.put("missing", missing);
-        vec.add(ha);
-        return vec;
+        hashtable.put("warnings", warning);
+        hashtable.put("missing", missing);
+
+        Vector result = new Vector();
+        result.add(hashtable);
+        return result;
     }
 
     @Override
