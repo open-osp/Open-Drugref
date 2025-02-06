@@ -5,12 +5,14 @@
 
 package org.drugref.plugin;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 import junit.framework.TestCase;
 import org.drugref.Drugref;
 import org.drugref.ca.vigilance.VigilanceDao;
 import org.drugref.util.DrugrefProperties;
+import org.junit.Assert;
 
 /**
  *
@@ -170,16 +172,68 @@ public class DrugrefApiTest extends TestCase {
     public void testGetAllergies() {
         System.out.println("testGetAllergies");
 
-        String drugAtc = "N02BE01";
+        Vector vec = new Vector();
+        Hashtable product = new Hashtable();
+        product.put("id","1");
+        product.put("description","Remeron RD");
+        product.put("type","13");
+        product.put("ATC","N06AX11");
+        product.put("uuid", "2248542");
 
-//        Object allergies = new Object();
-        Vector key=new Vector();
-        key.addElement("N02BE01");
-        key.addElement("N05BA01");
-        key.addElement("N05BA12");
+        Hashtable substance = new Hashtable();
+        substance.put("id","2");
+        substance.put("description","SULFONAMIDES");
+        substance.put("type","11");
+        substance.put("ATC","J01E");
+        substance.put("uuid", "20374");
+
+        Hashtable generic = new Hashtable();
+        generic.put("id","3");
+        generic.put("description","TRIMETHOPRIME");
+        generic.put("type","11");
+        generic.put("ATC","");
+        generic.put("uuid","");
+
+        Hashtable generic2 = new Hashtable();
+        generic2.put("id","4");
+        generic2.put("description","cetirizine");
+        generic2.put("type","11");
+        generic2.put("ATC","");
+        generic2.put("uuid", "");
+
+        Hashtable notdrug = new Hashtable();
+        notdrug.put("id","5");
+        notdrug.put("description","strawberries");
+        notdrug.put("type","8");
+        notdrug.put("ATC","");
+        notdrug.put("uuid", "");
+
+        vec.add(product);
+        vec.add(substance);
+        vec.add(generic);
+        vec.add(generic2);
+        vec.add(notdrug);
+
+        // anti depressants
+        String prescribingAtc = "N06AX16";
 
         Drugref drugref = new Drugref(VigilanceDao.class);
-        drugref.get_allergy_warnings(drugAtc, key);
+        Vector vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+
+        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), product.get("id") );
+
+        // sulfa
+        prescribingAtc = "J01EA01";
+        vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+
+        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), substance.get("id") );
+
+
+        // ANTIHISTAMINES
+        prescribingAtc = "R06AE07";
+        vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+
+        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), generic2.get("id") );
 
     }
 
