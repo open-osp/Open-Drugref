@@ -158,11 +158,6 @@
             <artifactId>utils</artifactId>
             <version>1.07.00</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>postgresql</groupId>-->
-<!--            <artifactId>postgresql</artifactId>-->
-<!--            <version>8.3-603.jdbc3</version>-->
-<!--        </dependency>-->
 
         <dependency>
           <groupId>net.sf.json-lib</groupId>
