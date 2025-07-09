@@ -6,6 +6,9 @@
         </Console>
     </Appenders>
     <Loggers>
+	<logger name="openjpa.jdbc.SQL" level="error">
+		<appenderRef ref="Console" />
+	</logger>
         <Logger name="org.apache.log4j.xml" level="error">
             <AppenderRef ref="Console"/>
         </Logger>
