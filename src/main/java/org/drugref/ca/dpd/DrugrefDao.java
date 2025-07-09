@@ -26,7 +26,7 @@ public class DrugrefDao implements TablesDao {
     private String db;
     private String user;
     private String pwd;
-    private List<Integer> inactiveDrugs=new ArrayList();
+    private List<Integer> inactiveDrugs=new ArrayList<>();
     private final int MAX_NO_ROWS=60;
 
     public DrugrefDao() {

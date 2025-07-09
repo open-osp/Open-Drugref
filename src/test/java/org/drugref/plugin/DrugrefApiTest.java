@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 import junit.framework.TestCase;
 import org.drugref.Drugref;
+import org.drugref.ca.dpd.DrugrefDao;
 import org.drugref.ca.vigilance.VigilanceDao;
 import org.drugref.util.DrugrefProperties;
 import org.junit.Assert;
@@ -82,21 +83,21 @@ public class DrugrefApiTest extends TestCase {
      */
     public void testOperatorSearch() {
         System.out.println("SEARCH");
-        Drugref drugref = new Drugref(VigilanceDao.class);
+        Drugref drugref = new Drugref(DrugrefDao.class);
         Vector out = drugref.list_search_element3("-\"CALCIUM CARBONATE\" +600* +tab");
         System.out.println(out);
     }
 
     public void testParameterSearch() {
         System.out.println("SEARCH");
-        Drugref drugref = new Drugref(VigilanceDao.class);
-        Vector out = drugref.list_search_element3_right("altace");
+        Drugref drugref = new Drugref(DrugrefDao.class);
+        Vector out = drugref.list_search_element3_right("carbid");
         System.out.println(out);
     }
 
     public void testGetGenericDrug() {
         System.out.println("GET");
-        Drugref drugref = new Drugref(VigilanceDao.class);
+        Drugref drugref = new Drugref(DrugrefDao.class);
         Vector out = drugref.get_drug_2("20374", Boolean.FALSE);
         System.out.println(out);
     }
@@ -217,7 +218,7 @@ public class DrugrefApiTest extends TestCase {
         // anti depressants
         String prescribingAtc = "N06AX16";
 
-        Drugref drugref = new Drugref(VigilanceDao.class);
+        Drugref drugref = new Drugref(DrugrefDao.class);
         Vector vector = drugref.get_allergy_warnings(prescribingAtc, vec);
 
         Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), product.get("id") );

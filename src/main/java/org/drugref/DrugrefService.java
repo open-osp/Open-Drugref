@@ -46,13 +46,13 @@ public class DrugrefService extends HttpServlet {
     private static Logger logger = MiscUtils.getLogger();
     
     public void init(ServletConfig config) {
-        DrugrefProperties.DATA_BASE dataBase = DrugrefProperties.getInstance().getDatbase();
+        DrugrefProperties.DATA_BASE dataBase = DrugrefProperties.getInstance().getDatabase();
         xmlrpc = new XmlRpcServer();
         switch(dataBase) {
-            case cdpd: xmlrpc.addHandler("$default", new Drugref(DrugrefDao.class));
+            case CDPD: xmlrpc.addHandler("$default", new Drugref(DrugrefDao.class));
                         logger.info("Using database integration: CPDP");
             break;
-            case vigilance: xmlrpc.addHandler("$default", new Drugref(VigilanceDao.class));
+            case VIGILANCE: xmlrpc.addHandler("$default", new Drugref(VigilanceDao.class));
                         logger.info("Using database integration: Vigilance");
             break;
         }

@@ -47,7 +47,7 @@ public class DrugrefProperties extends Properties implements Serializable {
 	 * cdpd: Canadian Drug Product Database
 	 * vigilance: Vigilance Sante https://www.vigilance.ca/home
 	 */
-	public enum DATA_BASE {cdpd, vigilance}
+	public enum DATA_BASE {CDPD, VIGILANCE}
 
     private DrugrefProperties() {
 		logger.debug("DRUGREF PROPS CONSTRUCTOR");
@@ -124,8 +124,9 @@ public class DrugrefProperties extends Properties implements Serializable {
             return false;
     }
 
-	public DATA_BASE getDatbase(){
-		return DATA_BASE.valueOf(getProperty("database.integration"));
+	public DATA_BASE getDatabase(){
+		String dbIntegration = getProperty("database.integration");
+		return DATA_BASE.valueOf(dbIntegration.toUpperCase());
 	}
 
 }
