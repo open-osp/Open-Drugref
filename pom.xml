@@ -50,24 +50,18 @@
             <version>20041127.091804</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.18.0</version>
+            <version>2.25.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.18.0</version>
+            <version>2.25.0</version>
         </dependency>
-
-<!--        &lt;!&ndash;Enables log4j-2 binding from libraries that still use older Log4j-1 &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.logging.log4j</groupId>-->
-<!--            <artifactId>log4j-1.2-api</artifactId>-->
-<!--            <version>2.17.0</version>-->
-<!--        </dependency>-->
 
 <!--spring-core, spring-context, spring-orm and spring-tx -->
         <dependency>
@@ -109,17 +103,15 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.7.0</version>
+            <version>1.11.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+            <version>2.14.0</version>
             <scope>compile</scope>
         </dependency>
-		
-
 
 		<!-- jpa -->
         <dependency>
@@ -128,11 +120,11 @@
             <version>1.4</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.30</version>
-            <scope>compile</scope>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.openjpa</groupId>
@@ -159,14 +151,13 @@
             <version>1.07.00</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
-          <groupId>net.sf.json-lib</groupId>
-          <artifactId>json-lib</artifactId>
-          <version>2.4</version>
-          <classifier>jdk15</classifier>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20250517</version>
         </dependency>
 
-    
     </dependencies>
     <build>
         <plugins>
@@ -185,14 +176,12 @@
             <artifactId>openjpa-maven-plugin</artifactId>
             <version>${openjpa.version}</version>
             <configuration>
-                <includes>**/org/drugref/ca/**/*.class</includes>
-                <excludes>**/org/durgref/ca/dpd/**/*.class</excludes>
+                <includes>**/*.class</includes>
                 <addDefaultConstructor>true</addDefaultConstructor>
                 <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
             </configuration>
             <executions>
                 <execution>
-                    <id>enhancer</id>
                     <phase>process-classes</phase>
                     <goals>
                         <goal>enhance</goal>
