@@ -6,19 +6,17 @@
         </Console>
     </Appenders>
     <Loggers>
-	<logger name="openjpa.jdbc.SQL" level="error">
+
+	<logger name="openjpa.jdbc.SQL" level="ERROR">
 		<appenderRef ref="Console" />
 	</logger>
-        <Logger name="org.apache.log4j.xml" level="error">
+        <Logger name="org.apache.log4j.xml" level="ERROR">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Logger name="openjpa.jdbc.SQL" level="TRACE" >
+        <Logger name="openjpa.Runtime" level="ERROR" >
             <AppenderRef ref="Console" />
         </Logger>
-        <Logger name="openjpa.Runtime" level="TRACE" >
-            <AppenderRef ref="Console" />
-        </Logger>
-        <Root level="TRACE">
+        <Root level="ERROR">
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>

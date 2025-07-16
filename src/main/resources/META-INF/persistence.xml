@@ -3,7 +3,7 @@
 
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL" >
         <properties>
-            <property name="openjpa.Log" value="DefaultLevel=ERROR"/>
+	        <property name="openjpa.Log" value="DefaultLevel=ERROR, Runtime=DEBUG, Tool=DEBUG, SQL=ERROR"/>
         </properties>
     </persistence-unit>
 
