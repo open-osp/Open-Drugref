@@ -342,19 +342,19 @@ public class DPDImport {
         return arrList;
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws Exception {
-
-
-        /*DPDImport imp = new DPDImport();
-        long timeTaken = imp.doItDifferent();  // executeOn(entities);
-        System.out.println("GOING OUT after " + timeTaken);*/
-        //DPDImport imp = new DPDImport();
-        //imp.addStrengthToBrandName();
-       // imp.addDescriptorToSearchName();
-    }
+//    /**
+//     * @param args the command line arguments
+//     */
+//    public static void main(String[] args) throws Exception {
+//
+//
+//        /*DPDImport imp = new DPDImport();
+//        long timeTaken = imp.doItDifferent();  // executeOn(entities);
+//        System.out.println("GOING OUT after " + timeTaken);*/
+//        //DPDImport imp = new DPDImport();
+//        //imp.addStrengthToBrandName();
+//       // imp.addDescriptorToSearchName();
+//    }
 
     private void insertLines(EntityManager entityManager, List<String> sqlLines) {
 
