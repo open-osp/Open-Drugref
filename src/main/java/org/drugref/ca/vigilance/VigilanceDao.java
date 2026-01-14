@@ -1,5 +1,6 @@
 package org.drugref.ca.vigilance;
 
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.QueryImpl;
 import org.drugref.Category;
 import org.drugref.ca.dpd.CdDrugProduct;
@@ -7,6 +8,7 @@ import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.drugref.ca.TablesDao;
 import org.drugref.util.JpaUtils;
+import org.drugref.util.MiscUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
@@ -17,7 +19,7 @@ import java.util.*;
 
 @Repository
 public class VigilanceDao implements TablesDao, Serializable {
-
+    Logger logger = MiscUtils.getLogger();
     /*
      * alternate is French which was not considered as a choice during initial development
      * Future development should consider the system language French or English
@@ -130,7 +132,8 @@ public class VigilanceDao implements TablesDao, Serializable {
 
         Query query = em.createNativeQuery(sql);
         query.setParameter(1, genericCode);
-        return (String) query.getSingleResult();
+        List results = query.getResultList();
+        return results.isEmpty() ? null : (String) results.get(0);
     }
 
     /**
@@ -459,7 +462,11 @@ public class VigilanceDao implements TablesDao, Serializable {
         Vector warning = new Vector();
         Vector missing = new Vector();
 
+        logger.info("Checking {} allergies against ATC code {}", allergies.size(), prescribedATCCode);
+
         for(Object allergyMap : allergies) {
+
+            logger.info("Checking {}", allergyMap);
 
             Map allergy = new Hashtable<>((Hashtable) allergyMap);
             ArrayList<String> allergyATCList = new ArrayList<>();
