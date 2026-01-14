@@ -7,14 +7,17 @@
     </Appenders>
     <Loggers>
 
-	<logger name="openjpa.jdbc.SQL" level="ERROR">
-		<appenderRef ref="Console" />
-	</logger>
+        <logger name="openjpa" level="OFF" additivity="false">
+            <appenderRef ref="Console" />
+        </logger>
         <Logger name="org.apache.log4j.xml" level="ERROR">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Logger name="openjpa.Runtime" level="ERROR" >
-            <AppenderRef ref="Console" />
+        <Logger name="org.eclipse.persistence" level="WARN">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="eclipselink" level="WARN">
+            <AppenderRef ref="Console"/>
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="Console" />
