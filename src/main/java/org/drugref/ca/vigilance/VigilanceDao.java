@@ -171,9 +171,11 @@ public class VigilanceDao implements TablesDao, Serializable {
         query.setParameter(2, Category.BRAND.getOrdinal());
         query.setParameter(3, Category.AI_GENERIC.getOrdinal());
         query.setParameter(4, Category.GENERIC.getOrdinal());
-        Hashtable<String, Object> singleResult = (Hashtable) query.getSingleResult();
+
         CdDrugSearch cdDrugSearch = new CdDrugSearch();
-        if(singleResult != null) {
+        List<Hashtable<String, Object>> results = query.getResultList();
+        if(!results.isEmpty()) {
+            Hashtable<String, Object> singleResult = results.get(0);
             cdDrugSearch.setUuid((String) singleResult.get("id"));
             cdDrugSearch.setDrugCode((String) singleResult.get("drugCode"));
             cdDrugSearch.setCategory(Integer.parseInt((String) singleResult.get("category")));
@@ -304,35 +306,52 @@ public class VigilanceDao implements TablesDao, Serializable {
 
         sql.append(" UNION ");
 
-        sql.append("SELECT uuid AS `id`, ");
+        sql.append("SELECT IFNULL(gx.uuid, '') AS `id`, ");
         sql.append("CAST(?3 AS NCHAR) AS `category`,");
-        sql.append("GENcode AS `drugCode`,");
+        sql.append("IFNULL(gx.GENcode, g.GENcode) AS `drugCode`,");
         sql.append("CONCAT(");
-        sql.append("genericName").append(language);
+        sql.append("IFNULL(gx.genericName").append(language);
+        sql.append(",g.genericName").append(language).append(")");
         sql.append(", ").append("' ', ");
         sql.append("IFNULL(");
-        sql.append("strength").append(language);
+        sql.append("gx.strength").append(language);
         sql.append(",'')");
         sql.append(", ").append("' ', ");
         sql.append("IFNULL(");
-        sql.append("form").append(language);
+        sql.append("gx.form").append(language);
         sql.append(",'')");
         sql.append(") AS `name` ");
-        sql.append("FROM vig_generxPlus ");
+        sql.append("FROM vig_fgenPlus g ");
+        sql.append("LEFT JOIN vig_generxPlus gx ON (g.GENcode = gx.GENcode) ");
         sql.append("WHERE MATCH(");
-        sql.append("lowercaseGenericName").append(language).append(", ");
-        sql.append("strength").append(language).append(", ");
-        sql.append("form").append(language);
+        sql.append("gx.lowercaseGenericName").append(language).append(", ");
+        sql.append("gx.strength").append(language).append(", ");
+        sql.append("gx.form").append(language);
         sql.append(") ");
         sql.append("AGAINST (?1 IN BOOLEAN MODE) ");
+        sql.append("OR MATCH(");
+        sql.append("g.genericName").append(language);
+        sql.append(") ");
+        sql.append("AGAINST (?1 IN BOOLEAN MODE)");
 
-        Query query = em.createNativeQuery(sql.toString(), Hashtable.class);
+        Query query = em.createNativeQuery(sql.toString());
         String parameters = parseParameters(keyword);
         query.setParameter(1, parameters);
         query.setParameter(2, Category.BRAND.getOrdinal());
         query.setParameter(3, Category.AI_GENERIC.getOrdinal());
-        List results = query.getResultList();
-        Vector<Hashtable<String, Object>> resultList = new Vector<Hashtable<String,Object>>(results);
+        
+        List<Object[]> results = query.getResultList();
+        Vector<Hashtable<String, Object>> resultList = new Vector<>();
+        
+        for (Object[] row : results) {
+            Hashtable<String, Object> ha = new Hashtable<>();
+            ha.put("id", row[0]);
+            ha.put("category", row[1]);
+            ha.put("drugCode", row[2]);
+            ha.put("name", row[3]);
+            resultList.add(ha);
+        }
+        
         JpaUtils.close(em);
         return resultList;
     }
@@ -476,7 +495,8 @@ public class VigilanceDao implements TablesDao, Serializable {
                 // get ATC by drug description
                 String allergyDescription = (String) allergy.get("description");
                 if(allergyDescription != null) {
-                    allergyATCList.addAll(searchATCCodesByDrugname(allergyDescription));
+                    Set results = searchATCCodesByDrugname(allergyDescription);
+                    allergyATCList.addAll(results);
                 }
             } else {
                 allergyATCList.add(allergyATC.trim());
@@ -565,18 +585,22 @@ public class VigilanceDao implements TablesDao, Serializable {
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, pKey);
         Vector<Object> returnRows = new Vector<>();
-        Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());
-        parseComponents(result);
 
-        /*
-         * For whatever reason, the OSCAR interface needs the route info formatted this way.
-         */
-        String drugroute = (String) result.get("drugRoute");
-        Vector routeVector = new Vector();
-        routeVector.addElement(drugroute);
-        result.put("drugRoute", routeVector);
+        List<Hashtable> results = query.getResultList();
+        if(!results.isEmpty()) {
+            Hashtable result = new Hashtable<>(results.get(0));
+            parseComponents(result);
 
-        returnRows.addElement(result);
+            /*
+             * For whatever reason, the OSCAR interface needs the route info formatted this way.
+             */
+            String drugroute = (String) result.get("drugRoute");
+            Vector routeVector = new Vector();
+            routeVector.addElement(drugroute);
+            result.put("drugRoute", routeVector);
+
+            returnRows.addElement(result);
+        }
         return returnRows;
     }
 
@@ -633,19 +657,23 @@ public class VigilanceDao implements TablesDao, Serializable {
 
         Query query = em.createNativeQuery(sql, Hashtable.class);
         query.setParameter(1, uuid);
-        Hashtable result = new Hashtable<>((Hashtable) query.getSingleResult());
-        parseComponents(result);
-
-        /*
-         * For whatever reason, the OSCAR interface needs the route info formatted this way.
-         */
-        String drugroute = (String) result.get("drugRoute");
-        Vector<Object> routeVector = new Vector<>();
-        routeVector.addElement(drugroute);
-        result.put("drugRoute", routeVector);
-
         Vector<Object> returnRows = new Vector<>();
-        returnRows.addElement(result);
+
+        List<Hashtable> results = query.getResultList();
+        if(!results.isEmpty()) {
+            Hashtable result = new Hashtable<>(results.get(0));
+            parseComponents(result);
+
+            /*
+             * For whatever reason, the OSCAR interface needs the route info formatted this way.
+             */
+            String drugroute = (String) result.get("drugRoute");
+            Vector<Object> routeVector = new Vector<>();
+            routeVector.addElement(drugroute);
+            result.put("drugRoute", routeVector);
+
+            returnRows.addElement(result);
+        }
         return returnRows;
     }
 

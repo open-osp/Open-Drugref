@@ -7,6 +7,7 @@ package org.drugref.plugin;
 
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 import junit.framework.TestCase;
 import org.drugref.Drugref;
@@ -181,6 +182,8 @@ public class DrugrefApiTest extends TestCase {
         product.put("ATC","N06AX11");
         product.put("uuid", "2248542");
 
+        vec.add(product);
+
         Hashtable substance = new Hashtable();
         substance.put("id","2");
         substance.put("description","SULFONAMIDES");
@@ -188,53 +191,81 @@ public class DrugrefApiTest extends TestCase {
         substance.put("ATC","J01E");
         substance.put("uuid", "20374");
 
-        Hashtable generic = new Hashtable();
-        generic.put("id","3");
-        generic.put("description","TRIMETHOPRIME");
-        generic.put("type","11");
-        generic.put("ATC","");
-        generic.put("uuid","");
+        vec.add(substance);
+
+        Hashtable substanceNoAtc = new Hashtable();
+        substanceNoAtc.put("id","3");
+        substanceNoAtc.put("description","PENICILLINS");
+        substanceNoAtc.put("type","11");
+        substanceNoAtc.put("ATC","");
+        substanceNoAtc.put("uuid", "20192");
+
+        vec.add(substanceNoAtc);
+
+        Hashtable ingredient = new Hashtable();
+        ingredient.put("id","4");
+        ingredient.put("description","Polysporin");
+        ingredient.put("type","11");
+        ingredient.put("ATC","");
+        ingredient.put("uuid","");
+
+        vec.add(ingredient);
 
         Hashtable generic2 = new Hashtable();
-        generic2.put("id","4");
+        generic2.put("id","5");
         generic2.put("description","cetirizine");
         generic2.put("type","11");
         generic2.put("ATC","");
         generic2.put("uuid", "");
 
+        vec.add(generic2);
+
         Hashtable notdrug = new Hashtable();
-        notdrug.put("id","5");
+        notdrug.put("id","6");
         notdrug.put("description","strawberries");
         notdrug.put("type","8");
         notdrug.put("ATC","");
         notdrug.put("uuid", "");
 
-        vec.add(product);
-        vec.add(substance);
-        vec.add(generic);
-        vec.add(generic2);
         vec.add(notdrug);
+
+        Drugref drugref = new Drugref(VigilanceDao.class);
 
         // anti depressants
         String prescribingAtc = "N06AX16";
-
-        Drugref drugref = new Drugref(DrugrefDao.class);
         Vector vector = drugref.get_allergy_warnings(prescribingAtc, vec);
-
+        System.out.println("AD: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
         Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), product.get("id") );
 
         // sulfa
         prescribingAtc = "J01EA01";
         vector = drugref.get_allergy_warnings(prescribingAtc, vec);
-
+        System.out.println("SULFA: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
         Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), substance.get("id") );
 
+        // PENICILLINS NO ATC
+        prescribingAtc = "J01CE01";
+        vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+        System.out.println("PENICILLINS NO ATC: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
+        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), substanceNoAtc.get("id") );
+
+
+        prescribingAtc = "S03AA30";
+        vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+        System.out.println("Ingredient: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
+        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), ingredient.get("id") );
 
         // ANTIHISTAMINES
         prescribingAtc = "R06AE07";
         vector = drugref.get_allergy_warnings(prescribingAtc, vec);
-
+        System.out.println("Allergy: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
         Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), generic2.get("id") );
+
+
+//        prescribingAtc = "J01CE01";
+//        vector = drugref.get_allergy_warnings(prescribingAtc, vec);
+//        System.out.println("PENICILLINS: " + ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0));
+//        Assert.assertEquals( ((Vector) ((Hashtable) vector.get(0)).get("warnings")).get(0), generic2.get("id") );
 
     }
 
