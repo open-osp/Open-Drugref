@@ -135,11 +135,11 @@ public class Drugref {
                 Query query = em.createQuery(queryStr);
                 List<History> results = query.getResultList();
                 JpaUtils.close(em);
-                if(results!=null && results.size()>0){
+                if(results!=null && !results.isEmpty()){
                     return results.get(0).getDateTime().toString();
                 }
-                else
-                    return null;
+
+				return null;
             }
         }
         
@@ -308,12 +308,10 @@ public class Drugref {
     }
 
     public String identify() {
-
         return queryDao.identify();
     }
 
     public String version() {
-
         return queryDao.version();
     }
 

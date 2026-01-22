@@ -32,7 +32,7 @@ public class DrugrefDao implements TablesDao {
     public DrugrefDao() {
         //p("=========start tablesdao constructor======");
         this.plugindir = "plugins";
-        this.name = "Drugref Service";
+        this.name = "CDN Drug Product Database";
         this.version = "1.0";
 
         this.db = "drugref2";

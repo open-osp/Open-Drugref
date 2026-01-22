@@ -25,15 +25,28 @@ public class VigilanceDao implements TablesDao, Serializable {
      * Future development should consider the system language French or English
      */
     private static String language = "English";
+    private String name;
+    private String version;
+
+    public VigilanceDao() {
+        this.name = "Vigilance Sante: vigilance.ca";
+        this.version = "1.0";
+    }
 
     @Override
     public String identify() {
-        return "";
+        if(this.name == null) {
+            return "";
+        }
+        return this.name;
     }
 
     @Override
     public String version() {
-        return "";
+        if(this.version == null) {
+            return "";
+        }
+        return this.version;
     }
 
     @Override
