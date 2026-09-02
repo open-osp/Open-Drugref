@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 public class VigilanceImport implements Serializable {
 	private static final Logger logger = MiscUtils.getLogger();
-	private static final String LOGIN_URL = "https://manager.vigilance.ca/login";
-	private static final String DOWNLOAD_URL = "https://api-manager.vigilance.ca/files/";
+	private static final String LOGIN_URL = "";
+	private static final String DOWNLOAD_URL = "";
 	// https://api-manager.vigilance.ca/files/{id}
 	private static final String USER_AGENT = "Mozilla/5.0";
 
@@ -123,21 +123,21 @@ public class VigilanceImport implements Serializable {
 		connection.disconnect();
 	}
 
-	public static void main(String[] args) {
-		String username = "dwarren@openosp.ca";  // Replace with actual username
-		String password = "u^T82Pkw;pHM2(F";  // Replace with actual password
-		String outputFolder = "/downloads";
-
-		VigilanceImport downloader = new VigilanceImport(username, password);
-
-		try {
-			downloader.login();
-			downloader.downloadAllDatFiles(outputFolder);
-			System.out.println("All .dat files have been downloaded to " + outputFolder);
-		} catch (Exception e) {
-			logger.error("Error downloading files", e);
-		}
-	}
+//	public static void main(String[] args) {
+//		String username = "";  // Replace with actual username
+//		String password = "";  // Replace with actual password
+//		String outputFolder = "/downloads";
+//
+//		VigilanceImport downloader = new VigilanceImport(username, password);
+//
+//		try {
+//			downloader.login();
+//			downloader.downloadAllDatFiles(outputFolder);
+//			System.out.println("All .dat files have been downloaded to " + outputFolder);
+//		} catch (Exception e) {
+//			logger.error("Error downloading files", e);
+//		}
+//	}
 
 	public String getSessionCookie() {
 		return sessionCookie;
