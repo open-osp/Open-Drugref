@@ -129,5 +129,24 @@ public class DrugrefProperties extends Properties implements Serializable {
 		return DATA_BASE.valueOf(dbIntegration.toUpperCase());
 	}
 
+	public String getVigilanceBaseUrl(){
+		return getProperty("vigilance.files.base.url");
+	}
+	public String getVigilanceUsername(){
+		return getProperty("vigilance.username");
+	}
+	public String getVigilancePassword(){
+		return getProperty("vigilance.password");
+	}
+	public String getVigilanceUserId(){
+		return getProperty("vigilance.user.id");
+	}
+	public String getVigilanceClientId(){
+		return getProperty("vigilance.client.id");
+	}
+	public String getVigilanceClientSecret(){
+		return getProperty("vigilance.client.secret");
+	}
+
 }
 

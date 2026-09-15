@@ -19,9 +19,7 @@ import org.drugref.ca.dpd.history.HistoryUtil;
 public class RxUpdateDBWorker extends Thread{
     public RxUpdateDBWorker(){}
     public void run(){
-        synchronized(this){
-            Drugref.UPDATE_DB=true;
-
+        try {
             DPDImport dpdImport =new DPDImport();
             long timeDataImport=0L;
             timeDataImport=dpdImport.doItDifferent();
@@ -42,8 +40,8 @@ public class RxUpdateDBWorker extends Thread{
             Drugref.DB_INFO.put("timeImportGenericMinutes", timeGenericImport);
             Drugref.DB_INFO.put("descriptor", addedDescriptor);
             Drugref.DB_INFO.put("strength", addedStrength);
-
-            Drugref.UPDATE_DB=false;
+        } finally {
+            Drugref.UPDATE_DB.set(false);
         }
     }
 }
