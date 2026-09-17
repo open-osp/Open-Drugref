@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,31 +113,39 @@ public class VigilanceDataParser {
 
     private static void validateFile(File file, String[] expectedColumns) throws Exception {
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-
-            String headerLine = reader.readLine();
-            if (headerLine == null) {
-                throw new Exception("File " + file.getName() + " is empty (no header line)");
-            }
-
-            String[] headerColumns = headerLine.split("\t");
-            if (headerColumns.length != expectedColumns.length) {
-                throw new Exception("Column count mismatch in " + file.getName() +
-                    ": expected " + expectedColumns.length + ", got " + headerColumns.length);
-            }
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.ISO_8859_1))) {
 
             String line;
+            int lineNumber = 0;
             boolean hasData = false;
+            boolean firstNonBlank = true;
             while ((line = reader.readLine()) != null) {
-                if (line.length() > 0) {
-                    hasData = true;
-                    break;
+                lineNumber++;
+                if (line.length() == 0) {
+                    continue;
                 }
+                if (firstNonBlank && isHeaderLine(line, expectedColumns)) {
+                    firstNonBlank = false;
+                    continue;
+                }
+                firstNonBlank = false;
+                String[] values = line.split("\t", -1);
+                if (values.length < expectedColumns.length) {
+                    throw new Exception("Line " + lineNumber + " in " + file.getName() +
+                        ": expected at least " + expectedColumns.length + " columns, got " + values.length);
+                }
+                hasData = true;
+                break;
             }
             if (!hasData) {
-                throw new Exception("File " + file.getName() + " contains no data rows");
+                throw new Exception("File " + file.getName() + " is empty or contains no data rows");
             }
         }
+    }
+
+    private static boolean isHeaderLine(String line, String[] expectedColumns) {
+        String[] values = line.split("\t", -1);
+        return values.length > 0 && values[0].equals(expectedColumns[0]);
     }
 
     private static void updateStatus(String updateId, String status, String progress, long startTime) {
@@ -179,38 +188,47 @@ public class VigilanceDataParser {
         try {
             conn = em.unwrap(java.sql.Connection.class);
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.ISO_8859_1));
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
                 conn.setAutoCommit(false);
 
-                String headerLine = reader.readLine();
-                if (headerLine == null) {
-                    logger.warn("File {} is empty", file.getName());
-                    return 0;
-                }
-
-                String[] headerColumns = headerLine.split("\t");
-                if (headerColumns.length != columns.length) {
-                    throw new Exception("Column count mismatch in " + file.getName() +
-                        ": expected " + columns.length + ", got " + headerColumns.length);
-                }
-
                 String line;
-                int lineNumber = 1;
+                int lineNumber = 0;
                 int batchCount = 0;
+                boolean warnedExtraColumns = false;
+                boolean firstNonBlank = true;
 
                 while ((line = reader.readLine()) != null) {
                     lineNumber++;
+                    if (line.length() == 0) {
+                        continue;
+                    }
+                    if (firstNonBlank && isHeaderLine(line, columns)) {
+                        firstNonBlank = false;
+                        continue;
+                    }
+                    firstNonBlank = false;
                     String[] values = line.split("\t", -1);
 
-                    if (values.length != columns.length) {
+                    if (values.length < columns.length) {
                         throw new Exception("Line " + lineNumber + " in " + file.getName() +
-                            ": expected " + columns.length + " columns, got " + values.length);
+                            ": expected at least " + columns.length + " columns, got " + values.length);
                     }
 
-                    for (int i = 0; i < values.length; i++) {
-                        stmt.setString(i + 1, values[i]);
+                    if (values.length > columns.length && !warnedExtraColumns) {
+                        warnedExtraColumns = true;
+                        logger.warn("Rows in {} contain {} columns; loading only the first {} columns",
+                            file.getName(), values.length, columns.length);
+                    }
+
+                    for (int i = 0; i < columns.length; i++) {
+                        String value = values[i];
+                        if (value.length() == 0) {
+                            stmt.setNull(i + 1, Types.NULL);
+                        } else {
+                            stmt.setString(i + 1, value);
+                        }
                     }
                     stmt.addBatch();
                     batchCount++;
@@ -264,6 +282,7 @@ public class VigilanceDataParser {
 
     private static void createFulltextIndexes() throws Exception {
         EntityManager em = JpaUtils.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
 
         String[][] indexes = {
             {"ft_nomprod_en", "vig_nomprodPlus", "productNameEnglish, strengthEnglish, formEnglish"},
@@ -275,6 +294,7 @@ public class VigilanceDataParser {
         };
 
         try {
+            tx.begin();
             for (String[] index : indexes) {
                 String indexName = index[0];
                 String table = index[1];
@@ -287,6 +307,10 @@ public class VigilanceDataParser {
                 em.createNativeQuery(indexSql).executeUpdate();
                 logger.info("Created FULLTEXT index: {}", indexSql);
             }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
         } finally {
             JpaUtils.close(em);
         }
