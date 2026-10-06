@@ -12,17 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class VigilanceUpdateDBWorker extends Thread {
+public class VigilanceUpdateDBWorker implements Runnable {
     private static final Logger logger = MiscUtils.getLogger();
 
     private static final String[] REQUIRED_FILES = {"fgenPlus.dat", "generxplus.dat", "nomprodPlus.dat"};
     private static final String ACTION_UPDATE = "vigilance update db";
 
-    public VigilanceUpdateDBWorker() {
-    }
-
     @Override
     public void run() {
+        Drugref.VIGILANCE_UPDATE_STATUS.clear();
         String updateId = UUID.randomUUID().toString();
         long startTime = System.currentTimeMillis();
         File tempDir = new File(System.getProperty("java.io.tmpdir"), "vigilance-update-" + updateId);

@@ -158,8 +158,7 @@ public class Drugref {
         public String updateDB(){
             if(UPDATE_DB.compareAndSet(false, true)){
                 if (DrugrefProperties.getInstance().getDatabase() == DrugrefProperties.DATA_BASE.VIGILANCE) {
-                    VigilanceUpdateDBWorker worker = new VigilanceUpdateDBWorker();
-                    worker.start();
+                    new Thread(new VigilanceUpdateDBWorker()).start();
                 } else {
                     RxUpdateDBWorker worker = new RxUpdateDBWorker();
                     worker.start();
