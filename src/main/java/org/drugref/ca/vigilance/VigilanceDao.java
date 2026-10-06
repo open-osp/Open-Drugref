@@ -16,6 +16,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.Serializable;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Repository
 public class VigilanceDao implements TablesDao, Serializable {
@@ -25,6 +27,29 @@ public class VigilanceDao implements TablesDao, Serializable {
      * Future development should consider the system language French or English
      */
     private static String language = "English";
+
+    /**
+     * Shortest word the FULLTEXT index holds, from the server's innodb_ft_min_token_size.
+     */
+    private static final int MINIMUM_TOKEN_LENGTH = 3;
+
+    /**
+     * One search token: a quoted phrase with its optional sign, or a run of non-space
+     * characters. The phrase alternative comes first so that the quotes are kept together.
+     */
+    private static final Pattern SEARCH_TOKEN = Pattern.compile("[+-]?\"[^\"]*\"|\\S+");
+
+    /**
+     * Letters and digits make up words, and every other character separates them. The search
+     * term's words, and the word it is ranked on, must both be found by this one rule.
+     */
+    private static final Pattern NON_WORD = Pattern.compile("[^\\p{L}\\p{N}]+");
+
+    /**
+     * Text holding at least one letter or digit, for telling a real quoted phrase from an empty
+     * or punctuation-only one. Matched against the whole string.
+     */
+    private static final Pattern HAS_WORD_CHARACTER = Pattern.compile(".*[\\p{L}\\p{N}].*");
     private String name;
     private String version;
 
@@ -237,11 +262,102 @@ public class VigilanceDao implements TablesDao, Serializable {
      */
     @Override
     public Vector listSearchElement4(String keyword, boolean ingredientOnly){
-        if(ingredientOnly) {
-            return listSearchIngredient(keyword);
-        } else {
-            return listSearchAll(keyword);
+        return listSearchBrandAndGeneric(keyword);
+    }
+
+    /**
+     * Searches the brand and generic product tables, and nothing else.
+     * <p>
+     * The ingredient table is deliberately not searched. Its rows describe active
+     * ingredients rather than products, so they carry no product identifier and cannot be
+     * turned into a prescription by the caller.
+     * <p>
+     * Rows that would display an identical label are collapsed here rather than by the
+     * caller, so that the surviving row is chosen deliberately. The generic record is
+     * preferred over the brand record for a shared label. Results are ordered so that an
+     * exact match on the search term comes before combination products, which in turn come
+     * before manufacturer-branded variants.
+     *
+     * @param keyword String the search term as typed by the user
+     * @return Vector of Hashtable rows carrying id, category, drugCode and name
+     */
+    private Vector listSearchBrandAndGeneric(String keyword) {
+        EntityManager em = JpaUtils.createEntityManager();
+        Assert.notNull(keyword, "Search value cannot be null.");
+
+        // Column names carry the language as a suffix. They are resolved once here so that an
+        // identifier is never split across two append calls in the middle of the statement.
+        String genericName = "genericName" + language;
+        String lowercaseGenericName = "lowercaseGenericName" + language;
+        String productName = "productName" + language;
+        String productNameCapitalized = "productNameCapitalized" + language;
+        String strength = "strength" + language;
+        String form = "form" + language;
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT `id`, `category`, `drugCode`, `name` FROM (");
+        sql.append("SELECT `id`, `category`, `drugCode`, `name`, rankTier, ");
+        sql.append("ROW_NUMBER() OVER (PARTITION BY `name` ORDER BY preferred, `id`) AS rowNumber ");
+        sql.append("FROM (");
+
+        // Generic products. Preferred over the brand record when both carry the same label.
+        sql.append("SELECT uuid AS `id`, ");
+        sql.append("CAST(?3 AS NCHAR) AS `category`, ");
+        sql.append("GENcode AS `drugCode`, ");
+        sql.append("CONCAT(").append(genericName).append(", ' ', ");
+        sql.append("IFNULL(").append(strength).append(",''), ' ', ");
+        sql.append("IFNULL(").append(form).append(",'')) AS `name`, ");
+        sql.append("0 AS preferred, ");
+        sql.append("CASE WHEN ").append(genericName).append(" = ?2 THEN 0 ");
+        sql.append("WHEN ").append(genericName).append(" LIKE CONCAT(?2,'%') THEN 1 ");
+        sql.append("ELSE 2 END AS rankTier ");
+        sql.append("FROM vig_generxPlus ");
+        sql.append("WHERE MATCH(").append(lowercaseGenericName).append(", ");
+        sql.append(strength).append(", ").append(form).append(") ");
+        sql.append("AGAINST (?1 IN BOOLEAN MODE)");
+
+        sql.append(" UNION ALL ");
+
+        // Brand products.
+        sql.append("SELECT productID AS `id`, ");
+        sql.append("CAST(?4 AS NCHAR) AS `category`, ");
+        sql.append("GENcode AS `drugCode`, ");
+        sql.append("CONCAT(").append(productNameCapitalized).append(", ' ', ");
+        sql.append("IFNULL(").append(strength).append(",''), ' ', ");
+        sql.append("IFNULL(").append(form).append(",'')) AS `name`, ");
+        sql.append("1 AS preferred, ");
+        sql.append("CASE WHEN ").append(productNameCapitalized).append(" = ?2 THEN 0 ");
+        sql.append("WHEN ").append(productNameCapitalized).append(" LIKE CONCAT(?2,'%') THEN 1 ");
+        sql.append("ELSE 2 END AS rankTier ");
+        sql.append("FROM vig_nomprodPlus ");
+        sql.append("WHERE MATCH(").append(productName).append(", ");
+        sql.append(strength).append(", ").append(form).append(") ");
+        sql.append("AGAINST (?1 IN BOOLEAN MODE)");
+
+        sql.append(") u");
+        sql.append(") d WHERE rowNumber = 1 ");
+        sql.append("ORDER BY rankTier, `name`");
+
+        Query query = em.createNativeQuery(sql.toString());
+        query.setParameter(1, parseSearchParameters(keyword));
+        query.setParameter(2, firstSearchWord(keyword));
+        query.setParameter(3, Category.AI_GENERIC.getOrdinal());
+        query.setParameter(4, Category.BRAND.getOrdinal());
+
+        List<Object[]> results = query.getResultList();
+        Vector<Hashtable<String, Object>> resultList = new Vector<>();
+
+        for (Object[] row : results) {
+            Hashtable<String, Object> ha = new Hashtable<>();
+            ha.put("id", row[0]);
+            ha.put("category", row[1]);
+            ha.put("drugCode", row[2]);
+            ha.put("name", row[3]);
+            resultList.add(ha);
         }
+
+        JpaUtils.close(em);
+        return resultList;
     }
 
     /**
@@ -745,6 +861,120 @@ public class VigilanceDao implements TablesDao, Serializable {
      * ie
      * tylenol, 500, tablet
      */
+    /**
+     * The first word of the search term, used to rank results by how well they match what was
+     * typed.
+     * <p>
+     * This has to be the first word rather than the whole term, because the ranking compares it
+     * against a product name with "=" and "LIKE ...%": "amoxicillin 500" matches no name either
+     * way, which would drop every row into the same tier and leave the results in name order.
+     * Ranking on "amoxicillin" keeps the plain strengths above the branded variants.
+     *
+     * @param keyword String the search term as typed by the user
+     * @return String the first word long enough to be indexed, or the term with its punctuation
+     *         removed when it has no such word
+     */
+    private String firstSearchWord(String keyword) {
+        for (String word : NON_WORD.split(keyword.trim())) {
+            if (word.length() >= MINIMUM_TOKEN_LENGTH) {
+                return word;
+            }
+        }
+        return NON_WORD.matcher(keyword.trim()).replaceAll("");
+    }
+
+    /**
+     * Splits a user's search term into FULLTEXT boolean-mode operands, requiring every word.
+     * <p>
+     * {@link #parseParameters} splits on commas only, so "apo atorvastatin" became the single
+     * operand "+apo atorvastatin*", which asks for "apo" and merely prefers "atorvastatin":
+     * every product from that manufacturer came back. Splitting on whitespace as well makes
+     * both words required.
+     * <p>
+     * Every character that is not a letter or digit separates words, rather than a chosen list
+     * of separators. FULLTEXT indexes punctuation as a word separator anyway, so this matches
+     * how the data is stored: "INSULIN-ASPART-RAPID" is three indexed words. It also means a
+     * stray operator character cannot reach the query, where it would either be read as an
+     * operator ("pms-amoxicillin" as "pms AND NOT amoxicillin") or fail outright ("apo-"
+     * becoming the invalid "+apo-*").
+     * <p>
+     * Words below {@link #MINIMUM_TOKEN_LENGTH} are dropped because the index does not hold
+     * them, and requiring one with a wildcard matches far too much: "children's" split into
+     * "children" and "s" would ask for a word beginning with "s" as well.
+     * <p>
+     * Operators the caller wrote are honoured per token rather than diverting the whole term:
+     * a leading "+" or "-" applies to every word in that token, and a quoted phrase is passed
+     * whole. Handing the term to {@link #parseParameters} instead, as this method first did,
+     * meant an operator anywhere disabled the word split for everything else, so
+     * "amoxicillin 500 -penta" returned the same rows as "amoxicillin -penta". It was also
+     * positionally unstable, because {@link #addOperators} appends its wildcard once at the
+     * end: adding a trailing token silently un-wildcarded the one before it.
+     * <p>
+     * "OR" is not carved out, because MySQL boolean mode has no such operator. It was only
+     * ever an optional word, so "apo OR pms" returned exactly the rows holding "apo".
+     * <p>
+     * This is deliberately separate from {@link #parseParameters}, which is shared with
+     * {@link #listSearchAll} on the allergy-checking path. Requiring every word there could
+     * narrow an allergy description enough to drop a warning, so that parsing is left alone.
+     *
+     * @param keyword String the search term as typed by the user
+     * @return String the boolean-mode expression to match against
+     */
+    private String parseSearchParameters(String keyword) {
+        StringBuilder parameterBuilder = new StringBuilder();
+        Matcher tokens = SEARCH_TOKEN.matcher(keyword.toLowerCase());
+
+        while (tokens.find()) {
+            String token = tokens.group();
+            String sign = "+";
+            if (token.startsWith("-")) {
+                sign = "-";
+                token = token.substring(1);
+            } else if (token.startsWith("+")) {
+                token = token.substring(1);
+            }
+
+            if (isQuotedPhrase(token)) {
+                // A phrase goes to the query whole: it matches adjacent words, and neither the
+                // word minimum nor a wildcard applies inside quotes.
+                parameterBuilder.append(sign).append(token).append(" ");
+                continue;
+            }
+
+            for (String word : NON_WORD.split(token)) {
+                if (word.length() >= MINIMUM_TOKEN_LENGTH) {
+                    parameterBuilder.append(sign).append(word).append("*").append(" ");
+                }
+            }
+        }
+
+        if (parameterBuilder.length() == 0) {
+            // Every word was below the index's minimum length, as in "b-12". Retry with the
+            // punctuation removed rather than searching for nothing, so "b-12" finds "B12".
+            String collapsed = NON_WORD.matcher(keyword.toLowerCase()).replaceAll("");
+            if (!collapsed.isEmpty()) {
+                parameterBuilder.append("+").append(collapsed).append("*");
+            }
+        }
+
+        return parameterBuilder.toString().trim();
+    }
+
+    /**
+     * True for a token that is a complete quoted phrase with something in it. An unbalanced
+     * quote is not one, and is left to the word split, which discards the stray character.
+     *
+     * @param token String one whitespace-delimited token, any leading sign already removed
+     * @return boolean true when the token should be passed to the query as a phrase
+     */
+    private boolean isQuotedPhrase(String token) {
+        return token.length() > 2
+                && token.startsWith("\"")
+                && token.endsWith("\"")
+                && HAS_WORD_CHARACTER.matcher(token.substring(1, token.length() - 1)).matches();
+    }
+
+
     private String parseParameters(String keyword) {
         StringTokenizer stringTokenizer = new StringTokenizer(keyword, ",", false);
         StringBuilder parameterBuilder = new StringBuilder();
