@@ -18,6 +18,10 @@ import org.drugref.util.JpaUtils;
 public class HistoryUtil {
     public  static final String ACTION_UPDATE="update db";
     public boolean addUpdateHistory(){
+        return addUpdateHistory(ACTION_UPDATE);
+    }
+
+    public boolean addUpdateHistory(String action){
         EntityManager entityManager = JpaUtils.createEntityManager();
         try {
             EntityTransaction tx = entityManager.getTransaction();
@@ -25,7 +29,7 @@ public class HistoryUtil {
         
             History h=new History();
             h.setDateTime(Calendar.getInstance().getTime());
-            h.setAction(ACTION_UPDATE);            
+            h.setAction(action);            
             entityManager.persist(h);
             entityManager.flush();
             entityManager.clear();
