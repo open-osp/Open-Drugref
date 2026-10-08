@@ -12,12 +12,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Performs the full Vigilance database update.
+ * <p>
+ * Started from {@link Drugref#updateDB()} as {@code new Thread(new VigilanceUpdateDBWorker()).start()}
+ * when {@code database.integration=vigilance}; gated by the shared {@link Drugref#UPDATE_DB} flag
+ * so that only one update can run at a time.
+ * <p>
+ * Flow:
+ * <ol>
+ *   <li>Clears {@link Drugref#VIGILANCE_UPDATE_STATUS} and generates a UUID update id used as the status key.</li>
+ *   <li>Creates a temp directory under {@code java.io.tmpdir} ({@code vigilance-update-<updateId>}).</li>
+ *   <li>Authenticates against the Vigilance API via
+ *       {@link VigilanceApiClient#authenticate()} (OAuth2 password grant with client
+ *       credentials from the {@code vigilance.*} properties).</li>
+ *   <li>Fetches the file list, extracts the {@code .dat} names and downloads the required files
+ *       {@code fgenPlus.dat}, {@code generxplus.dat} and {@code nomprodPlus.dat}, falling back to the
+ *       canonical names when the API lists different ones.</li>
+ *   <li>Loads the files into the {@code vig_*} MySQL tables via
+ *       {@link VigilanceDataParser#parseAndLoad(File, File, File, String)}, which returns per-table row counts.</li>
+ *   <li>Writes a {@code History} row via {@code HistoryUtil.addUpdateHistory("vigilance update db")} and
+ *       publishes {@code vigilance_tableRowNum} and {@code vigilance_timeImportMinutes} to
+ *       {@link Drugref#DB_INFO}.</li>
+ * </ol>
+ * Progress entries and the final {@code completed}/{@code failed} status are published to
+ * {@link Drugref#VIGILANCE_UPDATE_STATUS} under the update id; on failure the error message is
+ * additionally stored in {@link Drugref#DB_INFO} under {@code vigilance_last_error}.
+ * <p>
+ * In all cases the {@code finally} block resets {@link Drugref#UPDATE_DB} to {@code false} and
+ * deletes the temp directory, so a failed run never blocks subsequent updates.
+ */
 public class VigilanceUpdateDBWorker implements Runnable {
     private static final Logger logger = MiscUtils.getLogger();
 
+    /** Data files that must be downloaded from the Vigilance API before the update can run. */
     private static final String[] REQUIRED_FILES = {"fgenPlus.dat", "generxplus.dat", "nomprodPlus.dat"};
+    /** Action label written to the {@code History} table for a Vigilance update. */
     private static final String ACTION_UPDATE = "vigilance update db";
 
+    /**
+     * Runs the Vigilance update pipeline.
+     * <p>
+     * Never throws: all failures are logged, captured in the failed status entry of
+     * {@link Drugref#VIGILANCE_UPDATE_STATUS} and stored under {@code vigilance_last_error}
+     * in {@link Drugref#DB_INFO}.
+     */
     @Override
     public void run() {
         Drugref.VIGILANCE_UPDATE_STATUS.clear();
@@ -100,6 +139,14 @@ public class VigilanceUpdateDBWorker implements Runnable {
         }
     }
 
+    /**
+     * Finds an expected file name in the API's file list, ignoring case.
+     *
+     * @param availableFiles file names returned by {@link VigilanceApiClient#findDatFiles(String)}
+     * @param expectedName   one of {@link #REQUIRED_FILES}
+     * @return the matching listed name, or {@code null} if not present (the caller then
+     *         falls back to the expected name)
+     */
     private String findInList(List<String> availableFiles, String expectedName) {
         for (String available : availableFiles) {
             if (available.equalsIgnoreCase(expectedName)) {
@@ -109,6 +156,16 @@ public class VigilanceUpdateDBWorker implements Runnable {
         return null;
     }
 
+    /**
+     * Publishes an intermediate progress entry ({@code status}, {@code progress},
+     * {@code startTime}, {@code elapsedSeconds}) to {@link Drugref#VIGILANCE_UPDATE_STATUS}
+     * under the given update id.
+     *
+     * @param updateId  key of the status map
+     * @param status    current state ({@code running} while in progress)
+     * @param progress  human-readable description of the step in progress
+     * @param startTime epoch millis at which the update started
+     */
     private void updateStatus(String updateId, String status, String progress, long startTime) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", status);
@@ -118,6 +175,14 @@ public class VigilanceUpdateDBWorker implements Runnable {
         Drugref.VIGILANCE_UPDATE_STATUS.put(updateId, map);
     }
 
+    /**
+     * Recursively deletes the temporary download directory.
+     * <p>
+     * Failures are logged and swallowed so that cleanup can never mask the original
+     * outcome of the update.
+     *
+     * @param dir temp directory created at the start of {@link #run()}
+     */
     private void cleanupTempDir(File dir) {
         try {
             FileUtils.deleteDirectory(dir);

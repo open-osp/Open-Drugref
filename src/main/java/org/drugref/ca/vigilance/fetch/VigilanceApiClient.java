@@ -22,6 +22,20 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Minimal HTTP client for the Vigilance data files API.
+ * <p>
+ * Provides the three calls needed by {@link VigilanceUpdateDBWorker}:
+ * <ul>
+ *   <li>{@link #authenticate()} — POST {@code {baseUrl}/oauth/v2/token} (OAuth2 resource owner
+ *       password grant with client credentials in the form body).</li>
+ *   <li>{@link #getFileList(String)} — GET {@code {baseUrl}/files}.</li>
+ *   <li>{@link #downloadFile(String, String, File)} — GET {@code {baseUrl}/files/{base64(fileName)}}.</li>
+ * </ul>
+ * All credentials and the base URL are read once from the {@code vigilance.*} properties of the
+ * external {@code drugref2.properties} via {@link DrugrefProperties}; the client itself is
+ * stateless and not thread-safe, so one instance is created per update run.
+ */
 public class VigilanceApiClient {
     private static final Logger logger = MiscUtils.getLogger();
     private static final String USER_AGENT = "OpenOSP-Drugref/1.0";
@@ -33,6 +47,12 @@ public class VigilanceApiClient {
     private final String password;
     private final String userId;
 
+    /**
+     * Reads the {@code vigilance.*} configuration (base URL, client id/secret, username,
+     * password, user id) from {@link DrugrefProperties#getInstance()}.
+     * <p>
+     * Missing values are tolerated here and only cause {@link #authenticate()} to fail.
+     */
     public VigilanceApiClient() {
         DrugrefProperties props = DrugrefProperties.getInstance();
         this.baseUrl = props.getVigilanceBaseUrl();
@@ -206,12 +226,27 @@ public class VigilanceApiClient {
         return files;
     }
 
+    /**
+     * Appends a file name to the collected list when it ends with {@code .dat} (case-insensitive)
+     * and is not already present, preserving list order and deduplicating.
+     *
+     * @param files collected file names, modified in place
+     * @param name  candidate file name, may be {@code null}
+     */
     private void addDatFile(List<String> files, String name) {
         if (name != null && name.toLowerCase().endsWith(".dat") && !files.contains(name)) {
             files.add(name);
         }
     }
 
+    /**
+     * Performs an authenticated GET request and returns the response body.
+     *
+     * @param accessToken OAuth2 access token sent as {@code Authorization: Bearer ...}
+     * @param url         absolute request URL
+     * @return response body (UTF-8), or the error body when the request failed
+     * @throws IOException on any HTTP status other than 200
+     */
     private String get(String accessToken, String url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         try {
@@ -231,6 +266,12 @@ public class VigilanceApiClient {
         }
     }
 
+    /**
+     * Reads an input stream fully into a UTF-8 string.
+     *
+     * @param in stream to read, may be {@code null}
+     * @return the stream contents, or an empty string when {@code null}
+     */
     private String readBody(InputStream in) throws IOException {
         if (in == null) {
             return "";
@@ -246,10 +287,22 @@ public class VigilanceApiClient {
         }
     }
 
+    /**
+     * URL-encodes a value as UTF-8; {@code null} is encoded as an empty string.
+     *
+     * @param value value to encode, may be {@code null}
+     * @return percent-encoded value
+     */
     private static String encode(String value) throws IOException {
         return URLEncoder.encode(value == null ? "" : value, "UTF-8");
     }
 
+    /**
+     * Tests whether a string is {@code null}, empty or whitespace-only.
+     *
+     * @param value string to test
+     * @return {@code true} when the value is missing/blank
+     */
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

@@ -21,10 +21,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Parses the downloaded Vigilance {@code .dat} files and loads them into the MySQL
+ * {@code vig_*} tables.
+ * <p>
+ * Files are ISO-8859-1 encoded, tab-separated. An optional header line — one whose first
+ * field matches the first expected column name — is skipped. Each data row must have at
+ * least as many fields as the table column list; trailing extra fields are ignored (a
+ * single warning is logged).
+ * <p>
+ * Flow (see {@link #parseAndLoad(File, File, File, String)}):
+ * <ol>
+ *   <li>Validate all three files.</li>
+ *   <li>Truncate {@code vig_fgenPlus}, {@code vig_generxPlus} and {@code vig_nomprodPlus}.</li>
+ *   <li>Load each file with batched prepared-statement inserts.</li>
+ *   <li>Create the FULLTEXT indexes used by the Vigilance search queries (skipped when present).</li>
+ * </ol>
+ * Progress is published to {@link Drugref#VIGILANCE_UPDATE_STATUS} under the given update id.
+ */
 public class VigilanceDataParser {
     private static final Logger logger = MiscUtils.getLogger();
+
+    /** Number of rows per {@code executeBatch()} / commit when loading a table. */
     private static final int BATCH_SIZE = 1000;
 
+    /** Column layout of {@code vig_fgenPlus}; also the minimum field count of {@code fgenPlus.dat} rows. */
     private static final String[] FGENPLUS_COLUMNS = {
         "GENcode", "GENcodeDetail", "monographID", "genericNameFrench",
         "genericSimpleNameFrench", "genericNameEnglish", "genericSimpleNameEnglish",
@@ -37,6 +58,7 @@ public class VigilanceDataParser {
         "mgmntIndicatorProblematicDrugs", "mgmtIndicatorDrugsInProfile"
     };
 
+    /** Column layout of {@code vig_generxPlus}; also the minimum field count of {@code generxplus.dat} rows. */
     private static final String[] GENERXPLUS_COLUMNS = {
         "uuid", "GENcode", "genericNameFrench", "genericNameEnglish",
         "strengthFrench", "formFrench", "strengthEnglish", "formEnglish",
@@ -50,6 +72,7 @@ public class VigilanceDataParser {
         "usualNameFrench", "usualNameEnglish"
     };
 
+    /** Column layout of {@code vig_nomprodPlus}; also the minimum field count of {@code nomprodPlus.dat} rows. */
     private static final String[] NOMPRODPLUS_COLUMNS = {
         "productID", "GENcode", "productNameFrench", "strengthFrench",
         "formFrench", "productNameEnglish", "strengthEnglish", "formEnglish",
@@ -75,6 +98,18 @@ public class VigilanceDataParser {
         "prescriptionDietetician", "pediatricDosage", "defaultChronicity"
     };
 
+    /**
+     * Validates, truncates and loads the three Vigilance data files.
+     *
+     * @param fgenPlusFile    downloaded {@code fgenPlus.dat}
+     * @param generxPlusFile  downloaded {@code generxplus.dat}
+     * @param nomprodPlusFile downloaded {@code nomprodPlus.dat}
+     * @param updateId        key under which progress is published in
+     *                        {@link Drugref#VIGILANCE_UPDATE_STATUS}
+     * @return map of table name ({@code vig_fgenPlus}, {@code vig_generxPlus},
+     *         {@code vig_nomprodPlus}) to the number of rows loaded
+     * @throws Exception if a file is empty, has too few columns, or any load step fails
+     */
     public static Map<String, Integer> parseAndLoad(File fgenPlusFile, File generxPlusFile, File nomprodPlusFile, String updateId) throws Exception {
         Map<String, Integer> rowCounts = new HashMap<>();
 
@@ -111,6 +146,12 @@ public class VigilanceDataParser {
         return rowCounts;
     }
 
+    /**
+     * Checks that the file is readable and that its first data row has at least
+     * {@code expectedColumns.length} tab-separated fields.
+     *
+     * @throws Exception if the file is empty or the first data row has too few columns
+     */
     private static void validateFile(File file, String[] expectedColumns) throws Exception {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(file), StandardCharsets.ISO_8859_1))) {
@@ -143,11 +184,16 @@ public class VigilanceDataParser {
         }
     }
 
+    /** True when the line is a header row: its first field equals the first expected column name. */
     private static boolean isHeaderLine(String line, String[] expectedColumns) {
         String[] values = line.split("\t", -1);
         return values.length > 0 && values[0].equals(expectedColumns[0]);
     }
 
+    /**
+     * Publishes a {@code status}/{@code progress}/{@code startTime}/{@code elapsedSeconds}
+     * entry to {@link Drugref#VIGILANCE_UPDATE_STATUS} under the update id.
+     */
     private static void updateStatus(String updateId, String status, String progress, long startTime) {
         Map<String, Object> statusMap = new HashMap<>();
         statusMap.put("status", status);
@@ -157,6 +203,7 @@ public class VigilanceDataParser {
         Drugref.VIGILANCE_UPDATE_STATUS.put(updateId, statusMap);
     }
 
+    /** Truncates all three {@code vig_*} tables in a single transaction. */
     private static void truncateTables() throws Exception {
         EntityManager em = JpaUtils.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -175,6 +222,14 @@ public class VigilanceDataParser {
         }
     }
 
+    /**
+     * Loads one {@code .dat} file into a table with batched prepared-statement inserts.
+     * <p>
+     * Rows are committed in batches of {@link #BATCH_SIZE}; empty fields are inserted as
+     * {@code NULL}; progress is updated every 10,000 rows.
+     *
+     * @return the number of rows inserted
+     */
     private static int loadTable(File file, String tableName, String[] columns, String updateId, long startTime) throws Exception {
         int totalRows = 0;
 
@@ -280,6 +335,10 @@ public class VigilanceDataParser {
         return totalRows;
     }
 
+    /**
+     * Creates the six FULLTEXT indexes required by the Vigilance search queries
+     * (English/French pairs on the name/strength/form columns), skipping any that already exist.
+     */
     private static void createFulltextIndexes() throws Exception {
         EntityManager em = JpaUtils.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -316,6 +375,7 @@ public class VigilanceDataParser {
         }
     }
 
+    /** Checks {@code information_schema.statistics} for an existing index of the given name on the table. */
     private static boolean fulltextIndexExists(EntityManager em, String table, String indexName) {
         Query query = em.createNativeQuery(
             "SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ?1 AND index_name = ?2")
