@@ -40,6 +40,7 @@ import org.drugref.ca.dpd.CdDrugSearch;
 import org.drugref.ca.dpd.CdTherapeuticClass;
 import org.drugref.ca.dpd.DrugrefDao;
 import org.drugref.ca.dpd.History;
+import org.drugref.ca.vigilance.fetch.VigilanceUpdateDBWorker;
 import org.drugref.dinInteractionCheck.InteractionsCheckerFactory;
 import org.drugref.util.JpaUtils;
 import org.drugref.util.RxUpdateDBWorker;
@@ -49,6 +50,11 @@ import org.apache.logging.log4j.Logger;
 import org.drugref.util.MiscUtils;
 import org.drugref.dinInteractionCheck.InteractionRecord;
 import org.drugref.dinInteractionCheck.InteractionsChecker;
+import org.drugref.util.DrugrefProperties;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -59,7 +65,8 @@ public class Drugref {
 	
         protected TablesDao queryDao;
         public static HashMap<String,Object> DB_INFO=new HashMap<>();
-        public static Boolean UPDATE_DB=false;        
+        public static final AtomicBoolean UPDATE_DB = new AtomicBoolean(false);
+        public static final ConcurrentHashMap<String, Map<String, Object>> VIGILANCE_UPDATE_STATUS = new ConcurrentHashMap<>();
         private static Logger logger = MiscUtils.getLogger();
 
         public Drugref(Class<?> daoClazz) {
@@ -126,28 +133,36 @@ public class Drugref {
         }
         
         public String getLastUpdateTime(){
-            if(UPDATE_DB){
+            if(UPDATE_DB.get()){
                 return "updating";
             }else{
 
                 EntityManager em = JpaUtils.createEntityManager();
-                String queryStr="select h from History h where h.id=(select max(h2.id) from History h2)";
-                Query query = em.createQuery(queryStr);
-                List<History> results = query.getResultList();
-                JpaUtils.close(em);
-                if(results!=null && !results.isEmpty()){
-                    return results.get(0).getDateTime().toString();
+                try {
+                    String queryStr="select h from History h where h.id=(select max(h2.id) from History h2)";
+                    Query query = em.createQuery(queryStr);
+                    List<History> results = query.getResultList();
+                    if(results!=null && !results.isEmpty()){
+                        return results.get(0).getDateTime().toString();
+                    }
+                } catch (Exception e) {
+                    logger.error("getLastUpdateTime failed", e);
+                } finally {
+                    JpaUtils.close(em);
                 }
-
-				return null;
+                return "Never";
             }
         }
         
         //start the updating process if there isn't one already.
         public String updateDB(){
-            if(!UPDATE_DB){
-                RxUpdateDBWorker worker = new RxUpdateDBWorker();
-                worker.start();                
+            if(UPDATE_DB.compareAndSet(false, true)){
+                if (DrugrefProperties.getInstance().getDatabase() == DrugrefProperties.DATA_BASE.VIGILANCE) {
+                    new Thread(new VigilanceUpdateDBWorker()).start();
+                } else {
+                    RxUpdateDBWorker worker = new RxUpdateDBWorker();
+                    worker.start();
+                }
                 return "running";
             }else{                
                 return "updating";

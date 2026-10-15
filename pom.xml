@@ -186,6 +186,12 @@
             <version>${openjpa.version}</version>
             <configuration>
                 <includes>**/*.class</includes>
+                <excludes>
+                    **/fetch/*.class,
+                    **/VigilanceFileUploadServlet.class,
+                    **/VigilanceUpdateDBWorker.class,
+                    **/VigilanceDataParser.class
+                </excludes>
                 <addDefaultConstructor>true</addDefaultConstructor>
                 <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
             </configuration>
